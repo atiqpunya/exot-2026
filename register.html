@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -65,7 +65,7 @@
     <header class="header">
         <div class="container">
             <div class="header-content">
-                <a href="index.html" class="logo"><span class="logo-icon">📝</span> EXOT</a>
+                <a href="index.html" class="logo"><span class="logo-icon">ðŸ“</span> EXOT</a>
                 <nav class="nav">
                     <a href="register.html" class="nav-link active">Data</a>
                     <a href="attendance.html" class="nav-link">Absensi</a>
@@ -82,7 +82,7 @@
 
     <div id="authRequired" class="container" style="padding: 3rem; display: none;">
         <div class="card" style="max-width: 400px; margin: 0 auto; text-align: center;">
-            <h2>🔐 Login Diperlukan</h2>
+            <h2>ðŸ” Login Diperlukan</h2>
             <p>Halaman ini hanya untuk Panitia Utama</p>
             <a href="index.html?redirect=register.html" class="btn btn-primary" style="margin-top: 1rem;">Login</a>
         </div>
@@ -112,15 +112,15 @@
         <!-- Tabs -->
         <div class="card fade-in">
             <div class="tabs">
-                <button class="tab-btn active" onclick="switchTab('siswa')">👨‍🎓 Siswa & Guru</button>
-                <button class="tab-btn" onclick="switchTab('penguji')">👨‍🏫 Penguji</button>
-                <button class="tab-btn" onclick="switchTab('ruangan')">🏫 Ruangan</button>
-                <button class="tab-btn" onclick="switchTab('export')">📦 Export</button>
+                <button class="tab-btn active" onclick="switchTab('siswa')">ðŸ‘¨â€ðŸŽ“ Siswa & Guru</button>
+                <button class="tab-btn" onclick="switchTab('penguji')">ðŸ‘¨â€ðŸ« Penguji</button>
+                <button class="tab-btn" onclick="switchTab('ruangan')">ðŸ« Ruangan</button>
+                <button class="tab-btn" onclick="switchTab('export')">ðŸ“¦ Export</button>
             </div>
 
             <!-- Siswa & Guru Tab -->
             <div id="siswaTab" class="tab-content active">
-                <h4 style="margin-bottom: 1rem;">📄 Bulk Input Siswa & Guru</h4>
+                <h4 style="margin-bottom: 1rem;">ðŸ“„ Bulk Input Siswa & Guru</h4>
                 <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.9rem;">
                     Format: <code>Nama, Ruangan, Jenis</code> (jenis: siswa/guru)
                 </p>
@@ -129,16 +129,16 @@ Siti Aminah, 7B, siswa
 Budi Santoso, Guru Matematika, guru
 ..."></textarea>
                 <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-                    <button class="btn btn-primary" onclick="importStudents()">📥 Import Siswa/Guru</button>
-                    <button class="btn btn-danger" onclick="clearAllStudents()">🗑️ Hapus Semua</button>
+                    <button class="btn btn-primary" onclick="importStudents()">ðŸ“¥ Import Siswa/Guru</button>
+                    <button class="btn btn-danger" onclick="clearAllStudents()">ðŸ—‘ï¸ Hapus Semua</button>
                 </div>
                 <div id="studentImportResult" class="alert alert-success" style="display: none; margin-top: 1rem;">
                 </div>
 
                 <div style="margin-top: 1.5rem;">
-                    <h4>📋 Daftar Terdaftar (<span id="studentCount">0</span>)</h4>
+                    <h4>ðŸ“‹ Daftar Terdaftar (<span id="studentCount">0</span>)</h4>
                     <div style="display: flex; gap: 0.5rem; margin: 1rem 0; flex-wrap: wrap;">
-                        <input type="text" id="searchStudent" class="form-input" placeholder="🔍 Cari..."
+                        <input type="text" id="searchStudent" class="form-input" placeholder="ðŸ” Cari..."
                             style="width: 200px;">
                         <select id="filterType" class="form-input form-select" style="width: auto;">
                             <option value="all">Semua</option>
@@ -152,7 +152,7 @@ Budi Santoso, Guru Matematika, guru
 
             <!-- Penguji Tab -->
             <div id="pengujiTab" class="tab-content">
-                <h4 style="margin-bottom: 1rem;">👨‍🏫 Bulk Input Penguji</h4>
+                <h4 style="margin-bottom: 1rem;">ðŸ‘¨â€ðŸ« Bulk Input Penguji</h4>
                 <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.9rem;">
                     Format: <code>Username, Password, Nama, Mapel, Ruangan (opsional)</code><br>
                     Mapel: english / arabic / alquran<br>
@@ -163,20 +163,20 @@ arb1, pass123, Bu Fatimah, arabic, 8A|8B|8C
 qrn1, pass123, Ustadz Ali, alquran
 ..."></textarea>
                 <div style="margin-top: 1rem;">
-                    <button class="btn btn-primary" onclick="importExaminers()">📥 Import Penguji</button>
+                    <button class="btn btn-primary" onclick="importExaminers()">ðŸ“¥ Import Penguji</button>
                 </div>
                 <div id="examinerImportResult" class="alert alert-success" style="display: none; margin-top: 1rem;">
                 </div>
 
                 <div style="margin-top: 1.5rem;">
-                    <h4>📋 Daftar Penguji (<span id="examinerCount">0</span>)</h4>
+                    <h4>ðŸ“‹ Daftar Penguji (<span id="examinerCount">0</span>)</h4>
                     <div id="examinerList" style="max-height: 300px; overflow-y: auto;"></div>
                 </div>
             </div>
 
             <!-- Ruangan Tab -->
             <div id="ruanganTab" class="tab-content">
-                <h4 style="margin-bottom: 1rem;">🏫 Kelola Ruangan</h4>
+                <h4 style="margin-bottom: 1rem;">ðŸ« Kelola Ruangan</h4>
                 <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
                     <input type="text" id="newClassName" class="form-input" placeholder="Nama ruangan baru..."
                         style="flex: 1;">
@@ -185,10 +185,10 @@ qrn1, pass123, Ustadz Ali, alquran
                 <div id="classList" style="margin-top: 1rem;"></div>
 
                 <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
-                    <h4>✏️ Edit Nama Ruangan</h4>
+                    <h4>âœï¸ Edit Nama Ruangan</h4>
                     <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap;">
                         <select id="editClassOld" class="form-input form-select" style="width: auto;"></select>
-                        <span style="align-self: center;">→</span>
+                        <span style="align-self: center;">â†’</span>
                         <input type="text" id="editClassNew" class="form-input" placeholder="Nama baru"
                             style="width: 150px;">
                         <button class="btn btn-secondary" onclick="editClass()">Simpan</button>
@@ -198,71 +198,71 @@ qrn1, pass123, Ustadz Ali, alquran
 
             <!-- Export Tab -->
             <div id="exportTab" class="tab-content">
-                <h4 style="margin-bottom: 1rem;">📦 Export & Backup</h4>
+                <h4 style="margin-bottom: 1rem;">ðŸ“¦ Export & Backup</h4>
 
                 <div class="grid grid-2" style="gap: 1.5rem;">
                     <div>
-                        <h5 style="margin-bottom: 0.75rem;">📄 Download QR sebagai HTML</h5>
+                        <h5 style="margin-bottom: 0.75rem;">ðŸ“„ Download QR sebagai HTML</h5>
 
                         <div class="export-option" onclick="exportQR('all')">
-                            <h5>📦 Semua Data</h5>
+                            <h5>ðŸ“¦ Semua Data</h5>
                             <p>Download QR semua siswa, guru, dan penguji</p>
                         </div>
 
                         <div class="export-option" onclick="exportQR('siswa')">
-                            <h5>👨‍🎓 Hanya Siswa</h5>
+                            <h5>ðŸ‘¨â€ðŸŽ“ Hanya Siswa</h5>
                             <p>Download QR code semua siswa saja</p>
                         </div>
 
                         <div class="export-option" onclick="exportQR('guru')">
-                            <h5>👨‍🏫 Hanya Guru</h5>
+                            <h5>ðŸ‘¨â€ðŸ« Hanya Guru</h5>
                             <p>Download QR code semua guru saja</p>
                         </div>
 
                         <div class="export-option" onclick="exportQR('penguji')">
-                            <h5>📋 Hanya Penguji</h5>
+                            <h5>ðŸ“‹ Hanya Penguji</h5>
                             <p>Download QR code semua penguji saja</p>
                         </div>
 
                         <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
-                            <h5 style="margin-bottom: 0.75rem;">🖨️ Print QR Cards</h5>
+                            <h5 style="margin-bottom: 0.75rem;">ðŸ–¨ï¸ Print QR Cards</h5>
                             <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
                                 <select id="printPaperSize" class="form-input form-select" style="width: auto;">
-                                    <option value="A4">A4 (210×297mm)</option>
-                                    <option value="A3">A3 (297×420mm)</option>
+                                    <option value="A4">A4 (210Ã—297mm)</option>
+                                    <option value="A3">A3 (297Ã—420mm)</option>
                                 </select>
                                 <select id="printCardCount" class="form-input form-select" style="width: auto;">
-                                    <option value="4">4 kartu/halaman (2×2)</option>
-                                    <option value="6">6 kartu/halaman (2×3)</option>
-                                    <option value="8">8 kartu/halaman (2×4)</option>
-                                    <option value="9">9 kartu/halaman (3×3)</option>
+                                    <option value="4">4 kartu/halaman (2Ã—2)</option>
+                                    <option value="6">6 kartu/halaman (2Ã—3)</option>
+                                    <option value="8">8 kartu/halaman (2Ã—4)</option>
+                                    <option value="9">9 kartu/halaman (3Ã—3)</option>
                                 </select>
                             </div>
                             <div class="export-option" onclick="printQRCards()">
-                                <h5>🖨️ Cetak QR Cards</h5>
+                                <h5>ðŸ–¨ï¸ Cetak QR Cards</h5>
                                 <p>Cetak kartu QR sesuai pengaturan di atas</p>
                             </div>
                         </div>
                     </div>
 
                     <div>
-                        <h5 style="margin-bottom: 0.75rem;">📊 Export Data</h5>
+                        <h5 style="margin-bottom: 0.75rem;">ðŸ“Š Export Data</h5>
 
                         <div class="export-option" onclick="exportToCSV()">
-                            <h5>📊 Export CSV</h5>
+                            <h5>ðŸ“Š Export CSV</h5>
                             <p>Download data peserta ke file CSV</p>
                         </div>
 
                         <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
-                            <h5 style="margin-bottom: 0.75rem;">💾 Backup & Restore</h5>
+                            <h5 style="margin-bottom: 0.75rem;">ðŸ’¾ Backup & Restore</h5>
 
                             <div class="export-option" onclick="createBackup()">
-                                <h5>💾 Backup Data</h5>
+                                <h5>ðŸ’¾ Backup Data</h5>
                                 <p>Simpan semua data ke file JSON</p>
                             </div>
 
                             <div class="export-option" onclick="document.getElementById('restoreFile').click()">
-                                <h5>📥 Restore Data</h5>
+                                <h5>ðŸ“¥ Restore Data</h5>
                                 <p>Pulihkan data dari file backup</p>
                             </div>
                             <input type="file" id="restoreFile" accept=".json" style="display: none;"
@@ -270,7 +270,7 @@ qrn1, pass123, Ustadz Ali, alquran
                         </div>
 
                         <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
-                            <h5 style="margin-bottom: 0.75rem;">🔍 Download QR Individual</h5>
+                            <h5 style="margin-bottom: 0.75rem;">ðŸ” Download QR Individual</h5>
                             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                                 <input type="text" id="searchQR" class="form-input" placeholder="Cari nama..."
                                     style="flex: 1;">
@@ -285,7 +285,7 @@ qrn1, pass123, Ustadz Ali, alquran
     </main>
 
     <div class="floating-auth">
-        <button class="btn btn-secondary" onclick="toggleAuth()" id="floatingBtn">🔐 Login</button>
+        <button class="btn btn-secondary" onclick="toggleAuth()" id="floatingBtn">ðŸ” Login</button>
     </div>
 
     <script src="js/storage.js"></script>
@@ -298,7 +298,7 @@ qrn1, pass123, Ustadz Ali, alquran
             }
 
             document.getElementById('mainContent').style.display = 'block';
-            document.getElementById('floatingBtn').innerHTML = '🚪 Logout';
+            document.getElementById('floatingBtn').innerHTML = 'ðŸšª Logout';
 
             updateStats();
             loadStudentList();
@@ -351,7 +351,7 @@ qrn1, pass123, Ustadz Ali, alquran
             });
 
             document.getElementById('bulkStudents').value = '';
-            showResult('studentImportResult', `✅ ${count} data berhasil diimport!`);
+            showResult('studentImportResult', `âœ… ${count} data berhasil diimport!`);
             updateStats();
             loadStudentList();
         }
@@ -374,8 +374,8 @@ qrn1, pass123, Ustadz Ali, alquran
             });
 
             document.getElementById('bulkExaminers').value = '';
-            let msg = `✅ ${count} penguji berhasil ditambahkan!`;
-            if (errors.length) msg += `<br>⚠️ ${errors.join(', ')}`;
+            let msg = `âœ… ${count} penguji berhasil ditambahkan!`;
+            if (errors.length) msg += `<br>âš ï¸ ${errors.join(', ')}`;
             showResult('examinerImportResult', msg);
             updateStats();
             loadExaminerList();
@@ -416,8 +416,8 @@ qrn1, pass123, Ustadz Ali, alquran
                   <td>${s.class}</td>
                   <td><span class="badge badge-${s.type === 'guru' ? 'info' : 'success'}">${s.type || 'siswa'}</span></td>
                   <td>
-                    <button class="btn btn-sm btn-secondary" onclick="downloadSingleQR('${s.id}', 'student')">📱</button>
-                    <button class="btn btn-sm btn-danger" onclick="delStudent('${s.id}')">🗑️</button>
+                    <button class="btn btn-sm btn-secondary" onclick="downloadSingleQR('${s.id}', 'student')">ðŸ“±</button>
+                    <button class="btn btn-sm btn-danger" onclick="delStudent('${s.id}')">ðŸ—‘ï¸</button>
                   </td>
                 </tr>
               `).join('')}
@@ -465,8 +465,8 @@ qrn1, pass123, Ustadz Ali, alquran
                   <td><span class="badge badge-${subjectColors[e.subject]}">${subjectNames[e.subject]}</span></td>
                   <td>${e.assignedClasses?.join(', ') || 'Semua'}</td>
                   <td>
-                    <button class="btn btn-sm btn-secondary" onclick="downloadSingleQR('${e.id}', 'examiner')">📱</button>
-                    <button class="btn btn-sm btn-danger" onclick="delExaminer('${e.id}')">🗑️</button>
+                    <button class="btn btn-sm btn-secondary" onclick="downloadSingleQR('${e.id}', 'examiner')">ðŸ“±</button>
+                    <button class="btn btn-sm btn-danger" onclick="delExaminer('${e.id}')">ðŸ—‘ï¸</button>
                   </td>
                 </tr>
               `).join('')}
@@ -567,7 +567,7 @@ qrn1, pass123, Ustadz Ali, alquran
               ${item.isStudent ? (item.type || 'siswa') : 'penguji'}
             </span>
           </div>
-          <button class="btn btn-sm btn-primary" onclick="downloadSingleQR('${item.id}', '${item.isStudent ? 'student' : 'examiner'}')">📥 Download</button>
+          <button class="btn btn-sm btn-primary" onclick="downloadSingleQR('${item.id}', '${item.isStudent ? 'student' : 'examiner'}')">ðŸ“¥ Download</button>
         </div>
       `).join('');
         }
@@ -621,7 +621,7 @@ h1{text-align:center;margin-bottom:10px;color:#0ea5e9}
 .download-btn:hover{background:#0284c7}
 @media print{body{padding:0;background:white}.card{border:1px solid #000}.download-btn{display:none}}
 </style></head><body>
-<h1>📝 EXOT QR Codes - ${title}</h1>
+<h1>ðŸ“ EXOT QR Codes - ${title}</h1>
 <p class="info">Total: ${items.length} | Generated: ${new Date().toLocaleString('id-ID')}</p>
 <div class="grid">
 ${items.map(item => `
@@ -631,10 +631,11 @@ ${items.map(item => `
   <p>${item.room}</p>
   <span class="type ${item.type}">${item.type}</span>
   <br>
-  <a class="download-btn" href="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(item.qr)}" download="QR_${item.name.replace(/\\s+/g, '_')}.png">📥 Download</a>
+  <a class="download-btn" href="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(item.qr)}" download="QR_${item.name.replace(/\\s+/g, '_')}.png">ðŸ“¥ Download</a>
 </div>
 `).join('')}
 </div>
+<script type="module" src="js/firebase-config.js"></script>
 </body></html>`;
 
             const blob = new Blob([html], { type: 'text/html' });
@@ -766,7 +767,8 @@ ${items.map(item => `
                     }
                     return html;
                 })()}
-                </body>
+                <script type="module" src="js/firebase-config.js"></script>
+</body>
                 </html>
             `);
             printWindow.document.close();
@@ -775,6 +777,7 @@ ${items.map(item => `
             };
         }
     </script>
+<script type="module" src="js/firebase-config.js"></script>
 </body>
 
 </html>

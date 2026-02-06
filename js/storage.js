@@ -32,6 +32,7 @@ const DEFAULT_SETTINGS = {
 };
 
 // Initialize storage
+// Initialize storage
 function initStorage() {
   if (!localStorage.getItem(STORAGE_KEYS.STUDENTS)) {
     localStorage.setItem(STORAGE_KEYS.STUDENTS, JSON.stringify([]));
@@ -51,6 +52,45 @@ function initStorage() {
   if (!localStorage.getItem(STORAGE_KEYS.SETTINGS)) {
     localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(DEFAULT_SETTINGS));
   }
+
+  // FIREBASE SYNC LISTENERS
+  // We explicitly wait for window.firebaseDB to be available
+  const setupFirebase = () => {
+    if (window.firebaseConfigured) return;
+    if (window.firebaseDB && window.firebaseOnValue && window.firebaseRef) {
+      window.firebaseConfigured = true;
+      console.log('🔥 Firebase initialized, setting up listeners...');
+      const db = window.firebaseDB;
+      const ref = window.firebaseRef;
+      const onValue = window.firebaseOnValue;
+
+      // Sync Helper: Updates localStorage and reloads UI if needed
+      const syncLocal = (key, val) => {
+        if (val) {
+          const remoteData = JSON.stringify(val);
+          const localData = localStorage.getItem(key);
+          if (remoteData !== localData) {
+            localStorage.setItem(key, remoteData);
+            console.log(`🔄 Synced ${key} from cloud`);
+            // Trigger a custom event for UI updates
+            window.dispatchEvent(new Event('storage-update'));
+          }
+        }
+      };
+
+      onValue(ref(db, 'students'), (snap) => syncLocal(STORAGE_KEYS.STUDENTS, snap.val()));
+      onValue(ref(db, 'users'), (snap) => syncLocal(STORAGE_KEYS.USERS, snap.val()));
+      onValue(ref(db, 'classes'), (snap) => syncLocal(STORAGE_KEYS.CLASSES, snap.val()));
+      onValue(ref(db, 'rewards'), (snap) => syncLocal(STORAGE_KEYS.EXAMINER_REWARDS, snap.val()));
+      onValue(ref(db, 'settings'), (snap) => syncLocal(STORAGE_KEYS.SETTINGS, snap.val()));
+    } else {
+      // Retry if not yet loaded (e.g. module loading delay)
+      setTimeout(setupFirebase, 500);
+    }
+  };
+
+  // Start trying to setup firebase
+  setupFirebase();
 }
 
 // Generate unique ID
@@ -58,17 +98,30 @@ function generateId() {
   return 'EXOT-' + Date.now().toString(36) + '-' + Math.random().toString(36).substr(2, 9);
 }
 
+// Helper to save to Firebase
+function saveToFirebase(path, data) {
+  if (window.firebaseDB && window.firebaseSet && window.firebaseRef) {
+    const db = window.firebaseDB;
+    const ref = window.firebaseRef;
+    const set = window.firebaseSet;
+    set(ref(db, path), data).catch(console.error);
+  }
+}
+
 // ========================================
 // Settings Management
 // ========================================
 
 function getSettings() {
-  initStorage();
+  // We simply read from storage. initStorage handles the initial sync setup.
+  // Removing initStorage call here to prevent recursion/overhead on every get.
+  if (!localStorage.getItem(STORAGE_KEYS.SETTINGS)) initStorage();
   return JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS)) || DEFAULT_SETTINGS;
 }
 
 function saveSettings(settings) {
   localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
+  saveToFirebase('settings', settings);
 }
 
 function toggleDarkMode() {
@@ -99,12 +152,14 @@ function toggleSound() {
 // ========================================
 
 function getActivityLog() {
-  initStorage();
   return JSON.parse(localStorage.getItem(STORAGE_KEYS.ACTIVITY_LOG)) || [];
 }
 
 function saveActivityLog(log) {
   localStorage.setItem(STORAGE_KEYS.ACTIVITY_LOG, JSON.stringify(log));
+  // We opt NOT to sync activity log globally to save bandwidth/noise, 
+  // or we can sync it if needed. Let's sync it.
+  saveToFirebase('activity_log', log);
 }
 
 function logActivity(action, details = '') {
@@ -369,6 +424,7 @@ function getClasses() {
 
 function saveClasses(classes) {
   localStorage.setItem(STORAGE_KEYS.CLASSES, JSON.stringify(classes));
+  saveToFirebase('classes', classes);
 }
 
 function addClass(className) {
@@ -417,6 +473,7 @@ function getUsers() {
 
 function saveUsers(users) {
   localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+  saveToFirebase('users', users);
 }
 
 function addUser(username, password, name, role, subject = null, assignedClasses = []) {
@@ -485,6 +542,7 @@ function getStudents() {
 
 function saveStudents(students) {
   localStorage.setItem(STORAGE_KEYS.STUDENTS, JSON.stringify(students));
+  saveToFirebase('students', students);
 }
 
 function addStudent(name, studentClass, type = 'siswa') {
@@ -615,6 +673,7 @@ function getExaminerRewards() {
 
 function saveExaminerRewards(rewards) {
   localStorage.setItem(STORAGE_KEYS.EXAMINER_REWARDS, JSON.stringify(rewards));
+  saveToFirebase('rewards', rewards);
 }
 
 function generateExaminerReward(examinerId) {

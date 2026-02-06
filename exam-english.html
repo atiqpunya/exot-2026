@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -37,7 +37,7 @@
     <header class="header">
         <div class="container">
             <div class="header-content">
-                <a href="index.html" class="logo"><span class="logo-icon">📝</span> EXOT</a>
+                <a href="index.html" class="logo"><span class="logo-icon">ðŸ“</span> EXOT</a>
                 <nav class="nav" id="navMenu"></nav>
                 <img src="img/logo-alwildan.png" alt="SD Alwildan 4"
                     style="height: 40px; width: auto; margin-left: auto;">
@@ -47,7 +47,7 @@
 
     <div id="authRequired" class="container" style="padding: 3rem; display: none;">
         <div class="card" style="max-width: 400px; margin: 0 auto; text-align: center;">
-            <h2>🔐 Login Diperlukan</h2>
+            <h2>ðŸ” Login Diperlukan</h2>
             <p>Halaman ini untuk Penguji English atau Panitia Utama</p>
             <a href="index.html?redirect=exam-english.html" class="btn btn-primary" style="margin-top: 1rem;">Login</a>
         </div>
@@ -55,7 +55,7 @@
 
     <main id="mainContent" class="container" style="padding: 1.5rem; display: none;">
         <div class="subject-header fade-in">
-            <h1 style="margin: 0; font-size: 1.8rem;">📖 Penilaian English</h1>
+            <h1 style="margin: 0; font-size: 1.8rem;">ðŸ“– Penilaian English</h1>
             <p style="margin: 0.5rem 0 0; opacity: 0.9;">Input nilai siswa untuk mata pelajaran English</p>
         </div>
 
@@ -81,7 +81,7 @@
         <!-- Filters -->
         <div class="card fade-in" style="margin-bottom: 1.5rem;">
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                <input type="text" id="searchInput" class="form-input" placeholder="🔍 Cari nama..."
+                <input type="text" id="searchInput" class="form-input" placeholder="ðŸ” Cari nama..."
                     style="width: 200px;">
                 <select id="filterClass" class="form-input form-select" style="width: auto;"></select>
                 <select id="filterStatus" class="form-input form-select" style="width: auto;">
@@ -99,7 +99,7 @@
     </main>
 
     <div class="floating-auth">
-        <button class="btn btn-secondary" onclick="toggleAuth()" id="floatingBtn">🔐 Login</button>
+        <button class="btn btn-secondary" onclick="toggleAuth()" id="floatingBtn">ðŸ” Login</button>
     </div>
 
     <script src="js/storage.js"></script>
@@ -124,7 +124,7 @@
             }
 
             document.getElementById('mainContent').style.display = 'block';
-            document.getElementById('floatingBtn').innerHTML = '🚪 Logout';
+            document.getElementById('floatingBtn').innerHTML = 'ðŸšª Logout';
 
             // Set nav based on role
             const nav = document.getElementById('navMenu');
@@ -140,7 +140,7 @@
             } else {
                 nav.innerHTML = `
           <a href="exam-english.html" class="nav-link active">Input Nilai</a>
-          <a href="examiner-reward.html" class="nav-link">🎁 Reward</a>
+          <a href="examiner-reward.html" class="nav-link">ðŸŽ Reward</a>
         `;
             }
 
@@ -209,7 +209,7 @@
             const container = document.getElementById('studentList');
 
             if (!students.length) {
-                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><p>Tidak ada siswa yang hadir</p></div>';
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">ðŸ“­</div><p>Tidak ada siswa yang hadir</p></div>';
                 return;
             }
 
@@ -240,11 +240,11 @@
                              min="0" 
                              max="100" 
                              placeholder="0-100">
-                      ${s.scores[SUBJECT] !== null ? '<span class="badge badge-success">✓</span>' : ''}
+                      ${s.scores[SUBJECT] !== null ? '<span class="badge badge-success">âœ“</span>' : ''}
                     </div>
                   </td>
                   <td>
-                    <button class="btn btn-sm btn-primary" onclick="saveScore('${s.id}')">💾 Simpan</button>
+                    <button class="btn btn-sm btn-primary" onclick="saveScore('${s.id}')">ðŸ’¾ Simpan</button>
                   </td>
                 </tr>
               `).join('')}
@@ -268,6 +268,7 @@
             loadStudents();
         }
     </script>
+<script type="module" src="js/firebase-config.js"></script>
 </body>
 
 </html>
