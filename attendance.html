@@ -65,7 +65,7 @@
     <header class="header">
         <div class="container">
             <div class="header-content">
-                <a href="index.html" class="logo"><span class="logo-icon">ðŸ“</span> EXOT</a>
+                <a href="index.html" class="logo"><span class="logo-icon">📝</span> EXOT</a>
                 <nav class="nav">
                     <a href="register.html" class="nav-link">Data</a>
                     <a href="attendance.html" class="nav-link active">Absensi</a>
@@ -101,7 +101,7 @@
             <!-- Scanner -->
             <div class="card fade-in">
                 <div class="card-header">
-                    <h3 class="card-title">ðŸ“· Scan QR Siswa</h3>
+                    <h3 class="card-title">📷 Scan QR Siswa</h3>
                     <p class="card-subtitle">Arahkan kamera ke QR code</p>
                 </div>
 
@@ -110,8 +110,8 @@
                 </div>
 
                 <div style="margin-top: 1rem; text-align: center;">
-                    <button class="btn btn-primary" id="startBtn" onclick="startScanner()">ðŸ“· Mulai Scan</button>
-                    <button class="btn btn-danger" id="stopBtn" onclick="stopScanner()" style="display: none;">â¹ï¸
+                    <button class="btn btn-primary" id="startBtn" onclick="startScanner()">📷 Mulai Scan</button>
+                    <button class="btn btn-danger" id="stopBtn" onclick="stopScanner()" style="display: none;">⏹️
                         Stop</button>
                 </div>
 
@@ -125,7 +125,7 @@
 
                 <!-- Last Scanned -->
                 <div id="lastScanned" class="alert alert-success" style="display: none; margin-top: 1rem;">
-                    <span>âœ…</span>
+                    <span>✅</span>
                     <span id="lastScannedText">-</span>
                 </div>
             </div>
@@ -133,11 +133,11 @@
             <!-- Attended List -->
             <div class="card fade-in">
                 <div class="card-header">
-                    <h3 class="card-title">âœ… Sudah Hadir</h3>
+                    <h3 class="card-title">✅ Sudah Hadir</h3>
                     <p class="card-subtitle">Daftar siswa yang sudah absen</p>
                 </div>
                 <div style="margin-bottom: 1rem;">
-                    <input type="text" id="searchInput" class="form-input" placeholder="ðŸ” Cari nama...">
+                    <input type="text" id="searchInput" class="form-input" placeholder="🔍 Cari nama...">
                 </div>
                 <div id="attendedList" style="max-height: 400px; overflow-y: auto;"></div>
             </div>
@@ -145,7 +145,7 @@
     </main>
 
     <div class="floating-auth">
-        <button class="btn btn-secondary" onclick="toggleAuth()" id="floatingBtn">ðŸ” Login</button>
+        <button class="btn btn-secondary" onclick="toggleAuth()" id="floatingBtn">🔐 Login</button>
     </div>
 
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
@@ -160,7 +160,7 @@
             document.getElementById('searchInput').addEventListener('input', loadAttendedList);
 
             if (isLoggedIn()) {
-                document.getElementById('floatingBtn').innerHTML = 'ðŸšª Logout';
+                document.getElementById('floatingBtn').innerHTML = '🚪 Logout';
             }
         });
 
@@ -233,12 +233,12 @@
             const student = getStudentById(code);
 
             if (!student) {
-                showLastScanned('âŒ QR tidak ditemukan!', true);
+                showLastScanned('❌ QR tidak ditemukan!', true);
                 return;
             }
 
             if (student.attended) {
-                showLastScanned(`âš ï¸ ${student.name} sudah absen sebelumnya!`, true);
+                showLastScanned(`⚠️ ${student.name} sudah absen sebelumnya!`, true);
                 return;
             }
 
@@ -251,7 +251,7 @@
             document.body.appendChild(flash);
             setTimeout(() => flash.remove(), 500);
 
-            showLastScanned(`âœ… ${student.name} (${student.class}) - Hadir!`, false);
+            showLastScanned(`✅ ${student.name} (${student.class}) - Hadir!`, false);
             updateStats();
             loadAttendedList();
 
@@ -261,7 +261,7 @@
 
         function showLastScanned(text, isError) {
             const el = document.getElementById('lastScanned');
-            el.innerHTML = `<span>${isError ? 'âš ï¸' : 'âœ…'}</span><span>${text}</span>`;
+            el.innerHTML = `<span>${isError ? '⚠️' : '✅'}</span><span>${text}</span>`;
             el.className = `alert ${isError ? 'alert-warning' : 'alert-success'}`;
             el.style.display = 'flex';
         }
@@ -280,7 +280,7 @@
             const container = document.getElementById('attendedList');
 
             if (!students.length) {
-                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">ðŸ“­</div><p>Belum ada yang hadir</p></div>';
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><p>Belum ada yang hadir</p></div>';
                 return;
             }
 

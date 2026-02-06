@@ -55,7 +55,7 @@
     <header class="header">
         <div class="container">
             <div class="header-content">
-                <a href="index.html" class="logo"><span class="logo-icon">ðŸ“</span> EXOT</a>
+                <a href="index.html" class="logo"><span class="logo-icon">📝</span> EXOT</a>
                 <nav class="nav">
                     <a href="register.html" class="nav-link">Data</a>
                     <a href="attendance.html" class="nav-link">Absensi</a>
@@ -70,7 +70,7 @@
 
     <div id="authRequired" class="container" style="padding: 3rem; display: none;">
         <div class="card" style="max-width: 400px; margin: 0 auto; text-align: center;">
-            <h2>ðŸ” Login Diperlukan</h2>
+            <h2>🔐 Login Diperlukan</h2>
             <p>Halaman ini hanya untuk Panitia Utama</p>
             <a href="index.html?redirect=scan-examiner.html" class="btn btn-primary" style="margin-top: 1rem;">Login</a>
         </div>
@@ -78,22 +78,22 @@
 
     <main id="mainContent" class="container" style="padding: 1.5rem; display: none;">
         <div class="card fade-in" style="margin-bottom: 1.5rem;">
-            <h1 style="margin: 0;">ðŸŽ Scan QR Reward Penguji</h1>
+            <h1 style="margin: 0;">🎁 Scan QR Reward Penguji</h1>
             <p style="margin: 0.5rem 0 0; color: var(--text-muted);">Scan QR code penguji untuk klaim souvenir</p>
         </div>
 
         <div class="grid grid-2" style="gap: 1.5rem; align-items: start;">
             <!-- Scanner -->
             <div class="card fade-in">
-                <h3 style="margin-bottom: 1rem;">ðŸ“· Scanner</h3>
+                <h3 style="margin-bottom: 1rem;">📷 Scanner</h3>
 
                 <div class="scanner-container" id="scannerContainer">
                     <div id="video" style="width: 100%;"></div>
                 </div>
 
                 <div style="margin-top: 1rem; text-align: center;">
-                    <button class="btn btn-primary" id="startBtn" onclick="startScanner()">ðŸ“· Mulai Scan</button>
-                    <button class="btn btn-secondary" id="stopBtn" onclick="stopScanner()" style="display: none;">â¹ï¸
+                    <button class="btn btn-primary" id="startBtn" onclick="startScanner()">📷 Mulai Scan</button>
+                    <button class="btn btn-secondary" id="stopBtn" onclick="stopScanner()" style="display: none;">⏹️
                         Stop</button>
                 </div>
 
@@ -110,7 +110,7 @@
             <div>
                 <!-- Success -->
                 <div id="claimSuccess" class="claimed-card fade-in" style="display: none;">
-                    <h2 style="margin: 0;">âœ… Berhasil Diklaim!</h2>
+                    <h2 style="margin: 0;">✅ Berhasil Diklaim!</h2>
                     <div style="margin: 1rem 0;">
                         <p style="opacity: 0.9;">Penguji:</p>
                         <h3 id="claimedName" style="margin: 0;">-</h3>
@@ -124,7 +124,7 @@
                 <!-- Error -->
                 <div id="claimError" class="card fade-in" style="display: none;">
                     <div class="alert alert-error">
-                        <span>âŒ</span>
+                        <span>❌</span>
                         <span id="errorMessage">Error</span>
                     </div>
                     <button class="btn btn-secondary" onclick="resetClaim()" style="margin-top: 1rem;">Coba
@@ -133,7 +133,7 @@
 
                 <!-- Reward List -->
                 <div class="card fade-in" style="margin-top: 1.5rem;">
-                    <h3 style="margin-bottom: 1rem;">ðŸ“‹ Daftar Reward</h3>
+                    <h3 style="margin-bottom: 1rem;">📋 Daftar Reward</h3>
                     <div id="rewardList"></div>
                 </div>
             </div>
@@ -141,7 +141,7 @@
     </main>
 
     <div class="floating-auth">
-        <button class="btn btn-secondary" onclick="toggleAuth()" id="floatingBtn">ðŸ” Login</button>
+        <button class="btn btn-secondary" onclick="toggleAuth()" id="floatingBtn">🔐 Login</button>
     </div>
 
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
@@ -157,7 +157,7 @@
             }
 
             document.getElementById('mainContent').style.display = 'block';
-            document.getElementById('floatingBtn').innerHTML = 'ðŸšª Logout';
+            document.getElementById('floatingBtn').innerHTML = '🚪 Logout';
 
             loadRewardList();
         });
@@ -259,7 +259,7 @@
                   <td>${r.examinerName}</td>
                   <td><span class="badge badge-info">${subjectNames[r.subject] || r.subject}</span></td>
                   <td>${r.claimed
-                    ? '<span class="badge badge-success">âœ“ Diklaim</span>'
+                    ? '<span class="badge badge-success">✓ Diklaim</span>'
                     : '<span class="badge badge-warning">Menunggu</span>'
                 }</td>
                 </tr>
