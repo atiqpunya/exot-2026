@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reward Penguji - EXOT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .reward-card {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #78350f;
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            text-align: center;
+        }
+
+        .reward-qr {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            display: inline-block;
+            margin: 1.5rem 0;
+        }
+
+        .reward-qr img {
+            width: 200px;
+            height: 200px;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo"><span class="logo-icon">📝</span> EXOT</a>
+                <nav class="nav" id="navMenu"></nav>
+                <img src="img/logo-alwildan.png" alt="SD Alwildan 4"
+                    style="height: 40px; width: auto; margin-left: auto;">
+            </div>
+        </div>
+    </header>
+
+    <div id="authRequired" class="container" style="padding: 3rem; display: none;">
+        <div class="card" style="max-width: 400px; margin: 0 auto; text-align: center;">
+            <h2>🔐 Login Diperlukan</h2>
+            <p>Halaman ini untuk Penguji</p>
+            <a href="index.html?redirect=examiner-reward.html" class="btn btn-primary"
+                style="margin-top: 1rem;">Login</a>
+        </div>
+    </div>
+
+    <main id="mainContent" class="container" style="padding: 1.5rem; display: none;">
+        <div class="card fade-in" style="margin-bottom: 1.5rem;">
+            <h1 style="margin: 0;">🎁 Reward Penguji</h1>
+            <p style="margin: 0.5rem 0 0; color: var(--text-muted);">Selesaikan semua penilaian untuk mendapatkan QR
+                reward</p>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="card fade-in" style="margin-bottom: 1.5rem;">
+            <h3 style="margin-bottom: 1rem;">📊 Progress Penilaian Anda</h3>
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                <div class="progress-bar" style="flex: 1; height: 12px;">
+                    <div class="progress-fill" id="progressBar" style="width: 0%;"></div>
+                </div>
+                <span id="progressText" style="font-weight: 700; font-size: 1.2rem; color: var(--primary);">0%</span>
+            </div>
+            <p id="progressDetail" style="color: var(--text-muted);"></p>
+        </div>
+
+        <!-- Not Complete Section -->
+        <div id="notComplete" class="card fade-in" style="display: none;">
+            <div class="alert alert-warning">
+                <span>⏳</span>
+                <span>Selesaikan semua penilaian siswa untuk mendapatkan reward!</span>
+            </div>
+            <a href="#" id="examLink" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 1rem;">
+                ✏️ Lanjutkan Menilai
+            </a>
+        </div>
+
+        <!-- Complete Section -->
+        <div id="completeSection" style="display: none;">
+            <!-- Already has reward -->
+            <div id="hasReward" class="reward-card fade-in" style="display: none;">
+                <h2 style="margin: 0;">🎉 Selamat!</h2>
+                <p style="opacity: 0.9;">Anda telah menyelesaikan semua penilaian</p>
+
+                <div class="reward-qr">
+                    <img id="rewardQR" src="" alt="Reward QR">
+                </div>
+
+                <p style="font-weight: 600; margin: 0;">Tunjukkan QR ini ke Panitia Utama</p>
+                <p style="opacity: 0.9;">untuk menukarkan souvenir</p>
+
+                <div style="margin-top: 1.5rem;">
+                    <a id="downloadReward" class="btn" style="background: white; color: #78350f;" download>
+                        📥 Download QR
+                    </a>
+                </div>
+            </div>
+
+            <!-- Can generate reward -->
+            <div id="canGenerateReward" class="card fade-in" style="display: none;">
+                <div class="alert alert-success">
+                    <span>✅</span>
+                    <span>Semua siswa sudah dinilai! Anda berhak mendapatkan reward.</span>
+                </div>
+
+                <button class="btn btn-success btn-lg" onclick="generateReward()"
+                    style="width: 100%; margin-top: 1rem;">
+                    🎁 Submit Final & Dapatkan QR Reward
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <div class="floating-auth">
+        <button class="btn btn-secondary" onclick="toggleAuth()" id="floatingBtn">🔐 Login</button>
+    </div>
+
+    <script src="js/storage.js"></script>
+    <script>
+        let currentSession = null;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            currentSession = getSession();
+
+            if (!currentSession) {
+                document.getElementById('authRequired').style.display = 'block';
+                return;
+            }
+
+            // Only penguji can access this page
+            if (currentSession.role !== 'penguji') {
+                alert('Halaman ini hanya untuk Penguji!');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            document.getElementById('mainContent').style.display = 'block';
+            document.getElementById('floatingBtn').innerHTML = '🚪 Logout';
+
+            const subjectUrls = { english: 'exam-english.html', arabic: 'exam-arabic.html', alquran: 'exam-alquran.html' };
+            document.getElementById('navMenu').innerHTML = `
+        <a href="${subjectUrls[currentSession.subject]}" class="nav-link">Input Nilai</a>
+        <a href="examiner-reward.html" class="nav-link active">🎁 Reward</a>
+      `;
+
+            document.getElementById('examLink').href = subjectUrls[currentSession.subject];
+
+            checkProgress();
+        });
+
+        function toggleAuth() {
+            if (isLoggedIn()) { logout(); window.location.href = 'index.html'; }
+        }
+
+        function checkProgress() {
+            const subject = currentSession.subject;
+            let students = getAttendedStudents();
+
+            // Filter by assigned classes
+            if (currentSession.assignedClasses?.length) {
+                students = students.filter(s => currentSession.assignedClasses.includes(s.class));
+            }
+
+            const total = students.length;
+            const scored = students.filter(s => s.scores[subject] !== null).length;
+            const percent = total > 0 ? Math.round(scored / total * 100) : 0;
+
+            document.getElementById('progressBar').style.width = percent + '%';
+            document.getElementById('progressText').textContent = percent + '%';
+            document.getElementById('progressDetail').textContent =
+                `${scored} dari ${total} siswa sudah dinilai untuk mata pelajaran ${getSubjectName(subject)}`;
+
+            const isComplete = total > 0 && scored === total;
+
+            if (!isComplete) {
+                document.getElementById('notComplete').style.display = 'block';
+                document.getElementById('completeSection').style.display = 'none';
+            } else {
+                document.getElementById('notComplete').style.display = 'none';
+                document.getElementById('completeSection').style.display = 'block';
+
+                // Check if already has reward
+                const existingReward = getExaminerRewards().find(r => r.examinerId === currentSession.userId);
+
+                if (existingReward) {
+                    showReward(existingReward);
+                } else {
+                    document.getElementById('hasReward').style.display = 'none';
+                    document.getElementById('canGenerateReward').style.display = 'block';
+                }
+            }
+        }
+
+        function getSubjectName(subject) {
+            const names = { english: 'English', arabic: 'Arabic', alquran: 'Al-Quran' };
+            return names[subject] || subject;
+        }
+
+        function generateReward() {
+            const result = generateExaminerReward(currentSession.userId);
+
+            if (result.error) {
+                alert(result.error);
+                return;
+            }
+
+            showReward(result);
+        }
+
+        function showReward(reward) {
+            document.getElementById('hasReward').style.display = 'block';
+            document.getElementById('canGenerateReward').style.display = 'none';
+
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(reward.qrCode)}`;
+            document.getElementById('rewardQR').src = qrUrl;
+
+            const downloadLink = document.getElementById('downloadReward');
+            downloadLink.href = qrUrl;
+            downloadLink.download = `EXOT_Reward_${currentSession.name.replace(/\s+/g, '_')}.png`;
+        }
+    </script>
+</body>
+
+</html>

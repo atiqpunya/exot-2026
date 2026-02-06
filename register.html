@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data & Registrasi - EXOT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .bulk-textarea {
+            min-height: 180px;
+        }
+
+        .class-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0.8rem;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-full);
+            font-size: 0.85rem;
+            margin: 0.25rem;
+        }
+
+        .class-tag button {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0;
+        }
+
+        .export-option {
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .export-option:hover {
+            border-color: var(--primary);
+            background: var(--bg-glass);
+        }
+
+        .export-option h5 {
+            margin: 0 0 0.25rem;
+        }
+
+        .export-option p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo"><span class="logo-icon">📝</span> EXOT</a>
+                <nav class="nav">
+                    <a href="register.html" class="nav-link active">Data</a>
+                    <a href="attendance.html" class="nav-link">Absensi</a>
+                    <a href="exam-english.html" class="nav-link">English</a>
+                    <a href="exam-arabic.html" class="nav-link">Arabic</a>
+                    <a href="exam-alquran.html" class="nav-link">Al-Quran</a>
+                    <a href="dashboard.html" class="nav-link">Dashboard</a>
+                </nav>
+                <img src="img/logo-alwildan.png" alt="SD Alwildan 4"
+                    style="height: 40px; width: auto; margin-left: auto;">
+            </div>
+        </div>
+    </header>
+
+    <div id="authRequired" class="container" style="padding: 3rem; display: none;">
+        <div class="card" style="max-width: 400px; margin: 0 auto; text-align: center;">
+            <h2>🔐 Login Diperlukan</h2>
+            <p>Halaman ini hanya untuk Panitia Utama</p>
+            <a href="index.html?redirect=register.html" class="btn btn-primary" style="margin-top: 1rem;">Login</a>
+        </div>
+    </div>
+
+    <main id="mainContent" class="container" style="padding: 1.5rem; display: none;">
+        <!-- Stats -->
+        <div class="grid grid-4 fade-in" style="margin-bottom: 1.5rem;">
+            <div class="card stat-card">
+                <div class="stat-value" id="statTotal">0</div>
+                <div class="stat-label">Total Peserta</div>
+            </div>
+            <div class="card stat-card">
+                <div class="stat-value" id="statSiswa">0</div>
+                <div class="stat-label">Siswa</div>
+            </div>
+            <div class="card stat-card">
+                <div class="stat-value" id="statGuru">0</div>
+                <div class="stat-label">Guru</div>
+            </div>
+            <div class="card stat-card">
+                <div class="stat-value" id="statPenguji">0</div>
+                <div class="stat-label">Penguji</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="card fade-in">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('siswa')">👨‍🎓 Siswa & Guru</button>
+                <button class="tab-btn" onclick="switchTab('penguji')">👨‍🏫 Penguji</button>
+                <button class="tab-btn" onclick="switchTab('ruangan')">🏫 Ruangan</button>
+                <button class="tab-btn" onclick="switchTab('export')">📦 Export</button>
+            </div>
+
+            <!-- Siswa & Guru Tab -->
+            <div id="siswaTab" class="tab-content active">
+                <h4 style="margin-bottom: 1rem;">📄 Bulk Input Siswa & Guru</h4>
+                <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.9rem;">
+                    Format: <code>Nama, Ruangan, Jenis</code> (jenis: siswa/guru)
+                </p>
+                <textarea id="bulkStudents" class="bulk-textarea" placeholder="Ahmad Fauzi, 7A, siswa
+Siti Aminah, 7B, siswa
+Budi Santoso, Guru Matematika, guru
+..."></textarea>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button class="btn btn-primary" onclick="importStudents()">📥 Import Siswa/Guru</button>
+                    <button class="btn btn-danger" onclick="clearAllStudents()">🗑️ Hapus Semua</button>
+                </div>
+                <div id="studentImportResult" class="alert alert-success" style="display: none; margin-top: 1rem;">
+                </div>
+
+                <div style="margin-top: 1.5rem;">
+                    <h4>📋 Daftar Terdaftar (<span id="studentCount">0</span>)</h4>
+                    <div style="display: flex; gap: 0.5rem; margin: 1rem 0; flex-wrap: wrap;">
+                        <input type="text" id="searchStudent" class="form-input" placeholder="🔍 Cari..."
+                            style="width: 200px;">
+                        <select id="filterType" class="form-input form-select" style="width: auto;">
+                            <option value="all">Semua</option>
+                            <option value="siswa">Siswa</option>
+                            <option value="guru">Guru</option>
+                        </select>
+                    </div>
+                    <div id="studentList" style="max-height: 300px; overflow-y: auto;"></div>
+                </div>
+            </div>
+
+            <!-- Penguji Tab -->
+            <div id="pengujiTab" class="tab-content">
+                <h4 style="margin-bottom: 1rem;">👨‍🏫 Bulk Input Penguji</h4>
+                <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.9rem;">
+                    Format: <code>Username, Password, Nama, Mapel, Ruangan (opsional)</code><br>
+                    Mapel: english / arabic / alquran<br>
+                    Ruangan bisa lebih dari satu, pisahkan dengan <code>|</code>
+                </p>
+                <textarea id="bulkExaminers" class="bulk-textarea" placeholder="eng1, pass123, Pak Ahmad, english, 7A|7B|7C
+arb1, pass123, Bu Fatimah, arabic, 8A|8B|8C
+qrn1, pass123, Ustadz Ali, alquran
+..."></textarea>
+                <div style="margin-top: 1rem;">
+                    <button class="btn btn-primary" onclick="importExaminers()">📥 Import Penguji</button>
+                </div>
+                <div id="examinerImportResult" class="alert alert-success" style="display: none; margin-top: 1rem;">
+                </div>
+
+                <div style="margin-top: 1.5rem;">
+                    <h4>📋 Daftar Penguji (<span id="examinerCount">0</span>)</h4>
+                    <div id="examinerList" style="max-height: 300px; overflow-y: auto;"></div>
+                </div>
+            </div>
+
+            <!-- Ruangan Tab -->
+            <div id="ruanganTab" class="tab-content">
+                <h4 style="margin-bottom: 1rem;">🏫 Kelola Ruangan</h4>
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                    <input type="text" id="newClassName" class="form-input" placeholder="Nama ruangan baru..."
+                        style="flex: 1;">
+                    <button class="btn btn-primary" onclick="addNewClass()">+ Tambah</button>
+                </div>
+                <div id="classList" style="margin-top: 1rem;"></div>
+
+                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                    <h4>✏️ Edit Nama Ruangan</h4>
+                    <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap;">
+                        <select id="editClassOld" class="form-input form-select" style="width: auto;"></select>
+                        <span style="align-self: center;">→</span>
+                        <input type="text" id="editClassNew" class="form-input" placeholder="Nama baru"
+                            style="width: 150px;">
+                        <button class="btn btn-secondary" onclick="editClass()">Simpan</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Export Tab -->
+            <div id="exportTab" class="tab-content">
+                <h4 style="margin-bottom: 1rem;">📦 Export & Backup</h4>
+
+                <div class="grid grid-2" style="gap: 1.5rem;">
+                    <div>
+                        <h5 style="margin-bottom: 0.75rem;">📄 Download QR sebagai HTML</h5>
+
+                        <div class="export-option" onclick="exportQR('all')">
+                            <h5>📦 Semua Data</h5>
+                            <p>Download QR semua siswa, guru, dan penguji</p>
+                        </div>
+
+                        <div class="export-option" onclick="exportQR('siswa')">
+                            <h5>👨‍🎓 Hanya Siswa</h5>
+                            <p>Download QR code semua siswa saja</p>
+                        </div>
+
+                        <div class="export-option" onclick="exportQR('guru')">
+                            <h5>👨‍🏫 Hanya Guru</h5>
+                            <p>Download QR code semua guru saja</p>
+                        </div>
+
+                        <div class="export-option" onclick="exportQR('penguji')">
+                            <h5>📋 Hanya Penguji</h5>
+                            <p>Download QR code semua penguji saja</p>
+                        </div>
+
+                        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                            <h5 style="margin-bottom: 0.75rem;">🖨️ Print QR Cards</h5>
+                            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
+                                <select id="printPaperSize" class="form-input form-select" style="width: auto;">
+                                    <option value="A4">A4 (210×297mm)</option>
+                                    <option value="A3">A3 (297×420mm)</option>
+                                </select>
+                                <select id="printCardCount" class="form-input form-select" style="width: auto;">
+                                    <option value="4">4 kartu/halaman (2×2)</option>
+                                    <option value="6">6 kartu/halaman (2×3)</option>
+                                    <option value="8">8 kartu/halaman (2×4)</option>
+                                    <option value="9">9 kartu/halaman (3×3)</option>
+                                </select>
+                            </div>
+                            <div class="export-option" onclick="printQRCards()">
+                                <h5>🖨️ Cetak QR Cards</h5>
+                                <p>Cetak kartu QR sesuai pengaturan di atas</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h5 style="margin-bottom: 0.75rem;">📊 Export Data</h5>
+
+                        <div class="export-option" onclick="exportToCSV()">
+                            <h5>📊 Export CSV</h5>
+                            <p>Download data peserta ke file CSV</p>
+                        </div>
+
+                        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                            <h5 style="margin-bottom: 0.75rem;">💾 Backup & Restore</h5>
+
+                            <div class="export-option" onclick="createBackup()">
+                                <h5>💾 Backup Data</h5>
+                                <p>Simpan semua data ke file JSON</p>
+                            </div>
+
+                            <div class="export-option" onclick="document.getElementById('restoreFile').click()">
+                                <h5>📥 Restore Data</h5>
+                                <p>Pulihkan data dari file backup</p>
+                            </div>
+                            <input type="file" id="restoreFile" accept=".json" style="display: none;"
+                                onchange="handleRestore(event)">
+                        </div>
+
+                        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                            <h5 style="margin-bottom: 0.75rem;">🔍 Download QR Individual</h5>
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                <input type="text" id="searchQR" class="form-input" placeholder="Cari nama..."
+                                    style="flex: 1;">
+                                <button class="btn btn-secondary" onclick="searchAndShowQR()">Cari</button>
+                            </div>
+                            <div id="individualQRResult" style="margin-top: 1rem;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="floating-auth">
+        <button class="btn btn-secondary" onclick="toggleAuth()" id="floatingBtn">🔐 Login</button>
+    </div>
+
+    <script src="js/storage.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const session = requireAuth(['panitia_utama']);
+            if (!session) {
+                document.getElementById('authRequired').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('mainContent').style.display = 'block';
+            document.getElementById('floatingBtn').innerHTML = '🚪 Logout';
+
+            updateStats();
+            loadStudentList();
+            loadExaminerList();
+            loadClassList();
+
+            document.getElementById('searchStudent').addEventListener('input', loadStudentList);
+            document.getElementById('filterType').addEventListener('change', loadStudentList);
+        });
+
+        function toggleAuth() {
+            if (isLoggedIn()) { logout(); window.location.href = 'index.html'; }
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+                btn.classList.toggle('active',
+                    (tab === 'siswa' && i === 0) ||
+                    (tab === 'penguji' && i === 1) ||
+                    (tab === 'ruangan' && i === 2) ||
+                    (tab === 'export' && i === 3)
+                );
+            });
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(tab + 'Tab').classList.add('active');
+        }
+
+        function updateStats() {
+            const students = getStudents();
+            const examiners = getExaminers();
+            document.getElementById('statTotal').textContent = students.length;
+            document.getElementById('statSiswa').textContent = students.filter(s => s.type !== 'guru').length;
+            document.getElementById('statGuru').textContent = students.filter(s => s.type === 'guru').length;
+            document.getElementById('statPenguji').textContent = examiners.length;
+        }
+
+        function importStudents() {
+            const input = document.getElementById('bulkStudents').value.trim();
+            if (!input) return alert('Masukkan data!');
+
+            const lines = input.split('\n').filter(l => l.trim());
+            let count = 0;
+
+            lines.forEach(line => {
+                const parts = line.split(',').map(p => p.trim());
+                if (parts[0]) {
+                    addStudent(parts[0], parts[1] || '-', (parts[2] || 'siswa').toLowerCase());
+                    count++;
+                }
+            });
+
+            document.getElementById('bulkStudents').value = '';
+            showResult('studentImportResult', `✅ ${count} data berhasil diimport!`);
+            updateStats();
+            loadStudentList();
+        }
+
+        function importExaminers() {
+            const input = document.getElementById('bulkExaminers').value.trim();
+            if (!input) return alert('Masukkan data!');
+
+            const lines = input.split('\n').filter(l => l.trim());
+            let count = 0, errors = [];
+
+            lines.forEach(line => {
+                const parts = line.split(',').map(p => p.trim());
+                if (parts.length >= 4) {
+                    const classes = parts[4] ? parts[4].split('|').map(c => c.trim()) : [];
+                    const result = addUser(parts[0], parts[1], parts[2], 'penguji', parts[3].toLowerCase(), classes);
+                    if (result.error) errors.push(`${parts[0]}: ${result.error}`);
+                    else count++;
+                }
+            });
+
+            document.getElementById('bulkExaminers').value = '';
+            let msg = `✅ ${count} penguji berhasil ditambahkan!`;
+            if (errors.length) msg += `<br>⚠️ ${errors.join(', ')}`;
+            showResult('examinerImportResult', msg);
+            updateStats();
+            loadExaminerList();
+        }
+
+        function showResult(id, msg) {
+            const el = document.getElementById(id);
+            el.innerHTML = msg;
+            el.style.display = 'flex';
+            setTimeout(() => el.style.display = 'none', 5000);
+        }
+
+        function loadStudentList() {
+            let students = getStudents();
+            const search = document.getElementById('searchStudent').value.toLowerCase();
+            const filter = document.getElementById('filterType').value;
+
+            if (search) students = students.filter(s => s.name.toLowerCase().includes(search) || s.class.toLowerCase().includes(search));
+            if (filter !== 'all') students = students.filter(s => (s.type || 'siswa') === filter);
+
+            document.getElementById('studentCount').textContent = getStudents().length;
+            const container = document.getElementById('studentList');
+
+            if (!students.length) {
+                container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 1rem;">Tidak ada data</p>';
+                return;
+            }
+
+            container.innerHTML = `
+        <div class="table-container">
+          <table class="table">
+            <thead><tr><th>No</th><th>Nama</th><th>Ruangan</th><th>Jenis</th><th>Aksi</th></tr></thead>
+            <tbody>
+              ${students.slice(0, 50).map((s, i) => `
+                <tr>
+                  <td>${i + 1}</td>
+                  <td>${s.name}</td>
+                  <td>${s.class}</td>
+                  <td><span class="badge badge-${s.type === 'guru' ? 'info' : 'success'}">${s.type || 'siswa'}</span></td>
+                  <td>
+                    <button class="btn btn-sm btn-secondary" onclick="downloadSingleQR('${s.id}', 'student')">📱</button>
+                    <button class="btn btn-sm btn-danger" onclick="delStudent('${s.id}')">🗑️</button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+        ${students.length > 50 ? `<p style="text-align: center; color: var(--text-muted); margin-top: 0.5rem;">Menampilkan 50 dari ${students.length}</p>` : ''}
+      `;
+        }
+
+        function delStudent(id) {
+            if (confirm('Hapus?')) { deleteStudent(id); updateStats(); loadStudentList(); }
+        }
+
+        function clearAllStudents() {
+            if (confirm('Hapus SEMUA siswa & guru?')) {
+                localStorage.setItem('exot_students', '[]');
+                updateStats();
+                loadStudentList();
+            }
+        }
+
+        function loadExaminerList() {
+            const examiners = getExaminers();
+            document.getElementById('examinerCount').textContent = examiners.length;
+            const container = document.getElementById('examinerList');
+
+            if (!examiners.length) {
+                container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 1rem;">Belum ada penguji</p>';
+                return;
+            }
+
+            const subjectColors = { english: 'info', arabic: 'success', alquran: 'warning' };
+            const subjectNames = { english: 'English', arabic: 'Arabic', alquran: 'Al-Quran' };
+
+            container.innerHTML = `
+        <div class="table-container">
+          <table class="table">
+            <thead><tr><th>Username</th><th>Nama</th><th>Mapel</th><th>Ruangan</th><th>Aksi</th></tr></thead>
+            <tbody>
+              ${examiners.map(e => `
+                <tr>
+                  <td><code>${e.username}</code></td>
+                  <td>${e.name}</td>
+                  <td><span class="badge badge-${subjectColors[e.subject]}">${subjectNames[e.subject]}</span></td>
+                  <td>${e.assignedClasses?.join(', ') || 'Semua'}</td>
+                  <td>
+                    <button class="btn btn-sm btn-secondary" onclick="downloadSingleQR('${e.id}', 'examiner')">📱</button>
+                    <button class="btn btn-sm btn-danger" onclick="delExaminer('${e.id}')">🗑️</button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+        }
+
+        function delExaminer(id) {
+            if (confirm('Hapus penguji ini?')) { deleteUser(id); updateStats(); loadExaminerList(); }
+        }
+
+        function loadClassList() {
+            const classes = getClasses();
+            const container = document.getElementById('classList');
+            const select = document.getElementById('editClassOld');
+
+            container.innerHTML = classes.map(c => `
+        <span class="class-tag">${c} <button onclick="delClass('${c}')">&times;</button></span>
+      `).join('') || '<p style="color: var(--text-muted);">Belum ada ruangan</p>';
+
+            select.innerHTML = classes.map(c => `<option value="${c}">${c}</option>`).join('');
+        }
+
+        function addNewClass() {
+            const name = document.getElementById('newClassName').value.trim();
+            if (!name) return;
+            addClass(name);
+            document.getElementById('newClassName').value = '';
+            loadClassList();
+        }
+
+        function delClass(name) {
+            if (confirm(`Hapus ruangan ${name}?`)) { removeClass(name); loadClassList(); }
+        }
+
+        function editClass() {
+            const oldName = document.getElementById('editClassOld').value;
+            const newName = document.getElementById('editClassNew').value.trim();
+            if (!oldName || !newName) return;
+            updateClass(oldName, newName);
+            document.getElementById('editClassNew').value = '';
+            loadClassList();
+            loadStudentList();
+        }
+
+        // Download single QR
+        function downloadSingleQR(id, type) {
+            let data, name, room;
+
+            if (type === 'student') {
+                const s = getStudentById(id);
+                if (!s) return;
+                data = s.qrCode;
+                name = s.name;
+                room = s.class;
+            } else {
+                const e = getUserById(id);
+                if (!e) return;
+                data = e.id;
+                name = e.name;
+                room = e.subject;
+            }
+
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(data)}`;
+
+            // Create download link
+            const link = document.createElement('a');
+            link.href = qrUrl;
+            link.download = `QR_${name.replace(/\s+/g, '_')}_${room}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Search and show individual QR
+        function searchAndShowQR() {
+            const search = document.getElementById('searchQR').value.toLowerCase().trim();
+            if (!search) return;
+
+            const students = getStudents().filter(s => s.name.toLowerCase().includes(search));
+            const examiners = getExaminers().filter(e => e.name.toLowerCase().includes(search));
+
+            const container = document.getElementById('individualQRResult');
+            const all = [...students.map(s => ({ ...s, isStudent: true })), ...examiners.map(e => ({ ...e, isExaminer: true }))];
+
+            if (!all.length) {
+                container.innerHTML = '<p style="color: var(--text-muted);">Tidak ditemukan</p>';
+                return;
+            }
+
+            container.innerHTML = all.slice(0, 5).map(item => `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+          <div>
+            <strong>${item.name}</strong>
+            <span class="badge badge-${item.isStudent ? 'success' : 'info'}" style="margin-left: 0.5rem;">
+              ${item.isStudent ? (item.type || 'siswa') : 'penguji'}
+            </span>
+          </div>
+          <button class="btn btn-sm btn-primary" onclick="downloadSingleQR('${item.id}', '${item.isStudent ? 'student' : 'examiner'}')">📥 Download</button>
+        </div>
+      `).join('');
+        }
+
+        // Export QR by category
+        function exportQR(category) {
+            let items = [];
+            let title = '';
+
+            if (category === 'all') {
+                const students = getStudents();
+                const examiners = getExaminers();
+                items = [
+                    ...students.map(s => ({ name: s.name, room: s.class, type: s.type || 'siswa', qr: s.qrCode })),
+                    ...examiners.map(e => ({ name: e.name, room: e.subject, type: 'penguji', qr: e.id }))
+                ];
+                title = 'Semua Data';
+            } else if (category === 'siswa') {
+                items = getStudents().filter(s => s.type !== 'guru').map(s => ({ name: s.name, room: s.class, type: 'siswa', qr: s.qrCode }));
+                title = 'Siswa';
+            } else if (category === 'guru') {
+                items = getStudents().filter(s => s.type === 'guru').map(s => ({ name: s.name, room: s.class, type: 'guru', qr: s.qrCode }));
+                title = 'Guru';
+            } else if (category === 'penguji') {
+                items = getExaminers().map(e => ({ name: e.name, room: e.subject, type: 'penguji', qr: e.id }));
+                title = 'Penguji';
+            }
+
+            if (!items.length) {
+                alert('Tidak ada data untuk kategori ini!');
+                return;
+            }
+
+            const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>EXOT QR - ${title}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f5f5f5;padding:20px}
+h1{text-align:center;margin-bottom:10px;color:#0ea5e9}
+.info{text-align:center;margin-bottom:20px;color:#666}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:15px}
+.card{background:white;border:2px solid #ddd;border-radius:10px;padding:12px;text-align:center;page-break-inside:avoid}
+.card img{width:130px;height:130px;margin-bottom:8px}
+.card h3{font-size:12px;margin-bottom:4px;word-break:break-word}
+.card p{font-size:11px;color:#666}
+.card .type{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;margin-top:5px}
+.siswa{background:#dcfce7;color:#166534}
+.guru{background:#dbeafe;color:#1e40af}
+.penguji{background:#fef3c7;color:#92400e}
+.download-btn{display:inline-block;margin-top:8px;padding:4px 10px;font-size:11px;background:#0ea5e9;color:white;border:none;border-radius:5px;cursor:pointer;text-decoration:none}
+.download-btn:hover{background:#0284c7}
+@media print{body{padding:0;background:white}.card{border:1px solid #000}.download-btn{display:none}}
+</style></head><body>
+<h1>📝 EXOT QR Codes - ${title}</h1>
+<p class="info">Total: ${items.length} | Generated: ${new Date().toLocaleString('id-ID')}</p>
+<div class="grid">
+${items.map(item => `
+<div class="card">
+  <img src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=${encodeURIComponent(item.qr)}" alt="QR">
+  <h3>${item.name}</h3>
+  <p>${item.room}</p>
+  <span class="type ${item.type}">${item.type}</span>
+  <br>
+  <a class="download-btn" href="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(item.qr)}" download="QR_${item.name.replace(/\\s+/g, '_')}.png">📥 Download</a>
+</div>
+`).join('')}
+</div>
+</body></html>`;
+
+            const blob = new Blob([html], { type: 'text/html' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `EXOT_QR_${title.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // Handle restore from backup
+        function handleRestore(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                if (confirm('Ini akan mengganti semua data yang ada. Lanjutkan?')) {
+                    const result = restoreBackup(e.target.result);
+                    if (result.error) {
+                        alert('Error: ' + result.error);
+                    } else {
+                        alert('Data berhasil dipulihkan dari backup ' + result.date);
+                        location.reload();
+                    }
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // Print QR cards with paper size and card count options
+        function printQRCards() {
+            const students = getStudents();
+            if (!students.length) {
+                alert('Tidak ada data siswa!');
+                return;
+            }
+
+            const paperSize = document.getElementById('printPaperSize').value;
+            const cardCount = parseInt(document.getElementById('printCardCount').value);
+
+            // Paper dimensions in mm
+            const paperDims = {
+                'A4': { width: 210, height: 297 },
+                'A3': { width: 297, height: 420 }
+            };
+
+            // Grid layouts based on card count
+            const gridLayouts = {
+                4: { cols: 2, rows: 2 },
+                6: { cols: 2, rows: 3 },
+                8: { cols: 2, rows: 4 },
+                9: { cols: 3, rows: 3 }
+            };
+
+            const paper = paperDims[paperSize];
+            const grid = gridLayouts[cardCount];
+
+            // QR size scales with card count
+            const qrSize = cardCount <= 4 ? 100 : (cardCount <= 6 ? 85 : 70);
+            const fontSize = cardCount <= 4 ? 14 : (cardCount <= 6 ? 12 : 11);
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Print QR Cards - EXOT (${paperSize}, ${cardCount} kartu)</title>
+                    <style>
+                        * { box-sizing: border-box; margin: 0; padding: 0; }
+                        body { font-family: Arial, sans-serif; }
+                        .page { 
+                            width: ${paper.width}mm; 
+                            min-height: ${paper.height}mm; 
+                            padding: 10mm; 
+                            display: grid;
+                            grid-template-columns: repeat(${grid.cols}, 1fr);
+                            grid-template-rows: repeat(${grid.rows}, 1fr);
+                            gap: 8mm;
+                            page-break-after: always;
+                        }
+                        .card {
+                            border: 2px solid #333;
+                            border-radius: 10px;
+                            padding: 10px;
+                            text-align: center;
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            justify-content: center;
+                        }
+                        .card img { width: ${qrSize}px; height: ${qrSize}px; margin-bottom: 8px; }
+                        .card h3 { font-size: ${fontSize}px; margin-bottom: 4px; word-break: break-word; }
+                        .card p { font-size: ${fontSize - 2}px; color: #666; }
+                        .card .type { 
+                            display: inline-block; 
+                            padding: 2px 8px; 
+                            border-radius: 10px; 
+                            font-size: ${fontSize - 3}px; 
+                            margin-top: 6px;
+                            background: #e0f2fe;
+                            color: #0369a1;
+                        }
+                        @media print {
+                            @page { size: ${paperSize}; margin: 0; }
+                            .page { page-break-after: always; }
+                            .page:last-child { page-break-after: auto; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${(() => {
+                    let html = '';
+                    for (let i = 0; i < students.length; i += cardCount) {
+                        const pageItems = students.slice(i, i + cardCount);
+                        html += '<div class="page">';
+                        pageItems.forEach(s => {
+                            html += '<div class="card">' +
+                                '<img src="https://api.qrserver.com/v1/create-qr-code/?size=' + qrSize + 'x' + qrSize + '&data=' + encodeURIComponent(s.qrCode || s.id) + '" alt="QR">' +
+                                '<h3>' + s.name + '</h3>' +
+                                '<p>' + s.class + '</p>' +
+                                '<span class="type">' + (s.type || 'siswa') + '</span>' +
+                                '</div>';
+                        });
+                        html += '</div>';
+                    }
+                    return html;
+                })()}
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.onload = function () {
+                printWindow.print();
+            };
+        }
+    </script>
+</body>
+
+</html>

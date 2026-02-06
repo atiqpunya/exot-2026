@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penilaian English - EXOT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .subject-header {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            margin-bottom: 1.5rem;
+        }
+
+        .score-input {
+            width: 80px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .score-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo"><span class="logo-icon">📝</span> EXOT</a>
+                <nav class="nav" id="navMenu"></nav>
+                <img src="img/logo-alwildan.png" alt="SD Alwildan 4"
+                    style="height: 40px; width: auto; margin-left: auto;">
+            </div>
+        </div>
+    </header>
+
+    <div id="authRequired" class="container" style="padding: 3rem; display: none;">
+        <div class="card" style="max-width: 400px; margin: 0 auto; text-align: center;">
+            <h2>🔐 Login Diperlukan</h2>
+            <p>Halaman ini untuk Penguji English atau Panitia Utama</p>
+            <a href="index.html?redirect=exam-english.html" class="btn btn-primary" style="margin-top: 1rem;">Login</a>
+        </div>
+    </div>
+
+    <main id="mainContent" class="container" style="padding: 1.5rem; display: none;">
+        <div class="subject-header fade-in">
+            <h1 style="margin: 0; font-size: 1.8rem;">📖 Penilaian English</h1>
+            <p style="margin: 0.5rem 0 0; opacity: 0.9;">Input nilai siswa untuk mata pelajaran English</p>
+        </div>
+
+        <!-- Progress -->
+        <div class="card fade-in" style="margin-bottom: 1.5rem;">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h4 style="margin: 0;">Progress Penilaian</h4>
+                    <p style="margin: 0.25rem 0 0; color: var(--text-muted);">
+                        <strong id="scoredCount">0</strong> dari <strong id="totalCount">0</strong> siswa sudah dinilai
+                    </p>
+                </div>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <div class="progress-bar" style="width: 150px;">
+                        <div class="progress-fill" id="progressBar" style="width: 0%;"></div>
+                    </div>
+                    <span id="progressPercent" style="font-weight: 600; color: var(--primary);">0%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="card fade-in" style="margin-bottom: 1.5rem;">
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <input type="text" id="searchInput" class="form-input" placeholder="🔍 Cari nama..."
+                    style="width: 200px;">
+                <select id="filterClass" class="form-input form-select" style="width: auto;"></select>
+                <select id="filterStatus" class="form-input form-select" style="width: auto;">
+                    <option value="all">Semua Status</option>
+                    <option value="pending">Belum Dinilai</option>
+                    <option value="scored">Sudah Dinilai</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Student List -->
+        <div class="card fade-in">
+            <div id="studentList"></div>
+        </div>
+    </main>
+
+    <div class="floating-auth">
+        <button class="btn btn-secondary" onclick="toggleAuth()" id="floatingBtn">🔐 Login</button>
+    </div>
+
+    <script src="js/storage.js"></script>
+    <script>
+        const SUBJECT = 'english';
+        const SUBJECT_NAME = 'English';
+        let currentSession = null;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            currentSession = getSession();
+
+            // Check auth - allow panitia_utama or penguji with english subject
+            if (!currentSession) {
+                document.getElementById('authRequired').style.display = 'block';
+                return;
+            }
+
+            if (currentSession.role === 'penguji' && currentSession.subject !== SUBJECT) {
+                alert('Anda tidak memiliki akses ke halaman ini!');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            document.getElementById('mainContent').style.display = 'block';
+            document.getElementById('floatingBtn').innerHTML = '🚪 Logout';
+
+            // Set nav based on role
+            const nav = document.getElementById('navMenu');
+            if (currentSession.role === 'panitia_utama') {
+                nav.innerHTML = `
+          <a href="register.html" class="nav-link">Data</a>
+          <a href="attendance.html" class="nav-link">Absensi</a>
+          <a href="exam-english.html" class="nav-link active">English</a>
+          <a href="exam-arabic.html" class="nav-link">Arabic</a>
+          <a href="exam-alquran.html" class="nav-link">Al-Quran</a>
+          <a href="dashboard.html" class="nav-link">Dashboard</a>
+        `;
+            } else {
+                nav.innerHTML = `
+          <a href="exam-english.html" class="nav-link active">Input Nilai</a>
+          <a href="examiner-reward.html" class="nav-link">🎁 Reward</a>
+        `;
+            }
+
+            loadClassFilter();
+            loadStudents();
+
+            document.getElementById('searchInput').addEventListener('input', loadStudents);
+            document.getElementById('filterClass').addEventListener('change', loadStudents);
+            document.getElementById('filterStatus').addEventListener('change', loadStudents);
+        });
+
+        function toggleAuth() {
+            if (isLoggedIn()) {
+                logout();
+                window.location.href = 'index.html';
+            }
+        }
+
+        function loadClassFilter() {
+            const classes = getClasses();
+            const select = document.getElementById('filterClass');
+            select.innerHTML = '<option value="all">Semua Ruangan</option>' +
+                classes.map(c => `<option value="${c}">${c}</option>`).join('');
+
+            // If examiner has assigned classes, filter to those
+            if (currentSession.role === 'penguji' && currentSession.assignedClasses?.length) {
+                select.innerHTML = '<option value="all">Ruangan Saya</option>' +
+                    currentSession.assignedClasses.map(c => `<option value="${c}">${c}</option>`).join('');
+            }
+        }
+
+        function loadStudents() {
+            let students = getAttendedStudents();
+
+            // Filter by examiner's assigned classes
+            if (currentSession.role === 'penguji' && currentSession.assignedClasses?.length) {
+                students = students.filter(s => currentSession.assignedClasses.includes(s.class));
+            }
+
+            // Apply filters
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const classFilter = document.getElementById('filterClass').value;
+            const statusFilter = document.getElementById('filterStatus').value;
+
+            if (search) students = students.filter(s => s.name.toLowerCase().includes(search));
+            if (classFilter !== 'all') students = students.filter(s => s.class === classFilter);
+            if (statusFilter === 'pending') students = students.filter(s => s.scores[SUBJECT] === null);
+            if (statusFilter === 'scored') students = students.filter(s => s.scores[SUBJECT] !== null);
+
+            // Update progress
+            const allStudents = getAttendedStudents().filter(s => {
+                if (currentSession.role === 'penguji' && currentSession.assignedClasses?.length) {
+                    return currentSession.assignedClasses.includes(s.class);
+                }
+                return true;
+            });
+            const scored = allStudents.filter(s => s.scores[SUBJECT] !== null).length;
+            const total = allStudents.length;
+            const percent = total > 0 ? Math.round(scored / total * 100) : 0;
+
+            document.getElementById('scoredCount').textContent = scored;
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('progressBar').style.width = percent + '%';
+            document.getElementById('progressPercent').textContent = percent + '%';
+
+            const container = document.getElementById('studentList');
+
+            if (!students.length) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><p>Tidak ada siswa yang hadir</p></div>';
+                return;
+            }
+
+            container.innerHTML = `
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Nama</th>
+                <th>Ruangan</th>
+                <th>Nilai ${SUBJECT_NAME}</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${students.map((s, i) => `
+                <tr>
+                  <td>${i + 1}</td>
+                  <td><strong>${s.name}</strong></td>
+                  <td>${s.class}</td>
+                  <td>
+                    <div class="score-cell">
+                      <input type="number" 
+                             id="score-${s.id}" 
+                             class="form-input score-input" 
+                             value="${s.scores[SUBJECT] ?? ''}" 
+                             min="0" 
+                             max="100" 
+                             placeholder="0-100">
+                      ${s.scores[SUBJECT] !== null ? '<span class="badge badge-success">✓</span>' : ''}
+                    </div>
+                  </td>
+                  <td>
+                    <button class="btn btn-sm btn-primary" onclick="saveScore('${s.id}')">💾 Simpan</button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+        }
+
+        function saveScore(studentId) {
+            const input = document.getElementById('score-' + studentId);
+            const value = parseInt(input.value);
+
+            if (isNaN(value) || value < 0 || value > 100) {
+                alert('Nilai harus 0-100!');
+                input.focus();
+                return;
+            }
+
+            updateScore(studentId, SUBJECT, value, currentSession.userId);
+            loadStudents();
+        }
+    </script>
+</body>
+
+</html>

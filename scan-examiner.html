@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan Reward Penguji - EXOT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .scanner-container {
+            position: relative;
+            max-width: 400px;
+            margin: 0 auto;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            background: #000;
+        }
+
+        #video {
+            width: 100%;
+            display: block;
+        }
+
+        .scanner-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        .scanner-frame {
+            width: 200px;
+            height: 200px;
+            border: 3px solid #fbbf24;
+            border-radius: 20px;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+        }
+
+        .claimed-card {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo"><span class="logo-icon">📝</span> EXOT</a>
+                <nav class="nav">
+                    <a href="register.html" class="nav-link">Data</a>
+                    <a href="attendance.html" class="nav-link">Absensi</a>
+                    <a href="scan-examiner.html" class="nav-link active">Scan Reward</a>
+                    <a href="dashboard.html" class="nav-link">Dashboard</a>
+                </nav>
+                <img src="img/logo-alwildan.png" alt="SD Alwildan 4"
+                    style="height: 40px; width: auto; margin-left: auto;">
+            </div>
+        </div>
+    </header>
+
+    <div id="authRequired" class="container" style="padding: 3rem; display: none;">
+        <div class="card" style="max-width: 400px; margin: 0 auto; text-align: center;">
+            <h2>🔐 Login Diperlukan</h2>
+            <p>Halaman ini hanya untuk Panitia Utama</p>
+            <a href="index.html?redirect=scan-examiner.html" class="btn btn-primary" style="margin-top: 1rem;">Login</a>
+        </div>
+    </div>
+
+    <main id="mainContent" class="container" style="padding: 1.5rem; display: none;">
+        <div class="card fade-in" style="margin-bottom: 1.5rem;">
+            <h1 style="margin: 0;">🎁 Scan QR Reward Penguji</h1>
+            <p style="margin: 0.5rem 0 0; color: var(--text-muted);">Scan QR code penguji untuk klaim souvenir</p>
+        </div>
+
+        <div class="grid grid-2" style="gap: 1.5rem; align-items: start;">
+            <!-- Scanner -->
+            <div class="card fade-in">
+                <h3 style="margin-bottom: 1rem;">📷 Scanner</h3>
+
+                <div class="scanner-container" id="scannerContainer">
+                    <div id="video" style="width: 100%;"></div>
+                </div>
+
+                <div style="margin-top: 1rem; text-align: center;">
+                    <button class="btn btn-primary" id="startBtn" onclick="startScanner()">📷 Mulai Scan</button>
+                    <button class="btn btn-secondary" id="stopBtn" onclick="stopScanner()" style="display: none;">⏹️
+                        Stop</button>
+                </div>
+
+                <div style="margin-top: 1rem;">
+                    <label class="form-label">Atau input manual:</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" id="manualInput" class="form-input" placeholder="Kode reward...">
+                        <button class="btn btn-secondary" onclick="claimManual()">Klaim</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Result -->
+            <div>
+                <!-- Success -->
+                <div id="claimSuccess" class="claimed-card fade-in" style="display: none;">
+                    <h2 style="margin: 0;">✅ Berhasil Diklaim!</h2>
+                    <div style="margin: 1rem 0;">
+                        <p style="opacity: 0.9;">Penguji:</p>
+                        <h3 id="claimedName" style="margin: 0;">-</h3>
+                        <p id="claimedSubject" style="opacity: 0.9;">-</p>
+                    </div>
+                    <p style="opacity: 0.9;">Berikan souvenir kepada penguji</p>
+                    <button class="btn" style="background: white; color: #059669; margin-top: 1rem;"
+                        onclick="resetClaim()">Scan Lagi</button>
+                </div>
+
+                <!-- Error -->
+                <div id="claimError" class="card fade-in" style="display: none;">
+                    <div class="alert alert-error">
+                        <span>❌</span>
+                        <span id="errorMessage">Error</span>
+                    </div>
+                    <button class="btn btn-secondary" onclick="resetClaim()" style="margin-top: 1rem;">Coba
+                        Lagi</button>
+                </div>
+
+                <!-- Reward List -->
+                <div class="card fade-in" style="margin-top: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem;">📋 Daftar Reward</h3>
+                    <div id="rewardList"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="floating-auth">
+        <button class="btn btn-secondary" onclick="toggleAuth()" id="floatingBtn">🔐 Login</button>
+    </div>
+
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="js/storage.js"></script>
+    <script>
+        let html5QrCode = null;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const session = requireAuth(['panitia_utama']);
+            if (!session) {
+                document.getElementById('authRequired').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('mainContent').style.display = 'block';
+            document.getElementById('floatingBtn').innerHTML = '🚪 Logout';
+
+            loadRewardList();
+        });
+
+        function toggleAuth() {
+            if (isLoggedIn()) { logout(); window.location.href = 'index.html'; }
+        }
+
+        async function startScanner() {
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('stopBtn').style.display = 'inline-flex';
+
+            try {
+                html5QrCode = new Html5Qrcode("video");
+
+                await html5QrCode.start(
+                    { facingMode: "environment" },
+                    {
+                        fps: 10,
+                        qrbox: { width: 200, height: 200 }
+                    },
+                    (decodedText) => {
+                        if (decodedText && decodedText.includes('REWARD')) {
+                            processReward(decodedText);
+                        }
+                    },
+                    (errorMessage) => {
+                        // Ignore scan errors (no QR found)
+                    }
+                );
+            } catch (err) {
+                console.error(err);
+                alert('Tidak bisa mengakses kamera: ' + err.message);
+                stopScanner();
+            }
+        }
+
+        async function stopScanner() {
+            if (html5QrCode) {
+                try {
+                    await html5QrCode.stop();
+                } catch (e) { }
+                html5QrCode = null;
+            }
+
+            document.getElementById('startBtn').style.display = 'inline-flex';
+            document.getElementById('stopBtn').style.display = 'none';
+        }
+
+        function claimManual() {
+            const code = document.getElementById('manualInput').value.trim();
+            if (!code) return;
+            processReward(code);
+        }
+
+        function processReward(code) {
+            const result = claimExaminerReward(code);
+
+            if (result.error) {
+                document.getElementById('errorMessage').textContent = result.error;
+                document.getElementById('claimError').style.display = 'block';
+                document.getElementById('claimSuccess').style.display = 'none';
+            } else {
+                const subjectNames = { english: 'English', arabic: 'Arabic', alquran: 'Al-Quran' };
+                document.getElementById('claimedName').textContent = result.examinerName;
+                document.getElementById('claimedSubject').textContent = 'Penguji ' + (subjectNames[result.subject] || result.subject);
+                document.getElementById('claimSuccess').style.display = 'block';
+                document.getElementById('claimError').style.display = 'none';
+                stopScanner();
+                loadRewardList();
+            }
+
+            document.getElementById('manualInput').value = '';
+        }
+
+        function resetClaim() {
+            document.getElementById('claimSuccess').style.display = 'none';
+            document.getElementById('claimError').style.display = 'none';
+        }
+
+        function loadRewardList() {
+            const rewards = getExaminerRewards();
+            const container = document.getElementById('rewardList');
+
+            if (!rewards.length) {
+                container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Belum ada reward</p>';
+                return;
+            }
+
+            const subjectNames = { english: 'English', arabic: 'Arabic', alquran: 'Al-Quran' };
+
+            container.innerHTML = `
+        <div class="table-container">
+          <table class="table">
+            <thead><tr><th>Nama</th><th>Mapel</th><th>Status</th></tr></thead>
+            <tbody>
+              ${rewards.map(r => `
+                <tr>
+                  <td>${r.examinerName}</td>
+                  <td><span class="badge badge-info">${subjectNames[r.subject] || r.subject}</span></td>
+                  <td>${r.claimed
+                    ? '<span class="badge badge-success">✓ Diklaim</span>'
+                    : '<span class="badge badge-warning">Menunggu</span>'
+                }</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+        }
+    </script>
+</body>
+
+</html>

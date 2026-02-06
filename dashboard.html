@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - EXOT</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0ea5e9">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo"><span class="logo-icon">📝</span> EXOT</a>
+                <nav class="nav">
+                    <a href="register.html" class="nav-link">Data</a>
+                    <a href="attendance.html" class="nav-link">Absensi</a>
+                    <a href="exam-english.html" class="nav-link">English</a>
+                    <a href="exam-arabic.html" class="nav-link">Arabic</a>
+                    <a href="exam-alquran.html" class="nav-link">Al-Quran</a>
+                    <a href="dashboard.html" class="nav-link active">Dashboard</a>
+                </nav>
+                <img src="img/logo-alwildan.png" alt="SD Alwildan 4"
+                    style="height: 40px; width: auto; margin-left: auto;">
+            </div>
+        </div>
+    </header>
+
+    <div id="authRequired" class="container" style="padding: 3rem; display: none;">
+        <div class="card" style="max-width: 400px; margin: 0 auto; text-align: center;">
+            <h2>🔐 Login Diperlukan</h2>
+            <p>Halaman ini hanya untuk Panitia Utama</p>
+            <a href="index.html?redirect=dashboard.html" class="btn btn-primary" style="margin-top: 1rem;">Login</a>
+        </div>
+    </div>
+
+    <main id="mainContent" class="container" style="padding: 1.5rem; display: none;">
+        <!-- Header -->
+        <div class="card fade-in" style="margin-bottom: 1.5rem;">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h1 style="margin: 0;">📊 Dashboard EXOT</h1>
+                    <p style="margin: 0.5rem 0 0; color: var(--text-muted);">Rekap hasil ujian lengkap</p>
+                </div>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="generateCertificates()">📜 Sertifikat PDF</button>
+                    <button class="btn btn-success" onclick="exportToCSV()">📥 Export CSV</button>
+                    <button class="btn btn-secondary" onclick="createBackup()">💾 Backup</button>
+                    <button class="btn btn-secondary" onclick="window.print()">🖨️ Print</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('overview')">📊 Ringkasan</button>
+            <button class="tab-btn" onclick="showTab('ranking')">🏆 Ranking</button>
+            <button class="tab-btn" onclick="showTab('rooms')">🏫 Per Ruangan</button>
+            <button class="tab-btn" onclick="showTab('charts')">📈 Grafik</button>
+            <button class="tab-btn" onclick="showTab('activity')">📋 Activity Log</button>
+        </div>
+
+        <!-- Tab: Overview -->
+        <div id="tab-overview" class="tab-content active">
+            <!-- Stats -->
+            <div class="grid grid-4 fade-in" style="margin-bottom: 1.5rem;">
+                <div class="card stat-card">
+                    <div class="stat-value" id="statTotal">0</div>
+                    <div class="stat-label">Total Peserta</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-value" style="color: var(--success);" id="statHadir">0</div>
+                    <div class="stat-label">Hadir</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-value" style="color: var(--primary);" id="statSelesai">0</div>
+                    <div class="stat-label">Selesai Ujian</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-value" style="color: var(--accent);" id="statAvg">0</div>
+                    <div class="stat-label">Rata-rata</div>
+                </div>
+            </div>
+
+            <!-- Per Subject Stats -->
+            <div class="grid grid-3 fade-in" style="margin-bottom: 1.5rem;">
+                <div class="card" style="border-left: 4px solid #3b82f6;">
+                    <h4 style="margin: 0 0 0.5rem;">📖 English</h4>
+                    <div style="display: flex; justify-content: space-between;"><span>Dinilai:</span><strong
+                            id="engScored">0</strong></div>
+                    <div style="display: flex; justify-content: space-between;"><span>Rata-rata:</span><strong
+                            id="engAvg">0</strong></div>
+                </div>
+                <div class="card" style="border-left: 4px solid #10b981;">
+                    <h4 style="margin: 0 0 0.5rem;">📕 Arabic</h4>
+                    <div style="display: flex; justify-content: space-between;"><span>Dinilai:</span><strong
+                            id="arbScored">0</strong></div>
+                    <div style="display: flex; justify-content: space-between;"><span>Rata-rata:</span><strong
+                            id="arbAvg">0</strong></div>
+                </div>
+                <div class="card" style="border-left: 4px solid #f59e0b;">
+                    <h4 style="margin: 0 0 0.5rem;">📗 Al-Quran</h4>
+                    <div style="display: flex; justify-content: space-between;"><span>Dinilai:</span><strong
+                            id="qrnScored">0</strong></div>
+                    <div style="display: flex; justify-content: space-between;"><span>Rata-rata:</span><strong
+                            id="qrnAvg">0</strong></div>
+                </div>
+            </div>
+
+            <!-- Filters & Table -->
+            <div class="card fade-in">
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                    <input type="text" id="searchInput" class="form-input" placeholder="🔍 Cari nama..."
+                        style="width: 200px;">
+                    <select id="filterClass" class="form-input form-select" style="width: auto;"></select>
+                    <select id="filterStatus" class="form-input form-select" style="width: auto;">
+                        <option value="all">Semua Status</option>
+                        <option value="hadir">Hadir</option>
+                        <option value="selesai">Selesai Ujian</option>
+                        <option value="belum">Belum Selesai</option>
+                    </select>
+                </div>
+                <div id="resultTable"></div>
+            </div>
+        </div>
+
+        <!-- Tab: Ranking -->
+        <div id="tab-ranking" class="tab-content">
+            <div class="card fade-in">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="margin: 0;">🏆 Peringkat Nilai</h3>
+                    <select id="rankingFilter" class="form-input form-select" style="width: auto;"
+                        onchange="loadRanking()">
+                        <option value="all">Semua Ruangan</option>
+                    </select>
+                </div>
+                <div id="rankingTable"></div>
+            </div>
+        </div>
+
+        <!-- Tab: Per Room -->
+        <div id="tab-rooms" class="tab-content">
+            <div class="card fade-in">
+                <h3 style="margin: 0 0 1rem;">🏫 Statistik Per Ruangan</h3>
+                <div id="roomStats"></div>
+            </div>
+        </div>
+
+        <!-- Tab: Charts -->
+        <div id="tab-charts" class="tab-content">
+            <div class="grid grid-2" style="margin-bottom: 1.5rem;">
+                <div class="card fade-in">
+                    <h4 style="margin: 0 0 1rem;">📊 Rata-rata Per Mata Pelajaran</h4>
+                    <div class="chart-container">
+                        <canvas id="subjectChart"></canvas>
+                    </div>
+                </div>
+                <div class="card fade-in">
+                    <h4 style="margin: 0 0 1rem;">📈 Rata-rata Per Ruangan</h4>
+                    <div class="chart-container">
+                        <canvas id="roomChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Activity Log -->
+        <div id="tab-activity" class="tab-content">
+            <div class="card fade-in">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="margin: 0;">📋 Activity Log</h3>
+                    <button class="btn btn-sm btn-danger"
+                        onclick="if(confirm('Hapus semua log?')){clearActivityLog();loadActivity();}">🗑️ Clear</button>
+                </div>
+                <div id="activityLog" class="activity-log"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Settings Toggle -->
+    <div class="settings-toggle no-print">
+        <button class="btn btn-secondary" onclick="toggleDarkMode()" title="Dark Mode">🌙</button>
+        <button class="btn btn-secondary" onclick="toggleSound()" id="soundBtn" title="Sound">🔊</button>
+    </div>
+
+    <div class="floating-auth no-print">
+        <button class="btn btn-secondary" onclick="toggleAuth()" id="floatingBtn">🔐 Login</button>
+    </div>
+
+    <script src="js/storage.js"></script>
+    <script>
+        let subjectChart = null;
+        let roomChart = null;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Register service worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js').catch(() => { });
+            }
+
+            const session = requireAuth(['panitia_utama']);
+            if (!session) {
+                document.getElementById('authRequired').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('mainContent').style.display = 'block';
+            document.getElementById('floatingBtn').innerHTML = '🚪 Logout';
+
+            // Update sound button
+            updateSoundBtn();
+
+            loadClassFilter();
+            updateStats();
+            loadResults();
+            loadRanking();
+            loadRoomStats();
+            loadActivity();
+            initCharts();
+
+            document.getElementById('searchInput').addEventListener('input', loadResults);
+            document.getElementById('filterClass').addEventListener('change', loadResults);
+            document.getElementById('filterStatus').addEventListener('change', loadResults);
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function (e) {
+                if (e.altKey) {
+                    switch (e.key) {
+                        case '1': window.location.href = 'register.html'; break;
+                        case '2': window.location.href = 'attendance.html'; break;
+                        case '3': window.location.href = 'exam-english.html'; break;
+                        case '4': window.location.href = 'exam-arabic.html'; break;
+                        case '5': window.location.href = 'exam-alquran.html'; break;
+                        case 'd': toggleDarkMode(); break;
+                    }
+                }
+            });
+        });
+
+        function toggleAuth() {
+            if (isLoggedIn()) { logout(); window.location.href = 'index.html'; }
+        }
+
+        function updateSoundBtn() {
+            const settings = getSettings();
+            document.getElementById('soundBtn').textContent = settings.soundEnabled ? '🔊' : '🔇';
+        }
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+            event.target.classList.add('active');
+
+            if (tabId === 'charts') {
+                setTimeout(initCharts, 100);
+            }
+        }
+
+        function loadClassFilter() {
+            const classes = getClasses();
+            const options = '<option value="all">Semua Ruangan</option>' + classes.map(c => `<option value="${c}">${c}</option>`).join('');
+            document.getElementById('filterClass').innerHTML = options;
+            document.getElementById('rankingFilter').innerHTML = options;
+        }
+
+        function updateStats() {
+            const students = getStudents();
+            const attended = students.filter(s => s.attended);
+            const completed = attended.filter(s =>
+                s.scores.english !== null && s.scores.arabic !== null && s.scores.alquran !== null
+            );
+
+            let totalSum = 0, totalCount = 0;
+            let engSum = 0, engCount = 0;
+            let arbSum = 0, arbCount = 0;
+            let qrnSum = 0, qrnCount = 0;
+
+            attended.forEach(s => {
+                if (s.scores.english !== null) { engSum += s.scores.english; engCount++; }
+                if (s.scores.arabic !== null) { arbSum += s.scores.arabic; arbCount++; }
+                if (s.scores.alquran !== null) { qrnSum += s.scores.alquran; qrnCount++; }
+            });
+
+            completed.forEach(s => {
+                totalSum += (s.scores.english + s.scores.arabic + s.scores.alquran) / 3;
+                totalCount++;
+            });
+
+            document.getElementById('statTotal').textContent = students.length;
+            document.getElementById('statHadir').textContent = attended.length;
+            document.getElementById('statSelesai').textContent = completed.length;
+            document.getElementById('statAvg').textContent = totalCount > 0 ? (totalSum / totalCount).toFixed(1) : '-';
+
+            document.getElementById('engScored').textContent = engCount;
+            document.getElementById('engAvg').textContent = engCount > 0 ? (engSum / engCount).toFixed(1) : '-';
+            document.getElementById('arbScored').textContent = arbCount;
+            document.getElementById('arbAvg').textContent = arbCount > 0 ? (arbSum / arbCount).toFixed(1) : '-';
+            document.getElementById('qrnScored').textContent = qrnCount;
+            document.getElementById('qrnAvg').textContent = qrnCount > 0 ? (qrnSum / qrnCount).toFixed(1) : '-';
+        }
+
+        function loadResults() {
+            let students = getStudents();
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const classFilter = document.getElementById('filterClass').value;
+            const statusFilter = document.getElementById('filterStatus').value;
+
+            if (search) students = students.filter(s => s.name.toLowerCase().includes(search));
+            if (classFilter !== 'all') students = students.filter(s => s.class === classFilter);
+            if (statusFilter === 'hadir') students = students.filter(s => s.attended);
+            if (statusFilter === 'selesai') students = students.filter(s =>
+                s.scores.english !== null && s.scores.arabic !== null && s.scores.alquran !== null);
+            if (statusFilter === 'belum') students = students.filter(s =>
+                s.attended && (s.scores.english === null || s.scores.arabic === null || s.scores.alquran === null));
+
+            const container = document.getElementById('resultTable');
+            if (!students.length) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><p>Tidak ada data</p></div>';
+                return;
+            }
+
+            // Get ranking for rank info
+            const ranking = getRanking();
+            const rankMap = {};
+            ranking.forEach(r => rankMap[r.id] = r.rank);
+
+            container.innerHTML = `
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Nama</th>
+                                <th>Ruangan</th>
+                                <th>Hadir</th>
+                                <th>English</th>
+                                <th>Arabic</th>
+                                <th>Al-Quran</th>
+                                <th>Rata-rata</th>
+                                <th>Rank</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${students.slice(0, 100).map((s, i) => {
+                const avg = (s.scores.english !== null && s.scores.arabic !== null && s.scores.alquran !== null)
+                    ? ((s.scores.english + s.scores.arabic + s.scores.alquran) / 3).toFixed(1) : '-';
+                const rank = rankMap[s.id];
+                const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-other';
+                return `
+                                    <tr>
+                                        <td>${i + 1}</td>
+                                        <td><strong>${s.name}</strong></td>
+                                        <td>${s.class}</td>
+                                        <td>${s.attended ? '<span class="badge badge-success">✓</span>' : '<span class="badge badge-warning">-</span>'}</td>
+                                        <td>${s.scores.english ?? '-'}</td>
+                                        <td>${s.scores.arabic ?? '-'}</td>
+                                        <td>${s.scores.alquran ?? '-'}</td>
+                                        <td><strong>${avg}</strong></td>
+                                        <td>${rank ? `<span class="rank-badge ${rankClass}">${rank}</span>` : '-'}</td>
+                                    </tr>`;
+            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                ${students.length > 100 ? `<p style="text-align: center; color: var(--text-muted); margin-top: 0.5rem;">Menampilkan 100 dari ${students.length}</p>` : ''}`;
+        }
+
+        function loadRanking() {
+            const filter = document.getElementById('rankingFilter').value;
+            const ranked = getRanking(filter === 'all' ? null : filter);
+            const container = document.getElementById('rankingTable');
+
+            if (!ranked.length) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🏆</div><p>Belum ada data ranking</p></div>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Nama</th>
+                                <th>Ruangan</th>
+                                <th>English</th>
+                                <th>Arabic</th>
+                                <th>Al-Quran</th>
+                                <th>Rata-rata</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${ranked.slice(0, 50).map(s => {
+                const rankClass = s.rank === 1 ? 'rank-1' : s.rank === 2 ? 'rank-2' : s.rank === 3 ? 'rank-3' : 'rank-other';
+                return `
+                                    <tr>
+                                        <td><span class="rank-badge ${rankClass}">${s.rank}</span></td>
+                                        <td><strong>${s.name}</strong></td>
+                                        <td>${s.class}</td>
+                                        <td>${s.scores.english}</td>
+                                        <td>${s.scores.arabic}</td>
+                                        <td>${s.scores.alquran}</td>
+                                        <td><strong>${s.average.toFixed(1)}</strong></td>
+                                    </tr>`;
+            }).join('')}
+                        </tbody>
+                    </table>
+                </div>`;
+        }
+
+        function loadRoomStats() {
+            const stats = getRoomStats();
+            const container = document.getElementById('roomStats');
+
+            container.innerHTML = `
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Ruangan</th>
+                                <th>Total</th>
+                                <th>Hadir</th>
+                                <th>Selesai</th>
+                                <th>Rata-rata</th>
+                                <th>Progress</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${stats.map(r => {
+                const progress = r.total > 0 ? (r.completed / r.total * 100).toFixed(0) : 0;
+                return `
+                                    <tr>
+                                        <td><strong>${r.room}</strong></td>
+                                        <td>${r.total}</td>
+                                        <td>${r.attended}</td>
+                                        <td>${r.completed}</td>
+                                        <td><strong>${r.avgScore}</strong></td>
+                                        <td>
+                                            <div class="progress-bar" style="width: 100px;">
+                                                <div class="progress-fill" style="width: ${progress}%;"></div>
+                                            </div>
+                                        </td>
+                                    </tr>`;
+            }).join('')}
+                        </tbody>
+                    </table>
+                </div>`;
+        }
+
+        function loadActivity() {
+            const log = getActivityLog().slice(0, 100);
+            const container = document.getElementById('activityLog');
+
+            if (!log.length) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div><p>Belum ada aktivitas</p></div>';
+                return;
+            }
+
+            container.innerHTML = log.map(item => `
+                <div class="activity-item">
+                    <span class="activity-time">${new Date(item.timestamp).toLocaleString('id-ID')}</span>
+                    <span class="activity-user">${item.userName}</span>
+                    <span class="activity-action">${item.action}: ${item.details}</span>
+                </div>
+            `).join('');
+        }
+
+        function initCharts() {
+            const stats = getSubjectStats();
+            const roomStats = getRoomStats();
+
+            // Subject Chart
+            const ctx1 = document.getElementById('subjectChart');
+            if (subjectChart) subjectChart.destroy();
+            subjectChart = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: ['English', 'Arabic', 'Al-Quran'],
+                    datasets: [{
+                        label: 'Rata-rata Nilai',
+                        data: [parseFloat(stats.english.avg), parseFloat(stats.arabic.avg), parseFloat(stats.alquran.avg)],
+                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b'],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, max: 100 } }
+                }
+            });
+
+            // Room Chart
+            const ctx2 = document.getElementById('roomChart');
+            if (roomChart) roomChart.destroy();
+            roomChart = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: roomStats.map(r => r.room),
+                    datasets: [{
+                        label: 'Rata-rata',
+                        data: roomStats.map(r => parseFloat(r.avgScore)),
+                        backgroundColor: '#0ea5e9',
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, max: 100 } }
+                }
+            });
+        }
+
+        function generateCertificates() {
+            const { jsPDF } = window.jspdf;
+            const ranked = getRanking().slice(0, 10);
+
+            if (!ranked.length) {
+                alert('Tidak ada data untuk sertifikat!');
+                return;
+            }
+
+            const doc = new jsPDF('landscape', 'mm', 'a4');
+
+            ranked.forEach((student, idx) => {
+                if (idx > 0) doc.addPage();
+
+                // Background
+                doc.setFillColor(240, 249, 255);
+                doc.rect(0, 0, 297, 210, 'F');
+
+                // Border
+                doc.setDrawColor(14, 165, 233);
+                doc.setLineWidth(3);
+                doc.rect(10, 10, 277, 190);
+
+                // Title
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(28);
+                doc.setTextColor(14, 165, 233);
+                doc.text('SERTIFIKAT', 148.5, 40, { align: 'center' });
+
+                doc.setFontSize(16);
+                doc.setTextColor(60, 60, 60);
+                doc.text('EXOT - Exam Oral Test 2026', 148.5, 52, { align: 'center' });
+
+                // Name
+                doc.setFontSize(14);
+                doc.text('Diberikan kepada:', 148.5, 75, { align: 'center' });
+
+                doc.setFontSize(26);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(20, 20, 20);
+                doc.text(student.name, 148.5, 92, { align: 'center' });
+
+                // Details
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(80, 80, 80);
+                doc.text(`Ruangan: ${student.class}`, 148.5, 108, { align: 'center' });
+                doc.text(`Peringkat: ${student.rank}`, 148.5, 118, { align: 'center' });
+
+                // Scores
+                doc.text(`English: ${student.scores.english} | Arabic: ${student.scores.arabic} | Al-Quran: ${student.scores.alquran}`, 148.5, 135, { align: 'center' });
+                doc.setFontSize(16);
+                doc.setFont('helvetica', 'bold');
+                doc.text(`Rata-rata: ${student.average.toFixed(1)}`, 148.5, 150, { align: 'center' });
+
+                // Date
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`Diterbitkan: ${new Date().toLocaleDateString('id-ID')}`, 148.5, 175, { align: 'center' });
+            });
+
+            doc.save('EXOT_Sertifikat_Top10.pdf');
+            logActivity('certificate', 'Generated PDF certificates for top 10');
+        }
+    </script>
+</body>
+
+</html>
