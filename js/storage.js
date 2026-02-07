@@ -60,6 +60,10 @@ function initStorage() {
     if (window.firebaseDB && window.firebaseOnValue && window.firebaseRef) {
       window.firebaseConfigured = true;
       console.log('🔥 Firebase initialized, setting up listeners...');
+
+      // Update sync status to online
+      setTimeout(() => updateSyncStatus('online'), 100);
+
       const db = window.firebaseDB;
       const ref = window.firebaseRef;
       const onValue = window.firebaseOnValue;
@@ -96,6 +100,67 @@ function initStorage() {
 // Generate unique ID
 function generateId() {
   return 'EXOT-' + Date.now().toString(36) + '-' + Math.random().toString(36).substr(2, 9);
+}
+
+// ========================================
+// Toast Notification System
+// ========================================
+
+function showToast(message, type = 'info', duration = 3000) {
+  // Create container if doesn't exist
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+
+  // Create toast
+  const icons = {
+    success: '✅',
+    error: '❌',
+    warning: '⚠️',
+    info: 'ℹ️'
+  };
+
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `
+    <span class="toast-icon">${icons[type]}</span>
+    <span class="toast-message">${message}</span>
+    <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+  `;
+
+  container.appendChild(toast);
+
+  // Auto remove
+  if (duration > 0) {
+    setTimeout(() => {
+      toast.style.animation = 'slideIn 0.3s ease-out reverse';
+      setTimeout(() => toast.remove(), 300);
+    }, duration);
+  }
+
+  return toast;
+}
+
+// ========================================
+// Sync Status Tracking
+// ========================================
+
+function updateSyncStatus(status) {
+  const indicator = document.getElementById('syncStatus');
+  if (!indicator) return;
+
+  indicator.classList.remove('online', 'offline', 'syncing');
+  indicator.classList.add(status);
+
+  const textEl = indicator.querySelector('.sync-text');
+  if (textEl) {
+    const texts = { online: 'Online', offline: 'Offline', syncing: 'Syncing...' };
+    textEl.textContent = texts[status] || 'Unknown';
+  }
 }
 
 // Helper to save to Firebase

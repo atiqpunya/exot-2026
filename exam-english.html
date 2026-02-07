@@ -150,6 +150,10 @@
             document.getElementById('searchInput').addEventListener('input', loadStudents);
             document.getElementById('filterClass').addEventListener('change', loadStudents);
             document.getElementById('filterStatus').addEventListener('change', loadStudents);
+
+            // Auto-refresh when data changes in other tabs
+            window.addEventListener('storage', loadStudents);
+            window.addEventListener('storage-update', loadStudents);
         });
 
         function toggleAuth() {
@@ -203,15 +207,30 @@
 
             document.getElementById('scoredCount').textContent = scored;
             document.getElementById('totalCount').textContent = total;
+            document.getElementById('progressBar').style.width = percent + '%';
+            document.getElementById('progressPercent').textContent = percent + '%';
+
+            const container = document.getElementById('studentList');
+
+            if (!students.length) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><p>Belum ada siswa yang hadir untuk dinilai</p></div>';
+                return;
+            }
+
+            container.innerHTML = `
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
                 <th>No</th>
                 <th>Nama</th>
                 <th>Ruangan</th>
                 <th>Nilai ${SUBJECT_NAME}</th>
                 <th>Aksi</th>
-              </tr >
-            </thead >
-                <tbody>
-                    ${students.map((s, i) => `
+              </tr>
+            </thead>
+            <tbody>
+              ${students.map((s, i) => `
                 <tr>
                   <td>${i + 1}</td>
                   <td><strong>${s.name}</strong></td>
@@ -233,9 +252,9 @@
                   </td>
                 </tr>
               `).join('')}
-                </tbody>
-          </table >
-        </div >
+            </tbody>
+          </table>
+        </div>
       `;
         }
 
