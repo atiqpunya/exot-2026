@@ -78,7 +78,7 @@
         </div>
 
         <div class="card fade-in" style="margin-bottom: 1.5rem;">
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
                 <input type="text" id="searchInput" class="form-input" placeholder="🔍 Cari nama..."
                     style="width: 200px;">
                 <select id="filterClass" class="form-input form-select" style="width: auto;"></select>
@@ -87,6 +87,10 @@
                     <option value="pending">Belum Dinilai</option>
                     <option value="scored">Sudah Dinilai</option>
                 </select>
+                <label style="display: flex; align-items: center; gap: 0.5rem; margin-left: 1rem; cursor: pointer;">
+                    <input type="checkbox" id="showAllStudents" onchange="loadStudents()">
+                    <span style="font-size: 0.85rem;">Tampilkan Semua Siswa</span>
+                </label>
             </div>
         </div>
 
@@ -165,7 +169,9 @@
         }
 
         function loadStudents() {
-            let students = getAttendedStudents();
+            // Check if we should show all students or just attended ones
+            const showAll = document.getElementById('showAllStudents')?.checked;
+            let students = showAll ? getStudents() : getAttendedStudents();
             if (currentSession.role === 'penguji' && currentSession.assignedClasses?.length) {
                 students = students.filter(s => currentSession.assignedClasses.includes(s.class));
             }
