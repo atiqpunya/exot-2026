@@ -200,8 +200,22 @@
 
             const container = document.getElementById('studentList');
 
+            // Debug info
+            const allRegistered = getStudents();
+            const allAttended = getAttendedStudents();
+            console.log('📊 DEBUG: Total registered:', allRegistered.length, 'Attended:', allAttended.length, 'Showing:', students.length);
+
             if (!students.length) {
-                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><p>Belum ada siswa yang hadir untuk dinilai</p></div>';
+                const showAll = document.getElementById('showAllStudents')?.checked;
+                let message = '';
+                if (allRegistered.length === 0) {
+                    message = `<div class="empty-state"><div class="empty-state-icon">📝</div><p><strong>Belum ada siswa terdaftar</strong></p><p style="color: var(--text-muted); font-size: 0.9rem;">Registrasi siswa dulu di <a href="register.html">Data & Registrasi</a></p></div>`;
+                } else if (!showAll && allAttended.length === 0) {
+                    message = `<div class="empty-state"><div class="empty-state-icon">📭</div><p><strong>Belum ada siswa yang hadir</strong></p><p style="color: var(--text-muted); font-size: 0.9rem;">Centang ☑️ "Tampilkan Semua Siswa" untuk melihat ${allRegistered.length} siswa terdaftar</p></div>`;
+                } else {
+                    message = `<div class="empty-state"><div class="empty-state-icon">📭</div><p>Tidak ada siswa yang sesuai filter</p></div>`;
+                }
+                container.innerHTML = message;
                 return;
             }
 
