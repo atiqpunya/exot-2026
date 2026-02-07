@@ -4,13 +4,13 @@ import { getDatabase, ref, set, onValue, update, get } from "https://www.gstatic
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyDTdKCF-rYzUGdWnDnPfEXxALSuP53nPw8",
-    authDomain: "gen-lang-client-0987176592.firebaseapp.com",
-    databaseURL: "https://gen-lang-client-0987176592-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "gen-lang-client-0987176592",
-    storageBucket: "gen-lang-client-0987176592.firebasestorage.app",
-    messagingSenderId: "369163094436",
-    appId: "1:369163094436:web:31befbb46af74bd0299931"
+    apiKey: "AIzaSyD89OYtoor7v6FjNENDNbbQXV8Nxe7gFAI",
+    authDomain: "gen-lang-client-0663259310.firebaseapp.com",
+    databaseURL: "https://gen-lang-client-0663259310-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "gen-lang-client-0663259310",
+    storageBucket: "gen-lang-client-0663259310.firebasestorage.app",
+    messagingSenderId: "171862260005",
+    appId: "1:171862260005:web:96e4c2b04013356c43c2cc"
 };
 
 // Initialize Firebase
