@@ -183,23 +183,8 @@
             const total = allStudents.length;
             const percent = total > 0 ? Math.round(scored / total * 100) : 0;
 
-            document.getElementById('scoredCount').textContent = scored;
-            document.getElementById('totalCount').textContent = total;
-            document.getElementById('progressBar').style.width = percent + '%';
-            document.getElementById('progressPercent').textContent = percent + '%';
-
-            const container = document.getElementById('studentList');
-            if (!students.length) {
-                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><p>Tidak ada siswa yang hadir</p></div>';
-                return;
-            }
-
-            container.innerHTML = `
-        <div class="table-container">
-          <table class="table">
-            <thead><tr><th>No</th><th>Nama</th><th>Ruangan</th><th>Nilai ${SUBJECT_NAME}</th><th>Aksi</th></tr></thead>
-            <tbody>
-              ${students.map((s, i) => `
+              ${
+                students.map((s, i) => `
                 <tr>
                   <td>${i + 1}</td>
                   <td><strong>${s.name}</strong></td>
@@ -212,10 +197,11 @@
                   </td>
                   <td><button class="btn btn-sm btn-primary" onclick="saveScore('${s.id}')">💾 Simpan</button></td>
                 </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
+              `).join('')
+            }
+            </tbody >
+          </table >
+        </div >
       `;
         }
 
@@ -227,7 +213,7 @@
             loadStudents();
         }
     </script>
-<script type="module" src="js/firebase-config.js"></script>
+    <script type="module" src="js/firebase-config.js"></script>
 </body>
 
 </html>
