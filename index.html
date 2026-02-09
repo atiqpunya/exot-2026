@@ -1,24 +1,224 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/logo.css">
-    <script src="js/app-flow.js" defer></script>
+    <title>EXOT 2026 - Exam Oral Test</title>
     <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <meta name="theme-color" content="#ffffff">
-    <title>Your Title Here</title>
+    <meta name="theme-color" content="#0ea5e9">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-header h1 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header p {
+            color: var(--text-muted);
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0;
+        }
+
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .quick-link {
+            padding: 1rem;
+            text-align: center;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: var(--transition);
+        }
+
+        .quick-link:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .quick-link-icon {
+            font-size: 1.5rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+    </style>
 </head>
 
 <body>
-    <h1>Welcome to Exot 2026</h1>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="card fade-in">
+                <div class="login-header">
+                    <h1>📝 EXOT 2026</h1>
+                    <p>Exam Oral Test - SD Islam Alwildan</p>
+                </div>
+
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input type="text" id="username" class="form-input" placeholder="Masukkan username" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="password" class="form-input" placeholder="Masukkan password"
+                                required>
+                            <button type="button" class="password-toggle" onclick="togglePassword()">👁️</button>
+                        </div>
+                    </div>
+
+                    <div id="loginError" class="alert alert-error" style="display: none;">
+                        <span>❌</span>
+                        <span id="errorText">Username atau password salah!</span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 1rem;">
+                        🔐 Login
+                    </button>
+                </form>
+
+                <div class="quick-links">
+                    <a href="attendance.html" class="quick-link">
+                        <span class="quick-link-icon">📷</span>
+                        <span>Absensi QR</span>
+                    </a>
+                    <a href="dashboard.html" class="quick-link">
+                        <span class="quick-link-icon">📊</span>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="exam-english.html" class="quick-link">
+                        <span class="quick-link-icon">📖</span>
+                        <span>English</span>
+                    </a>
+                    <a href="exam-arabic.html" class="quick-link">
+                        <span class="quick-link-icon">📕</span>
+                        <span>Arabic</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Footer Credit -->
     <div class="footer-credit">
         Dibuat oleh <a href="#">Muhammad Atiq Qoidul Islam</a>
     </div>
+
+    <script src="js/storage.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Check if already logged in
+            const session = getSession();
+            if (session) {
+                redirectByRole(session);
+            }
+
+            // Check for redirect parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const redirect = urlParams.get('redirect');
+            if (redirect) {
+                sessionStorage.setItem('loginRedirect', redirect);
+            }
+        });
+
+        function togglePassword() {
+            const input = document.getElementById('password');
+            const btn = document.querySelector('.password-toggle');
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                btn.textContent = '👁️';
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            const result = login(username, password);
+
+            if (result.error) {
+                document.getElementById('errorText').textContent = result.error;
+                document.getElementById('loginError').style.display = 'flex';
+                return;
+            }
+
+            // Check for redirect
+            const redirect = sessionStorage.getItem('loginRedirect');
+            if (redirect) {
+                sessionStorage.removeItem('loginRedirect');
+                window.location.href = redirect;
+                return;
+            }
+
+            // Redirect based on role
+            redirectByRole(result);
+        }
+
+        function redirectByRole(session) {
+            if (session.role === 'panitia_utama') {
+                window.location.href = 'register.html';
+            } else if (session.role === 'penguji') {
+                const subjectUrls = {
+                    english: 'exam-english.html',
+                    arabic: 'exam-arabic.html',
+                    alquran: 'exam-alquran.html'
+                };
+                window.location.href = subjectUrls[session.subject] || 'index.html';
+            }
+        }
+    </script>
+    <script type="module" src="js/firebase-config.js"></script>
 </body>
 
 </html>
