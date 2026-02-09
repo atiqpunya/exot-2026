@@ -53,48 +53,19 @@ function initStorage() {
     localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(DEFAULT_SETTINGS));
   }
 
-  // FIREBASE SYNC LISTENERS
-  // We explicitly wait for window.firebaseDB to be available
-  const setupFirebase = () => {
-    if (window.firebaseConfigured) return;
-    if (window.firebaseDB && window.firebaseOnValue && window.firebaseRef) {
-      window.firebaseConfigured = true;
-      console.log('🔥 Firebase initialized, setting up listeners...');
-
+  // GOOGLE SHEETS SYNC LISTENERS
+  const setupGoogleSync = () => {
+    if (window.googleSheetsAPI) {
+      console.log('📊 Google Sheets API initialized');
       // Update sync status to online
-      setTimeout(() => updateSyncStatus('online'), 100);
+      updateSyncStatus('online');
 
-      const db = window.firebaseDB;
-      const ref = window.firebaseRef;
-      const onValue = window.firebaseOnValue;
-
-      // Sync Helper: Updates localStorage and reloads UI if needed
-      const syncLocal = (key, val) => {
-        if (val) {
-          const remoteData = JSON.stringify(val);
-          const localData = localStorage.getItem(key);
-          if (remoteData !== localData) {
-            localStorage.setItem(key, remoteData);
-            console.log(`🔄 Synced ${key} from cloud`);
-            // Trigger a custom event for UI updates
-            window.dispatchEvent(new Event('storage-update'));
-          }
-        }
-      };
-
-      onValue(ref(db, 'students'), (snap) => syncLocal(STORAGE_KEYS.STUDENTS, snap.val()));
-      onValue(ref(db, 'users'), (snap) => syncLocal(STORAGE_KEYS.USERS, snap.val()));
-      onValue(ref(db, 'classes'), (snap) => syncLocal(STORAGE_KEYS.CLASSES, snap.val()));
-      onValue(ref(db, 'rewards'), (snap) => syncLocal(STORAGE_KEYS.EXAMINER_REWARDS, snap.val()));
-      onValue(ref(db, 'settings'), (snap) => syncLocal(STORAGE_KEYS.SETTINGS, snap.val()));
-    } else {
-      // Retry if not yet loaded (e.g. module loading delay)
-      setTimeout(setupFirebase, 500);
+      // Perform initial sync from cloud (optional, or manual)
+      // window.googleSheetsAPI.syncFromCloud();
     }
   };
 
-  // Start trying to setup firebase
-  setupFirebase();
+  setupGoogleSync();
 }
 
 // Generate unique ID
@@ -163,14 +134,27 @@ function updateSyncStatus(status) {
   }
 }
 
-// Helper to save to Firebase
-function saveToFirebase(path, data) {
-  if (window.firebaseDB && window.firebaseSet && window.firebaseRef) {
-    const db = window.firebaseDB;
-    const ref = window.firebaseRef;
-    const set = window.firebaseSet;
-    set(ref(db, path), data).catch(console.error);
-  }
+// Helper to save to Google Sheets (Throttled)
+let syncTimeout;
+function saveToFirebase(path, data) { // Keeping name for compatibility, but acts as saveToGoogleSheets
+  // We ignore 'path' and 'data' args because Google Sheets syncs EVERYTHING at once in this MVP
+
+  clearTimeout(syncTimeout);
+  updateSyncStatus('syncing');
+
+  syncTimeout = setTimeout(() => {
+    if (window.googleSheetsAPI) {
+      window.googleSheetsAPI.syncToCloud()
+        .then(res => {
+          if (res && !res.error) updateSyncStatus('online');
+          else updateSyncStatus('error');
+        })
+        .catch(err => {
+          console.error(err);
+          updateSyncStatus('offline');
+        });
+    }
+  }, 2000); // 2 second debounce
 }
 
 // ========================================
