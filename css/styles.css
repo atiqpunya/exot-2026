@@ -1188,3 +1188,39 @@ body.dark-mode .stat-value {
   animation: spin 0.8s linear infinite;
   margin-left: 0.5rem;
 }
+
+/* Footer Credit */
+.footer-credit {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  z-index: 998;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.footer-credit a {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.footer-credit a:hover {
+  color: var(--primary-dark);
+}
+
+body.dark-mode .footer-credit {
+  background: rgba(30, 41, 59, 0.95);
+}
+
+@media print {
+  .footer-credit {
+    display: none !important;
+  }
+}
