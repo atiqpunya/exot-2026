@@ -1,0 +1,11 @@
+.logo {
+    display: block;
+    margin: 0 auto;
+    width: 200px; /* Adjust width as necessary */
+    height: auto;
+    transition: transform 0.3s ease;
+}
+
+.logo:hover {
+    transform: scale(1.05);
+}
