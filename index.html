@@ -4,98 +4,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EXOT 2026 - Exam Oral Test</title>
+    <title>EXOT 2026 - Exam Oral Test | SD Islam Al-Wildan 4</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0ea5e9">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
-    <style>
-        .login-container {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1.5rem;
-        }
-
-        .login-card {
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .login-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .login-header h1 {
-            font-size: 2.5rem;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .login-header p {
-            color: var(--text-muted);
-        }
-
-        .password-wrapper {
-            position: relative;
-        }
-
-        .password-toggle {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1.2rem;
-            padding: 0;
-        }
-
-        .quick-links {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.75rem;
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .quick-link {
-            padding: 1rem;
-            text-align: center;
-            background: var(--bg-glass);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            text-decoration: none;
-            color: var(--text-primary);
-            transition: var(--transition);
-        }
-
-        .quick-link:hover {
-            border-color: var(--primary);
-            transform: translateY(-2px);
-        }
-
-        .quick-link-icon {
-            font-size: 1.5rem;
-            display: block;
-            margin-bottom: 0.5rem;
-        }
-    </style>
+    <link rel="stylesheet" href="css/logo.css">
 </head>
 
-<body>
-    <div class="login-container">
-        <div class="login-card">
-            <div class="card fade-in">
-                <div class="login-header">
-                    <h1>📝 EXOT 2026</h1>
-                    <p>Exam Oral Test - SD Islam Alwildan</p>
+<body class="landing-page">
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-background">
+            <div class="hero-blob blob-1"></div>
+            <div class="hero-blob blob-2"></div>
+            <div class="hero-blob blob-3"></div>
+        </div>
+
+        <div class="hero-content">
+            <div class="hero-text fade-in">
+                <div class="hero-badge">✨ Exam Oral Test 2026</div>
+                <h1 class="hero-title">Platform Ujian Lisan Digital</h1>
+                <p class="hero-description">
+                    Sistem penilaian digital untuk EXOT (Exam Oral Test) yang diselenggarakan oleh SD Islam Al-Wildan 4
+                    Islamic School Jakarta. Objektif, Transparan, dan Modern.
+                </p>
+
+                <div class="hero-stats">
+                    <div class="hero-stat-item">
+                        <strong>3</strong>
+                        <span>Mata Pelajaran</span>
+                    </div>
+                    <div class="hero-stat-item">
+                        <strong>Real-time</strong>
+                        <span>Penilaian</span>
+                    </div>
+                    <div class="hero-stat-item">
+                        <strong>Digital</strong>
+                        <span>Certificate</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Login Card -->
+            <div class="hero-login-card fade-in">
+                <div class="login-header" style="text-align: center; margin-bottom: 2rem;">
+                    <img src="img/logo-alwildan.png" alt="SD Al-Wildan 4" style="height: 80px; margin-bottom: 1rem;">
+                    <h2 style="font-size: 1.5rem; color: var(--text-primary); margin-bottom: 0.5rem;">Login
+                        Peserta/Penguji</h2>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">Masuk untuk memulai ujian atau penilaian
+                    </p>
                 </div>
 
                 <form id="loginForm" onsubmit="handleLogin(event)">
@@ -106,49 +67,114 @@
 
                     <div class="form-group">
                         <label class="form-label">Password</label>
-                        <div class="password-wrapper">
+                        <div class="password-wrapper" style="position: relative;">
                             <input type="password" id="password" class="form-input" placeholder="Masukkan password"
                                 required>
-                            <button type="button" class="password-toggle" onclick="togglePassword()">👁️</button>
+                            <button type="button" class="password-toggle" onclick="togglePassword()"
+                                style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer;">👁️</button>
                         </div>
                     </div>
 
-                    <div id="loginError" class="alert alert-error" style="display: none;">
+                    <div id="loginError" class="alert alert-error" style="display: none; margin-bottom: 1rem;">
                         <span>❌</span>
                         <span id="errorText">Username atau password salah!</span>
                     </div>
 
-                    <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 1rem;">
-                        🔐 Login
+                    <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+                        🔐 Masuk Sekarang
                     </button>
                 </form>
+            </div>
+        </div>
+    </section>
 
-                <div class="quick-links">
-                    <a href="attendance.html" class="quick-link">
-                        <span class="quick-link-icon">📷</span>
-                        <span>Absensi QR</span>
-                    </a>
-                    <a href="dashboard.html" class="quick-link">
-                        <span class="quick-link-icon">📊</span>
-                        <span>Dashboard</span>
-                    </a>
-                    <a href="exam-english.html" class="quick-link">
-                        <span class="quick-link-icon">📖</span>
-                        <span>English</span>
-                    </a>
-                    <a href="exam-arabic.html" class="quick-link">
-                        <span class="quick-link-icon">📕</span>
-                        <span>Arabic</span>
-                    </a>
+    <!-- Subjects Section -->
+    <section class="subjects-section">
+        <div class="container">
+            <div class="section-title" style="text-align: center;">Mata Pelajaran Ujian</div>
+            <p class="section-subtitle" style="text-align: center;">Kompetensi utama yang diujikan dalam EXOT 2026</p>
+
+            <div class="subjects-grid">
+                <div class="subject-item english">
+                    <div class="subject-icon" style="color: #3b82f6; background: rgba(59, 130, 246, 0.1);">Aa</div>
+                    <h3>English</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">Speaking, Reading, and Comprehension
+                        assessment.</p>
+                </div>
+                <div class="subject-item arabic">
+                    <div class="subject-icon" style="color: #10b981; background: rgba(16, 185, 129, 0.1);">ض</div>
+                    <h3>Arabic</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">Maharah Kalam and Qiro'ah assessment.
+                    </p>
+                </div>
+                <div class="subject-item alquran">
+                    <div class="subject-icon" style="color: #f59e0b; background: rgba(245, 158, 11, 0.1);">📖</div>
+                    <h3>Al-Quran</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">Tahfidz and Tahsin quality assessment.
+                    </p>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <!-- Footer Credit -->
-    <div class="footer-credit">
-        Dibuat oleh <a href="#">Muhammad Atiq Qoidul Islam</a>
-    </div>
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="container">
+            <h2 class="section-title">Keunggulan Sistem EXOT</h2>
+            <p class="section-subtitle">Platform modern untuk mendukung transparansi dan efisiensi ujian</p>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon" style="color: var(--primary);">⚡</div>
+                    <h3>Real-time Scoring</h3>
+                    <p style="color: var(--text-secondary);">Nilai langsung tersimpan dan dapat dilihat secara
+                        real-time.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon" style="color: #8b5cf6;">📱</div>
+                    <h3>QR Attendance</h3>
+                    <p style="color: var(--text-secondary);">Absensi cepat dan akurat menggunakan pemindaian QR Code.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon" style="color: #f43f5e;">📊</div>
+                    <h3>Data Analytics</h3>
+                    <p style="color: var(--text-secondary);">Analisis performa siswa dengan visualisasi data yang
+                        lengkap.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div>
+                <div class="footer-logo">
+                    <span>📝</span> EXOT 2026
+                </div>
+                <p style="color: #94a3b8; line-height: 1.6; max-width: 400px;">
+                    Sistem manajemen ujian lisan digital untuk meningkatkan kualitas pendidikan dan transparansi
+                    penilaian di lingkungan SD Islam Al-Wildan 4.
+                </p>
+            </div>
+            <div style="text-align: right;">
+                <h4 style="color: white; margin-bottom: 1.5rem; font-size: 1.1rem;">Quick Links</h4>
+                <div class="footer-links">
+                    <a href="attendance.html">Absensi Siswa</a>
+                    <a href="dashboard.html">Dashboard Monitoring</a>
+                    <a href="register.html">Data Registrasi</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 SD Islam Al-Wildan 4 Islamic School Jakarta. All rights reserved.</p>
+            <p style="margin-top: 0.5rem; font-size: 0.8rem; color: #475569;">
+                Dibuat dengan ❤️ oleh <a href="#" style="color: #64748b; text-decoration: none;">Muhammad Atiq Qoidul
+                    Islam</a>
+            </p>
+        </div>
+    </footer>
 
     <script src="js/storage.js"></script>
     <script>
@@ -156,7 +182,8 @@
             // Check if already logged in
             const session = getSession();
             if (session) {
-                redirectByRole(session);
+                // Optional: Auto redirect content if logged in, or just let them stay on landing page
+                // redirectByRole(session);
             }
 
             // Check for redirect parameter
