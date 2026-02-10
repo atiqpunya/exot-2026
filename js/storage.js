@@ -644,7 +644,17 @@ function addStudent(name, studentClass, type = 'siswa') {
     createdAt: new Date().toISOString()
   };
 
-  newStudent.qrCode = newStudent.id;
+  // Generate unique short code for QR
+  let shortCode;
+  let isUnique = false;
+  while (!isUnique) {
+    shortCode = generateShortCode();
+    if (!students.find(s => s.qrCode === shortCode)) {
+      isUnique = true;
+    }
+  }
+
+  newStudent.qrCode = shortCode;
   students.push(newStudent);
   saveStudents(students);
 

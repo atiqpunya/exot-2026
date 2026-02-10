@@ -92,7 +92,7 @@
                 <p style="opacity: 0.9;">Anda telah menyelesaikan semua penilaian</p>
 
                 <div class="reward-qr">
-                    <img id="rewardQR" src="" alt="Reward QR">
+                    <div id="rewardQR"></div>
                 </div>
 
                 <div
@@ -132,6 +132,7 @@
     </div>
 
     <script src="js/storage.js"></script>
+    <script src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
     <script>
         let currentSession = null;
 
@@ -227,13 +228,28 @@
             document.getElementById('hasReward').style.display = 'block';
             document.getElementById('canGenerateReward').style.display = 'none';
 
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(reward.qrCode)}`;
-            document.getElementById('rewardQR').src = qrUrl;
+            const qrCode = new QRCodeStyling({
+                width: 200,
+                height: 200,
+                type: "svg",
+                data: reward.qrCode,
+                image: "img/logo-alwildan.png",
+                dotsOptions: { color: "#000", type: "rounded" },
+                backgroundOptions: { color: "#fff" },
+                imageOptions: { crossOrigin: "anonymous", margin: 10 }
+            });
+
+            document.getElementById('rewardQR').innerHTML = '';
+            qrCode.append(document.getElementById('rewardQR'));
+
             document.getElementById('rewardCodeDisplay').textContent = reward.qrCode;
 
+            // Update download link
             const downloadLink = document.getElementById('downloadReward');
-            downloadLink.href = qrUrl;
-            downloadLink.download = `EXOT_Reward_${currentSession.name.replace(/\s+/g, '_')}.png`;
+            downloadLink.onclick = (e) => {
+                e.preventDefault();
+                qrCode.download({ name: `Reward_${reward.qrCode}`, extension: "png" });
+            };
         }
     </script>
     <!-- Footer Credit -->

@@ -289,6 +289,7 @@ qrn1, pass123, Ustadz Ali, alquran
     </div>
 
     <script src="js/storage.js"></script>
+    <script src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const session = requireAuth(['panitia_utama']);
@@ -516,31 +517,44 @@ qrn1, pass123, Ustadz Ali, alquran
 
         // Download single QR
         function downloadSingleQR(id, type) {
-            let data, name, room;
+            let data, name, room, label;
 
             if (type === 'student') {
                 const s = getStudentById(id);
                 if (!s) return;
-                data = s.qrCode;
+                data = s.qrCode || s.id;
                 name = s.name;
                 room = s.class;
+                label = s.type || 'siswa';
             } else {
                 const e = getUserById(id);
                 if (!e) return;
-                data = e.id;
+                data = e.qrCode || e.id;
                 name = e.name;
                 room = e.subject;
+                label = 'penguji';
             }
 
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(data)}`;
+            const qrCode = new QRCodeStyling({
+                width: 300,
+                height: 300,
+                type: "png",
+                data: data,
+                image: "img/logo-alwildan.png",
+                dotsOptions: {
+                    color: "#000",
+                    type: "rounded"
+                },
+                backgroundOptions: {
+                    color: "#fff",
+                },
+                imageOptions: {
+                    crossOrigin: "anonymous",
+                    margin: 10
+                }
+            });
 
-            // Create download link
-            const link = document.createElement('a');
-            link.href = qrUrl;
-            link.download = `QR_${name.replace(/\s+/g, '_')}_${room}.png`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            qrCode.download({ name: `QR_${name.replace(/\s+/g, '_')}_${room}`, extension: "png" });
         }
 
         // Search and show individual QR
@@ -601,181 +615,457 @@ qrn1, pass123, Ustadz Ali, alquran
                 return;
             }
 
+            // Convert items to JSON for the template
+            const itemsJson = JSON.stringify(items);
+
             const html = `<!DOCTYPE html>
 <html><head><meta charset="UTF-8"><title>EXOT QR - ${title}</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Arial,sans-serif;background:#f5f5f5;padding:20px}
-h1{text-align:center;margin-bottom:10px;color:#0ea5e9}
-.info{text-align:center;margin-bottom:20px;color:#666}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:15px}
-.card{background:white;border:2px solid #ddd;border-radius:10px;padding:12px;text-align:center;page-break-inside:avoid}
-.card img{width:130px;height:130px;margin-bottom:8px}
-.card h3{font-size:12px;margin-bottom:4px;word-break:break-word}
-.card p{font-size:11px;color:#666}
-.card .type{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;margin-top:5px}
-.siswa{background:#dcfce7;color:#166534}
-.guru{background:#dbeafe;color:#1e40af}
-.penguji{background:#fef3c7;color:#92400e}
-.download-btn{display:inline-block;margin-top:8px;padding:4px 10px;font-size:11px;background:#0ea5e9;color:white;border:none;border-radius:5px;cursor:pointer;text-decoration:none}
-.download-btn:hover{background:#0284c7}
-@media print{body{padding:0;background:white}.card{border:1px solid #000}.download-btn{display:none}}
-</style></head><body>
-<h1>📝 EXOT QR Codes - ${title}</h1>
-<p class="info">Total: ${items.length} | Generated: ${new Date().toLocaleString('id-ID')}</p>
-<div class="grid">
-${items.map(item => `
-<div class="card">
-  <img src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=${encodeURIComponent(item.qr)}" alt="QR">
-  <h3>${item.name}</h3>
-  <p>${item.room}</p>
-  <span class="type ${item.type}">${item.type}</span>
-  <br>
-  <a class="download-btn" href="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(item.qr)}" download="QR_${item.name.replace(/\\s+/g, '_')}.png">📥 Download</a>
-</div>
-`).join('')}
-</div>
-
-</body></html>`;
-
-            const blob = new Blob([html], { type: 'text/html' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `EXOT_QR_${title.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.html`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+<script src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
-        // Handle restore from backup
-        function handleRestore(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                if (confirm('Ini akan mengganti semua data yang ada. Lanjutkan?')) {
-                    const result = restoreBackup(e.target.result);
-                    if (result.error) {
-                        alert('Error: ' + result.error);
-                    } else {
-                        alert('Data berhasil dipulihkan dari backup ' + result.date);
-                        location.reload();
-                    }
-                }
-            };
-            reader.readAsText(file);
-            event.target.value = '';
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
         }
 
-        // Print QR cards with paper size and card count options
-        function printQRCards() {
-            const students = getStudents();
-            if (!students.length) {
-                alert('Tidak ada data siswa!');
-                return;
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #0ea5e9;
+        }
+
+        .info {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #666;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .card {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+            page-break-inside: avoid;
+        }
+
+        .qr-container {
+            width: 130px;
+            height: 130px;
+            margin: 0 auto 8px auto;
+        }
+
+        .card h3 {
+            font-size: 12px;
+            margin-bottom: 4px;
+            word-break: break-word;
+        }
+
+        .card p {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .card .type {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            margin-top: 5px;
+        }
+
+        .card .code {
+            display: block;
+            font-size: 10px;
+            margin-top: 4px;
+            font-family: monospace;
+            color: #555;
+        }
+
+        .siswa {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .guru {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .penguji {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .download-btn {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 4px 10px;
+            font-size: 11px;
+            background: #0ea5e9;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .download-btn:hover {
+            background: #0284c7;
+        }
+
+        @media print {
+            body {
+                padding: 0;
+                background: white;
             }
 
-            const paperSize = document.getElementById('printPaperSize').value;
-            const cardCount = parseInt(document.getElementById('printCardCount').value);
+            .card {
+                border: 1px solid #000;
+            }
 
-            // Paper dimensions in mm
-            const paperDims = {
-                'A4': { width: 210, height: 297 },
-                'A3': { width: 297, height: 420 }
-            };
-
-            // Grid layouts based on card count
-            const gridLayouts = {
-                4: { cols: 2, rows: 2 },
-                6: { cols: 2, rows: 3 },
-                8: { cols: 2, rows: 4 },
-                9: { cols: 3, rows: 3 }
-            };
-
-            const paper = paperDims[paperSize];
-            const grid = gridLayouts[cardCount];
-
-            // QR size scales with card count
-            const qrSize = cardCount <= 4 ? 100 : (cardCount <= 6 ? 85 : 70);
-            const fontSize = cardCount <= 4 ? 14 : (cardCount <= 6 ? 12 : 11);
-
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <meta charset="UTF-8">
-                    <title>Print QR Cards - EXOT (${paperSize}, ${cardCount} kartu)</title>
-                    <style>
-                        * { box-sizing: border-box; margin: 0; padding: 0; }
-                        body { font-family: Arial, sans-serif; }
-                        .page { 
-                            width: ${paper.width}mm; 
-                            min-height: ${paper.height}mm; 
-                            padding: 10mm; 
-                            display: grid;
-                            grid-template-columns: repeat(${grid.cols}, 1fr);
-                            grid-template-rows: repeat(${grid.rows}, 1fr);
-                            gap: 8mm;
-                            page-break-after: always;
-                        }
-                        .card {
-                            border: 2px solid #333;
-                            border-radius: 10px;
-                            padding: 10px;
-                            text-align: center;
-                            display: flex;
-                            flex-direction: column;
-                            align-items: center;
-                            justify-content: center;
-                        }
-                        .card img { width: ${qrSize}px; height: ${qrSize}px; margin-bottom: 8px; }
-                        .card h3 { font-size: ${fontSize}px; margin-bottom: 4px; word-break: break-word; }
-                        .card p { font-size: ${fontSize - 2}px; color: #666; }
-                        .card .type { 
-                            display: inline-block; 
-                            padding: 2px 8px; 
-                            border-radius: 10px; 
-                            font-size: ${fontSize - 3}px; 
-                            margin-top: 6px;
-                            background: #e0f2fe;
-                            color: #0369a1;
-                        }
-                        @media print {
-                            @page { size: ${paperSize}; margin: 0; }
-                            .page { page-break-after: always; }
-                            .page:last-child { page-break-after: auto; }
-                        }
-                    </style>
-                </head>
-                <body>
-                    ${(() => {
-                    let html = '';
-                    for (let i = 0; i < students.length; i += cardCount) {
-                        const pageItems = students.slice(i, i + cardCount);
-                        html += '<div class="page">';
-                        pageItems.forEach(s => {
-                            html += '<div class="card">' +
-                                '<img src="https://api.qrserver.com/v1/create-qr-code/?size=' + qrSize + 'x' + qrSize + '&data=' + encodeURIComponent(s.qrCode || s.id) + '" alt="QR">' +
-                                '<h3>' + s.name + '</h3>' +
-                                '<p>' + s.class + '</p>' +
-                                '<span class="type">' + (s.type || 'siswa') + '</span>' +
-                                '</div>';
-                        });
-                        html += '</div>';
-                    }
-                    return html;
-                })()}
-                
-</body>
-                </html>
-            `);
-            printWindow.document.close();
-            printWindow.onload = function () {
-                printWindow.print();
-            };
+            .download-btn {
+                display: none;
+            }
         }
+    </style>
+    </head>
+
+    <body>
+        <h1>📝 EXOT QR Codes - ${title}</h1>
+        <p class="info">Total: ${items.length} | Generated: ${new Date().toLocaleString('id-ID')}</p>
+        <div class="grid" id="grid"></div>
+
+        <script>
+const items = ${itemsJson};
+const grid = document.getElementById('grid');
+
+items.forEach((item, index) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    
+    // Create container for QR
+    const qrDiv = document.createElement('div');
+    qrDiv.className = 'qr-container';
+    qrDiv.id = 'qr-' + index;
+    
+    card.appendChild(qrDiv);
+    card.innerHTML += \`
+        <h3>\${item.name}</h3>
+        <p>\${item.room}</p>
+        <span class="type \${item.type}">\${item.type}</span>
+        <span class="code">\${item.qr}</span>
+        <br>
+        <button class="download-btn" onclick="downloadSingle('\${item.qr}', '\${item.name}', '\${item.room}')">📥 Download PNG</button>
+    \`;
+    grid.appendChild(card);
+
+    // Generate QR
+    const qrCode = new QRCodeStyling({
+        width: 130,
+        height: 130,
+        type: "svg",
+        data: item.qr,
+        image: "https://exot-2026.vercel.app/img/logo-alwildan.png", // Use absolute URL if possible, or relative if local
+        dotsOptions: { color: "#000", type: "rounded" },
+        backgroundOptions: { color: "#fff" },
+        imageOptions: { crossOrigin: "anonymous", margin: 5 }
+    });
+    qrCode.append(document.getElementById('qr-' + index));
+});
+
+function downloadSingle(data, name, room) {
+    const qrCode = new QRCodeStyling({
+        width: 300,
+        height: 300,
+        type: "png",
+        data: data,
+        image: "https://exot-2026.vercel.app/img/logo-alwildan.png",
+        dotsOptions: { color: "#000", type: "rounded" },
+        backgroundOptions: { color: "#fff" },
+        imageOptions: { crossOrigin: "anonymous", margin: 10 }
+    });
+    qrCode.download({ name: \`QR_\${name.replace(/\\s+/g, '_')}_\${room}\`, extension: "png" });
+}
+        </script>
+    </body>
+
+</html>`;
+
+const blob = new Blob([html], { type: 'text/html' });
+const a = document.createElement('a');
+a.href = URL.createObjectURL(blob);
+a.download = `EXOT_QR_${title.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.html`;
+document.body.appendChild(a);
+a.click();
+document.body.removeChild(a);
+}
+
+// Handle restore from backup
+function handleRestore(event) {
+const file = event.target.files[0];
+if (!file) return;
+
+const reader = new FileReader();
+reader.onload = function (e) {
+if (confirm('Ini akan mengganti semua data yang ada. Lanjutkan?')) {
+const result = restoreBackup(e.target.result);
+if (result.error) {
+alert('Error: ' + result.error);
+} else {
+alert('Data berhasil dipulihkan dari backup ' + result.date);
+location.reload();
+}
+}
+};
+reader.readAsText(file);
+event.target.value = '';
+}
+
+// Print QR cards with paper size, card count options, and custom Logos
+async function printQRCards() {
+const students = getStudents();
+if (!students.length) {
+alert('Tidak ada data siswa!');
+return;
+}
+
+const btn = document.querySelector('div[onclick="printQRCards()"]');
+const originalText = btn.innerHTML;
+btn.innerHTML = '<h5>⏳ Generating QRs...</h5>
+<p>Mohon tunggu sebentar...</p>';
+btn.style.pointerEvents = 'none';
+
+const paperSize = document.getElementById('printPaperSize').value;
+const cardCount = parseInt(document.getElementById('printCardCount').value);
+
+// Paper dimensions in mm
+const paperDims = {
+'A4': { width: 210, height: 297 },
+'A3': { width: 297, height: 420 }
+};
+
+// Grid layouts based on card count
+const gridLayouts = {
+4: { cols: 2, rows: 2 },
+6: { cols: 2, rows: 3 },
+8: { cols: 2, rows: 4 },
+9: { cols: 3, rows: 3 }
+};
+
+const paper = paperDims[paperSize];
+const grid = gridLayouts[cardCount];
+
+// QR size scales with card count
+const qrSize = cardCount <= 4 ? 300 : (cardCount <=6 ? 250 : 200); // Higher res for print const displaySize=cardCount
+    <=4 ? 120 : (cardCount <=6 ? 100 : 85); const fontSize=cardCount <=4 ? 14 : (cardCount <=6 ? 12 : 11); // Helper to
+    generate QR Data URI const generateQRDataUri=async (data)=> {
+    const qrCode = new QRCodeStyling({
+    width: qrSize,
+    height: qrSize,
+    type: "png",
+    data: data,
+    image: "img/logo-alwildan.png",
+    dotsOptions: { color: "#000", type: "rounded" },
+    backgroundOptions: { color: "#fff" },
+    imageOptions: { crossOrigin: "anonymous", margin: 10 }
+    });
+    const blob = await qrCode.getRawData('png');
+    return URL.createObjectURL(blob);
+    };
+
+    try {
+    // Pre-generate all QRs (batching could be added for huge lists)
+    const studentQRs = [];
+    for (const s of students) {
+    const url = await generateQRDataUri(s.qrCode || s.id);
+    studentQRs.push({ ...s, qrUrl: url });
+    }
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+
+    <head>
+        <meta charset="UTF-8">
+        <title>Print QR Cards - EXOT (${paperSize}, ${cardCount} kartu)</title>
+        <style>
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: Arial, sans-serif;
+            }
+
+            .page {
+                width: $ {
+                    paper.width
+                }
+
+                mm;
+
+                min-height: $ {
+                    paper.height
+                }
+
+                mm;
+                padding: 10mm;
+                display: grid;
+
+                grid-template-columns: repeat($ {
+                        grid.cols
+                    }
+
+                    , 1fr);
+
+                grid-template-rows: repeat($ {
+                        grid.rows
+                    }
+
+                    , 1fr);
+                gap: 8mm;
+                page-break-after: always;
+            }
+
+            .card {
+                border: 2px solid #333;
+                border-radius: 10px;
+                padding: 10px;
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .card img {
+                width: $ {
+                    displaySize
+                }
+
+                px;
+
+                height: $ {
+                    displaySize
+                }
+
+                px;
+                margin-bottom: 8px;
+            }
+
+            .card h3 {
+                font-size: $ {
+                    fontSize
+                }
+
+                px;
+                margin-bottom: 4px;
+                word-break: break-word;
+            }
+
+            .card p {
+                font-size: $ {
+                    fontSize - 2
+                }
+
+                px;
+                color: #666;
+            }
+
+            .card .type {
+                display: inline-block;
+                padding: 2px 8px;
+                border-radius: 10px;
+
+                font-size: $ {
+                    fontSize - 3
+                }
+
+                px;
+                margin-top: 6px;
+                background: #e0f2fe;
+                color: #0369a1;
+            }
+
+            .card .code {
+                font-size: 10px;
+                margin-top: 4px;
+                font-family: monospace;
+                color: #555;
+            }
+
+            @media print {
+                @page {
+                    size: $ {
+                        paperSize
+                    }
+
+                    ;
+                    margin: 0;
+                }
+
+                .page {
+                    page-break-after: always;
+                }
+
+                .page:last-child {
+                    page-break-after: auto;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        ${(() => {
+        let html = '';
+        for (let i = 0; i < studentQRs.length; i +=cardCount) { const pageItems=studentQRs.slice(i, i + cardCount); html
+            +='<div class="page">' ; pageItems.forEach(s=> {
+            html += '<div class="card">' +
+                '<img src="' + s.qrUrl + '" alt="QR">' +
+                '<h3>' + s.name + '</h3>' +
+                '<p>' + s.class + '</p>' +
+                '<span class="type">' + (s.type || 'siswa') + '</span>' +
+                '<span class="code">' + (s.qrCode || s.id) + '</span>' +
+                '</div>';
+            });
+            html += '</div>';
+            }
+            return html;
+            })()}
+    </body>
+
+    </html>
+    `);
+    printWindow.document.close();
+    printWindow.onload = function () {
+    // Give images a moment to render
+    setTimeout(() => printWindow.print(), 500);
+    };
+
+    } catch (e) {
+    console.error(e);
+    alert('Gagal generate QR: ' + e.message);
+    } finally {
+    btn.innerHTML = originalText;
+    btn.style.pointerEvents = 'auto';
+    }
+    }
     </script>
     <!-- Footer Credit -->
     <div class="footer-credit">
@@ -784,6 +1074,6 @@ ${items.map(item => `
 
     <script src="js/google-sheets-api.js"></script>
     <!-- <script type="module" src="js/firebase-config.js"></script> -->
-</body>
+    </body>
 
-</html>
+    </html>
