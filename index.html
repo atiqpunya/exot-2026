@@ -63,11 +63,11 @@
                     style="display: flex; gap: 1rem; margin-bottom: 1.5rem; justify-content: center;">
                     <button type="button" class="tab-btn active" onclick="switchLoginTab('student')" id="tabStudent"
                         style="padding: 0.5rem 1rem; border: none; background: transparent; border-bottom: 2px solid var(--primary); color: var(--primary); font-weight: 600; cursor: pointer;">
-                        👔 Panitia
+                        👨‍🎓 Peserta
                     </button>
                     <button type="button" class="tab-btn" onclick="switchLoginTab('examiner')" id="tabExaminer"
                         style="padding: 0.5rem 1rem; border: none; background: transparent; border-bottom: 2px solid transparent; color: var(--text-secondary); font-weight: 600; cursor: pointer;">
-                        👨‍🏫 Penguji
+                        🔐 Panitia / Penguji
                     </button>
                 </div>
 
@@ -228,11 +228,6 @@
                     option.textContent = c;
                     classSelect.appendChild(option);
                 });
-                // Add option for committee
-                const teacherOption = document.createElement('option');
-                teacherOption.value = 'Panitia';
-                teacherOption.textContent = 'Panitia';
-                classSelect.appendChild(teacherOption);
             }
 
             // Check for redirect parameter
