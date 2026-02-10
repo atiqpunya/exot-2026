@@ -771,10 +771,10 @@ qrn1, pass123, Ustadz Ali, alquran
             try {
                 // Use Firebase Upload
                 const result = await window.firebaseService.uploadLocalData();
-                if (result) {
+                if (result.success) {
                     alert('✅ Data berhasil disimpan ke Firebase!');
                 } else {
-                    throw new Error('Gagal upload sebagian data');
+                    throw new Error('Gagal upload:\n' + result.errors.join('\n'));
                 }
             } catch (e) {
                 alert('❌ Gagal menyimpan: ' + e.message);

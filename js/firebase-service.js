@@ -25,9 +25,9 @@ const firebaseService = {
     async save(key, data, timestamp = null) {
         updateStatus('syncing');
 
-        // Create a timeout promise
+        // Create a timeout promise (20s)
         const timeout = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error("Request timed out (10s)")), 10000)
+            setTimeout(() => reject(new Error("Request timed out (20s). Check internet connection.")), 20000)
         );
 
         try {
@@ -44,12 +44,12 @@ const firebaseService = {
             ]);
 
             updateStatus('online');
-            return true;
+            return { success: true };
         } catch (error) {
             console.error("Firebase Save Error:", error);
             // Don't show error to user immediately to avoid spam, just status
             updateStatus('error');
-            return false;
+            return { success: false, error: error.message };
         }
     },
 
@@ -114,16 +114,19 @@ const firebaseService = {
      */
     async uploadLocalData() {
         const keys = ['students', 'users', 'classes', 'settings', 'examinerRewards'];
-        let successCount = 0;
+        let errors = [];
 
         for (const key of keys) {
             const storageKey = `exot_${key}`;
             const data = JSON.parse(localStorage.getItem(storageKey) || '[]');
-            const success = await this.save(storageKey, data);
-            if (success) successCount++;
+            const result = await this.save(storageKey, data);
+
+            if (!result.success) {
+                errors.push(`${key}: ${result.error}`);
+            }
         }
 
-        return successCount === keys.length;
+        return { success: errors.length === 0, errors: errors };
     },
 
     /**

@@ -226,7 +226,7 @@ function saveToFirebase(path, data) {
 
       window.firebaseService.save(fullKey, data, ts)
         .then(res => {
-          if (res) updateSyncStatus('online');
+          if (res && res.success) updateSyncStatus('online');
           else updateSyncStatus('error');
         })
         .catch(err => {
