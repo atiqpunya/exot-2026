@@ -1313,11 +1313,16 @@ function downloadSingle(data, name, room) {
 
     <footer style="text-align: center; margin-top: 2rem; color: var(--text-muted); font-size: 0.8rem;">
         <p>&copy; 2026 EXOT System. Created by Muhammad Atiq Qoidul Islam</p>
-        <p>Version 2.2 (Firebase CDN Fix)</p>
+        <p>Version 2.3 (Compat Mode)</p>
     </footer>
 
-    <script type="module" src="js/firebase-config.js?v=2.0"></script>
-    <script type="module" src="js/firebase-service.js?v=2.0"></script>
+    <!-- Firebase Compat SDK (Global 'firebase' object) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <!-- App Scripts (Compat Mode) -->
+    <script src="js/firebase-config.js?v=2.3"></script>
+    <script src="js/firebase-service.js?v=2.3"></script>
 </body>
 
 </html>

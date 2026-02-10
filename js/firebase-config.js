@@ -1,8 +1,6 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+// Firebase Config (Compat Mode)
+// Expects firebase-app-compat.js and firebase-firestore-compat.js to be loaded
 
-// Your web app's Firebase configuration
-// (Restored from previous setup)
 const firebaseConfig = {
     apiKey: "AIzaSyD89OYtoor7v6FjNENDNbbQXV8Nxe7gFAI",
     authDomain: "gen-lang-client-0663259310.firebaseapp.com",
@@ -14,19 +12,28 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+if (typeof firebase === 'undefined') {
+    console.error("CRITICAL: Firebase SDK not loaded!");
+    alert("Firebase failed to load. Please refresh the page.");
+} else {
+    try {
+        firebase.initializeApp(firebaseConfig);
+        window.db = firebase.firestore();
 
-// Enable offline persistence
+        // Enable offline persistence
+        window.db.enablePersistence()
+            .catch((err) => {
+                if (err.code == 'failed-precondition') {
+                    // Multiple tabs open, persistence can only be enabled in one tab at a a time.
+                    console.warn('Persistence failed: Multiple tabs open');
+                } else if (err.code == 'unimplemented') {
+                    // The current browser does not support all of the features required to enable persistence
+                    console.warn('Persistence not supported by browser');
+                }
+            });
 
-enableIndexedDbPersistence(db)
-    .catch((err) => {
-        if (err.code == 'failed-precondition') {
-            console.warn('Persistence failed: Multiple tabs open');
-        } else if (err.code == 'unimplemented') {
-            console.warn('Persistence not supported by browser');
-        }
-    });
-
-// Export db for use in other files
-export { db };
+        console.log("Firebase initialized successfully (Compat Mode)");
+    } catch (error) {
+        console.error("Firebase Initialization Error:", error);
+    }
+}
