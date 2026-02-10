@@ -9,14 +9,22 @@ const STORAGE_KEYS = {
   LAST_ACTIVITY: 'exot_last_activity'
 };
 
-// Default admin
+// Default admin and panitia
 const DEFAULT_USERS = [
   {
     id: 'admin-001',
     username: 'admin',
     password: 'exot2026',
     name: 'Administrator',
-    role: 'panitia_utama',
+    role: 'panitia_utama', // Super Admin
+    subject: null
+  },
+  {
+    id: 'panitia-001',
+    username: 'panitia',
+    password: 'panitia123',
+    name: 'Panitia Pelaksana',
+    role: 'panitia', // Restricted Admin
     subject: null
   }
 ];

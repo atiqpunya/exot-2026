@@ -124,11 +124,11 @@
         <!-- Tabs -->
         <div class="card fade-in">
             <div class="tabs">
-                <button class="tab-btn active" onclick="switchTab('siswa')">👨‍🎓 Siswa</button>
-                <button class="tab-btn" onclick="switchTab('panitia')">👔 Panitia</button>
-                <button class="tab-btn" onclick="switchTab('penguji')">👨‍🏫 Penguji</button>
-                <button class="tab-btn" onclick="switchTab('ruangan')">🏫 Ruangan</button>
-                <button class="tab-btn" onclick="switchTab('export')">📦 Export</button>
+                <button class="tab-btn active" onclick="switchTab('siswa')" id="btnTabSiswa">👨‍🎓 Siswa</button>
+                <button class="tab-btn" onclick="switchTab('panitia')" id="btnTabPanitia">👔 Panitia</button>
+                <button class="tab-btn" onclick="switchTab('penguji')" id="btnTabPenguji">👨‍🏫 Penguji</button>
+                <button class="tab-btn" onclick="switchTab('ruangan')" id="btnTabRuangan">🏫 Ruangan</button>
+                <button class="tab-btn" onclick="switchTab('export')" id="btnTabExport">📦 Export</button>
             </div>
 
             <!-- Siswa Tab -->
@@ -350,19 +350,39 @@ qrn1, pass123, Ustadz Ali, alquran
     <script src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const session = requireAuth(['panitia_utama']);
-            if (!session) {
-                document.getElementById('authRequired').style.display = 'block';
-                return;
+            // Check auth
+            const session = getSession();
+            if (!session || (session.role !== 'panitia_utama' && session.role !== 'panitia' && session.role !== 'guru')) {
+                window.location.href = 'index.html';
             }
 
-            document.getElementById('mainContent').style.display = 'block';
-            document.getElementById('floatingBtn').innerHTML = '🚪 Logout';
+            // Role-based UI restriction
+            if (session.role !== 'panitia_utama') {
+                // Hide restricted tabs for regular Panitia
+                if (document.getElementById('btnTabPanitia')) document.getElementById('btnTabPanitia').style.display = 'none';
+                if (document.getElementById('btnTabPenguji')) document.getElementById('btnTabPenguji').style.display = 'none';
 
+                // Also hide Stat Cards for Panitia/Penguji if desired, or keep them for visibility
+            }
+
+            // Initial load
             updateStats();
             loadStudentList();
-            loadExaminerList();
-            loadClassList();
+            if (session.role === 'panitia_utama') {
+                loadPanitiaList(); // Only load if visible
+                loadExaminerList();
+            }
+
+            // Listen for sync updates
+            window.addEventListener('storage-update', () => {
+                console.log('🔄 Data synced, refreshing UI...');
+                updateStats();
+                loadStudentList();
+                if (session.role === 'panitia_utama') {
+                    loadPanitiaList();
+                    loadExaminerList();
+                }
+            }); loadClassList();
 
             document.getElementById('searchStudent').addEventListener('input', loadStudentList);
             document.getElementById('filterType').addEventListener('change', loadStudentList);

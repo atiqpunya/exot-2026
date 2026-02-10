@@ -53,56 +53,33 @@
             <div class="hero-login-card fade-in">
                 <div class="login-header" style="text-align: center; margin-bottom: 2rem;">
                     <img src="img/logo-alwildan.png" alt="SD Al-Wildan 4" style="height: 80px; margin-bottom: 1rem;">
-                    <h2 style="font-size: 1.5rem; color: var(--text-primary); margin-bottom: 0.5rem;">Login
-                        Peserta/Penguji</h2>
-                    <p style="color: var(--text-secondary); font-size: 0.9rem;">Masuk untuk memulai ujian atau penilaian
-                    </p>
-                </div>
-
-                <div class="login-tabs"
-                    style="display: flex; gap: 1rem; margin-bottom: 1.5rem; justify-content: center;">
-                    <button type="button" class="tab-btn active" onclick="switchLoginTab('student')" id="tabStudent"
-                        style="padding: 0.5rem 1rem; border: none; background: transparent; border-bottom: 2px solid var(--primary); color: var(--primary); font-weight: 600; cursor: pointer;">
-                        👨‍🎓 Peserta
-                    </button>
-                    <button type="button" class="tab-btn" onclick="switchLoginTab('examiner')" id="tabExaminer"
-                        style="padding: 0.5rem 1rem; border: none; background: transparent; border-bottom: 2px solid transparent; color: var(--text-secondary); font-weight: 600; cursor: pointer;">
-                        🔐 Panitia / Penguji
-                    </button>
+                    <h2 style="font-size: 1.5rem; color: var(--text-primary); margin-bottom: 0.5rem;">Login Sistem</h2>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">Silakan login sesuai peran Anda</p>
                 </div>
 
                 <form id="loginForm" onsubmit="handleLogin(event)">
-                    <!-- Student/Teacher Login -->
-                    <div id="studentLoginSection">
-                        <div class="form-group">
-                            <label class="form-label">Nama Lengkap</label>
-                            <input type="text" id="studentName" class="form-input" placeholder="Masukkan nama lengkap"
-                                required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Kelas / Unit</label>
-                            <select id="studentClass" class="form-input form-select" required>
-                                <option value="" disabled selected>Pilih Kelas/Unit</option>
-                                <!-- Will be populated by JS -->
-                            </select>
-                        </div>
-                        <input type="hidden" id="loginType" value="student">
+                    <div class="form-group">
+                        <label class="form-label">Masuk Sebagai</label>
+                        <select id="loginRole" class="form-input form-select" required onchange="updateLoginUI()">
+                            <option value="" disabled selected>Pilih Peran...</option>
+                            <option value="admin">Admin</option>
+                            <option value="panitia">Panitia</option>
+                            <option value="penguji">Penguji</option>
+                        </select>
                     </div>
 
-                    <!-- Examiner Login -->
-                    <div id="examinerLoginSection" style="display: none;">
-                        <div class="form-group">
-                            <label class="form-label">Username</label>
-                            <input type="text" id="username" class="form-input" placeholder="Masukkan username">
-                        </div>
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input type="text" id="username" class="form-input" placeholder="Masukkan username" required>
+                    </div>
 
-                        <div class="form-group">
-                            <label class="form-label">Password</label>
-                            <div class="password-wrapper" style="position: relative;">
-                                <input type="password" id="password" class="form-input" placeholder="Masukkan password">
-                                <button type="button" class="password-toggle" onclick="togglePassword()"
-                                    style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer;">👁️</button>
-                            </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <div class="password-wrapper" style="position: relative;">
+                            <input type="password" id="password" class="form-input" placeholder="Masukkan password"
+                                required>
+                            <button type="button" class="password-toggle" onclick="togglePassword()"
+                                style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer;">👁️</button>
                         </div>
                     </div>
 
@@ -218,18 +195,6 @@
                 // redirectByRole(session);
             }
 
-            // Populate classes dropdown
-            const classes = getClasses();
-            const classSelect = document.getElementById('studentClass');
-            if (classSelect) {
-                classes.forEach(c => {
-                    const option = document.createElement('option');
-                    option.value = c;
-                    option.textContent = c;
-                    classSelect.appendChild(option);
-                });
-            }
-
             // Check for redirect parameter
             const urlParams = new URLSearchParams(window.location.search);
             const redirect = urlParams.get('redirect');
@@ -237,48 +202,6 @@
                 sessionStorage.setItem('loginRedirect', redirect);
             }
         });
-
-        function switchLoginTab(type) {
-            const studentBtn = document.getElementById('tabStudent');
-            const examinerBtn = document.getElementById('tabExaminer');
-            const studentSection = document.getElementById('studentLoginSection');
-            const examinerSection = document.getElementById('examinerLoginSection');
-            const loginType = document.getElementById('loginType');
-
-            if (type === 'student') {
-                studentBtn.classList.add('active');
-                studentBtn.style.borderBottomColor = 'var(--primary)';
-                studentBtn.style.color = 'var(--primary)';
-                examinerBtn.classList.remove('active');
-                examinerBtn.style.borderBottomColor = 'transparent';
-                examinerBtn.style.color = 'var(--text-secondary)';
-
-                studentSection.style.display = 'block';
-                examinerSection.style.display = 'none';
-                loginType.value = 'student';
-
-                document.getElementById('studentName').required = true;
-                document.getElementById('studentClass').required = true;
-                document.getElementById('username').required = false;
-                document.getElementById('password').required = false;
-            } else {
-                examinerBtn.classList.add('active');
-                examinerBtn.style.borderBottomColor = 'var(--primary)';
-                examinerBtn.style.color = 'var(--primary)';
-                studentBtn.classList.remove('active');
-                studentBtn.style.borderBottomColor = 'transparent';
-                studentBtn.style.color = 'var(--text-secondary)';
-
-                studentSection.style.display = 'none';
-                examinerSection.style.display = 'block';
-                loginType.value = 'examiner';
-
-                document.getElementById('studentName').required = false;
-                document.getElementById('studentClass').required = false;
-                document.getElementById('username').required = true;
-                document.getElementById('password').required = true;
-            }
-        }
 
         function togglePassword() {
             const input = document.getElementById('password');
@@ -292,51 +215,50 @@
             }
         }
 
+        function updateLoginUI() {
+            // Optional: visual changes based on role
+            const role = document.getElementById('loginRole').value;
+        }
+
         function handleLogin(e) {
             e.preventDefault();
-            const type = document.getElementById('loginType').value;
-            let result;
 
-            if (type === 'student') {
-                // Student "Login" (Registration/Check-in)
-                const name = document.getElementById('studentName').value.trim();
-                const className = document.getElementById('studentClass').value;
+            const role = document.getElementById('loginRole').value;
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
 
-                if (!name || !className) {
-                    result = { error: 'Mohon lengkapi data!' };
-                } else {
-                    // Cek apakah siswa sudah ada, jika belum buat baru (auto-register untuk kemudahan)
-                    let students = getStudents();
-                    let student = students.find(s => s.name.toLowerCase() === name.toLowerCase() && s.class === className);
+            if (!role) {
+                document.getElementById('errorText').textContent = 'Silakan pilih peran (Admin/Panitia/Penguji)!';
+                document.getElementById('loginError').style.display = 'flex';
+                return;
+            }
 
-                    if (!student) {
-                        // Create new student temporarily if not exists (or block it if strict)
-                        // For now we allow auto-create or find
-                        // Asking user intent: usually "pisahkan input" implies they scan or input name. 
-                        // If we assume this is just for checking status, we might not want to create.
-                        // But to be safe and helpful, we'll try to find first. If strict mode, show error.
-                        // Let's assume strict mode for now: "Data tidak ditemukan, hubungi panitia"
-                        result = { error: 'Data siswa tidak ditemukan! Hubungi panitia.' };
+            const result = login(username, password);
 
-                        // Relaxed mode (if requested later):
-                        // student = addStudent(name, className, className === 'Guru' ? 'guru' : 'siswa');
-                    } else {
-                        // Mock login session for student
-                        sessionStorage.setItem('exot_session', JSON.stringify({
-                            id: student.id,
-                            name: student.name,
-                            role: 'siswa',
-                            class: student.class
-                        }));
-                        result = { success: true, role: 'siswa' };
-                    }
-                }
+            if (!result) {
+                document.getElementById('errorText').textContent = 'Username atau password salah!';
+                document.getElementById('loginError').style.display = 'flex';
+                return;
+            }
 
-            } else {
-                // Examiner/Admin Login
-                const username = document.getElementById('username').value.trim();
-                const password = document.getElementById('password').value;
-                result = login(username, password);
+            // Role Validation
+            // We map internal roles to selected roles
+            // admin -> panitia_utama
+            // panitia -> panitia
+            // penguji -> penguji
+
+            let valid = false;
+            if (role === 'admin' && result.role === 'panitia_utama') valid = true;
+            else if (role === 'panitia' && result.role === 'panitia') valid = true;
+            else if (role === 'penguji' && result.role === 'penguji') valid = true;
+
+            // Allow Admin to login as Panitia for testing? No, strict for now.
+            // Actually, internal 'panitia_utama' is practically 'admin'.
+
+            if (!valid) {
+                document.getElementById('errorText').textContent = `Akun ini bukan akun ${role.charAt(0).toUpperCase() + role.slice(1)}!`;
+                document.getElementById('loginError').style.display = 'flex';
+                return;
             }
 
             if (result.error) {
@@ -366,7 +288,7 @@
         }
 
         function redirectByRole(session) {
-            if (session.role === 'panitia_utama') {
+            if (session.role === 'panitia_utama' || session.role === 'panitia') {
                 window.location.href = 'register.html';
             } else if (session.role === 'penguji') {
                 const subjectUrls = {
