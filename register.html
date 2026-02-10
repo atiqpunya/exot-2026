@@ -762,8 +762,9 @@ qrn1, pass123, Ustadz Ali, alquran
         }
 
         // Force Cloud Operations
+        // Force Cloud Operations
         async function forceSaveCloud() {
-            const btn = document.querySelector('button[title="Simpan data ke Spreadsheet"]');
+            const btn = document.querySelector('button[title="Simpan data ke Firebase"]');
             const originalText = btn.innerHTML;
             btn.innerHTML = '⏳ Saving...';
             btn.disabled = true;
@@ -793,7 +794,7 @@ qrn1, pass123, Ustadz Ali, alquran
         async function forceLoadCloud() {
             if (!confirm('Ini akan menimpa data lokal dengan data dari Cloud. Lanjutkan?')) return;
 
-            const btn = document.querySelector('button[title="Ambil data dari Spreadsheet"]');
+            const btn = document.querySelector('button[title="Ambil data dari Cloud"]');
             const originalText = btn.innerHTML;
             btn.innerHTML = '⏳ Loading...';
             btn.disabled = true;
@@ -1312,7 +1313,7 @@ function downloadSingle(data, name, room) {
 
     <footer style="text-align: center; margin-top: 2rem; color: var(--text-muted); font-size: 0.8rem;">
         <p>&copy; 2026 EXOT System. Created by Muhammad Atiq Qoidul Islam</p>
-        <p>Version 2.0 (Firebase Connected)</p>
+        <p>Version 2.1 (Button Fix)</p>
     </footer>
 
     <script type="module" src="js/firebase-config.js?v=2.0"></script>
