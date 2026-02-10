@@ -24,19 +24,30 @@ const firebaseService = {
      */
     async save(key, data, timestamp = null) {
         updateStatus('syncing');
+
+        // Create a timeout promise
+        const timeout = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("Request timed out (10s)")), 10000)
+        );
+
         try {
             const cleanKey = key.replace('exot_', ''); // remove prefix
             const docRef = doc(db, COLLECTION_NAME, cleanKey);
 
-            await setDoc(docRef, {
-                data: data,
-                updatedAt: timestamp || Date.now()
-            });
+            // Race between save and timeout
+            await Promise.race([
+                setDoc(docRef, {
+                    data: data,
+                    updatedAt: timestamp || Date.now()
+                }),
+                timeout
+            ]);
 
             updateStatus('online');
             return true;
         } catch (error) {
             console.error("Firebase Save Error:", error);
+            // Don't show error to user immediately to avoid spam, just status
             updateStatus('error');
             return false;
         }
