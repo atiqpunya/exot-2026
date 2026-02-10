@@ -100,9 +100,9 @@
                 <h2 style="margin: 0; color: var(--text-primary);">Data Registrasi</h2>
             </div>
             <div style="display: flex; gap: 0.5rem;">
-                <button class="btn btn-secondary" onclick="forceLoadCloud()" title="Ambil data dari Spreadsheet">☁️
+                <button class="btn btn-secondary" onclick="forceLoadCloud()" title="Ambil data dari Cloud">☁️
                     Load</button>
-                <button class="btn btn-primary" onclick="forceSaveCloud()" title="Simpan data ke Spreadsheet">💾
+                <button class="btn btn-primary" onclick="forceSaveCloud()" title="Simpan data ke Firebase">💾
                     Save</button>
             </div>
         </div>
@@ -1310,8 +1310,13 @@ function downloadSingle(data, name, room) {
     <!-- Footer Credit -->
 
 
-    <script type="module" src="js/firebase-config.js?v=1.2"></script>
-    <script type="module" src="js/firebase-service.js?v=1.2"></script>
+    <footer style="text-align: center; margin-top: 2rem; color: var(--text-muted); font-size: 0.8rem;">
+        <p>&copy; 2026 EXOT System. Created by Muhammad Atiq Qoidul Islam</p>
+        <p>Version 2.0 (Firebase Connected)</p>
+    </footer>
+
+    <script type="module" src="js/firebase-config.js?v=2.0"></script>
+    <script type="module" src="js/firebase-service.js?v=2.0"></script>
 </body>
 
 </html>
