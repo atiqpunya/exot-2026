@@ -61,7 +61,10 @@ function initStorage() {
       updateSyncStatus('online');
 
       // Perform initial sync from cloud (optional, or manual)
-      // window.googleSheetsAPI.syncFromCloud();
+      window.googleSheetsAPI.syncFromCloud().then(success => {
+        if (success) console.log('✅ Initial sync successful');
+        else console.warn('⚠️ Initial sync failed or no data');
+      });
     }
   };
 

@@ -100,8 +100,8 @@
                 <div class="stat-label">Siswa</div>
             </div>
             <div class="card stat-card">
-                <div class="stat-value" id="statGuru">0</div>
-                <div class="stat-label">Guru</div>
+                <div class="stat-value" id="statPanitia">0</div>
+                <div class="stat-label">Panitia</div>
             </div>
             <div class="card stat-card">
                 <div class="stat-value" id="statPenguji">0</div>
@@ -112,41 +112,61 @@
         <!-- Tabs -->
         <div class="card fade-in">
             <div class="tabs">
-                <button class="tab-btn active" onclick="switchTab('siswa')">👨‍🎓 Siswa & Guru</button>
+                <button class="tab-btn active" onclick="switchTab('siswa')">👨‍🎓 Siswa</button>
+                <button class="tab-btn" onclick="switchTab('panitia')">👔 Panitia</button>
                 <button class="tab-btn" onclick="switchTab('penguji')">👨‍🏫 Penguji</button>
                 <button class="tab-btn" onclick="switchTab('ruangan')">🏫 Ruangan</button>
                 <button class="tab-btn" onclick="switchTab('export')">📦 Export</button>
             </div>
 
-            <!-- Siswa & Guru Tab -->
+            <!-- Siswa Tab -->
             <div id="siswaTab" class="tab-content active">
-                <h4 style="margin-bottom: 1rem;">📄 Bulk Input Siswa & Guru</h4>
+                <h4 style="margin-bottom: 1rem;">📄 Bulk Input Siswa</h4>
                 <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.9rem;">
-                    Format: <code>Nama, Ruangan, Jenis</code> (jenis: siswa/guru)
+                    Format: <code>Nama, Ruangan</code>
                 </p>
-                <textarea id="bulkStudents" class="bulk-textarea" placeholder="Ahmad Fauzi, 7A, siswa
-Siti Aminah, 7B, siswa
-Budi Santoso, Guru Matematika, guru
+                <textarea id="bulkStudents" class="bulk-textarea" placeholder="Ahmad Fauzi, 7A
+Siti Aminah, 7B
 ..."></textarea>
                 <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-                    <button class="btn btn-primary" onclick="importStudents()">📥 Import Siswa/Guru</button>
+                    <button class="btn btn-primary" onclick="importStudents()">📥 Import Siswa</button>
                     <button class="btn btn-danger" onclick="clearAllStudents()">🗑️ Hapus Semua</button>
                 </div>
                 <div id="studentImportResult" class="alert alert-success" style="display: none; margin-top: 1rem;">
                 </div>
 
                 <div style="margin-top: 1.5rem;">
-                    <h4>📋 Daftar Terdaftar (<span id="studentCount">0</span>)</h4>
+                    <h4>📋 Daftar Siswa (<span id="studentCount">0</span>)</h4>
                     <div style="display: flex; gap: 0.5rem; margin: 1rem 0; flex-wrap: wrap;">
-                        <input type="text" id="searchStudent" class="form-input" placeholder="🔍 Cari..."
-                            style="width: 200px;">
-                        <select id="filterType" class="form-input form-select" style="width: auto;">
-                            <option value="all">Semua</option>
-                            <option value="siswa">Siswa</option>
-                            <option value="guru">Guru</option>
-                        </select>
+                        <input type="text" id="searchStudent" class="form-input" placeholder="🔍 Cari Siswa..."
+                            style="width: 100%;">
                     </div>
                     <div id="studentList" style="max-height: 300px; overflow-y: auto;"></div>
+                </div>
+            </div>
+
+            <!-- Panitia Tab -->
+            <div id="panitiaTab" class="tab-content">
+                <h4 style="margin-bottom: 1rem;">👔 Bulk Input Panitia</h4>
+                <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.9rem;">
+                    Format: <code>Nama, Jabatan/Unit</code>
+                </p>
+                <textarea id="bulkPanitia" class="bulk-textarea" placeholder="Budi Santoso, Ketua Panitia
+Siti Rahma, Sekretaris
+..."></textarea>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button class="btn btn-primary" onclick="importPanitia()">📥 Import Panitia</button>
+                </div>
+                <div id="panitiaImportResult" class="alert alert-success" style="display: none; margin-top: 1rem;">
+                </div>
+
+                <div style="margin-top: 1.5rem;">
+                    <h4>📋 Daftar Panitia (<span id="panitiaCount">0</span>)</h4>
+                    <div style="display: flex; gap: 0.5rem; margin: 1rem 0; flex-wrap: wrap;">
+                        <input type="text" id="searchPanitia" class="form-input" placeholder="🔍 Cari Panitia..."
+                            style="width: 100%;">
+                    </div>
+                    <div id="panitiaList" style="max-height: 300px; overflow-y: auto;"></div>
                 </div>
             </div>
 
@@ -214,9 +234,9 @@ qrn1, pass123, Ustadz Ali, alquran
                             <p>Download QR code semua siswa saja</p>
                         </div>
 
-                        <div class="export-option" onclick="exportQR('guru')">
-                            <h5>👨‍🏫 Hanya Guru</h5>
-                            <p>Download QR code semua guru saja</p>
+                        <div class="export-option" onclick="exportQR('panitia')">
+                            <h5>👔 Hanya Panitia</h5>
+                            <p>Download QR code semua panitia saja</p>
                         </div>
 
                         <div class="export-option" onclick="exportQR('penguji')">
@@ -238,9 +258,35 @@ qrn1, pass123, Ustadz Ali, alquran
                                     <option value="9">9 kartu/halaman (3×3)</option>
                                 </select>
                             </div>
-                            <div class="export-option" onclick="printQRCards()">
+                            <div class="export-option" onclick="togglePrintSettings()">
                                 <h5>🖨️ Cetak QR Cards</h5>
-                                <p>Cetak kartu QR sesuai pengaturan di atas</p>
+                                <p>Cetak kartu QR sesuai pengaturan</p>
+                            </div>
+
+                            <div id="printSettings"
+                                style="display: none; background: var(--bg-surface); padding: 1rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); margin-top: 0.5rem;">
+                                <h6 style="margin-bottom: 0.5rem;">Pengaturan Batch</h6>
+                                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                    <div style="flex: 1;">
+                                        <label style="font-size: 0.8rem;">Mulai dari</label>
+                                        <input type="number" id="printStart" class="form-input" value="1" min="1">
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <label style="font-size: 0.8rem;">Jumlah</label>
+                                        <input type="number" id="printLimit" class="form-input" value="50" min="1">
+                                    </div>
+                                </div>
+                                <div style="margin-bottom: 0.5rem;">
+                                    <label class="form-control">
+                                        <input type="checkbox" id="printHighQuality" checked>
+                                        High Quality (HD)
+                                    </label>
+                                </div>
+                                <button class="btn btn-primary btn-sm" style="width: 100%;" onclick="printQRCards()">🖨️
+                                    Generate & Print</button>
+                                <div id="printProgress"
+                                    style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-muted); display: none;">
+                                    Siap...</div>
                             </div>
                         </div>
                     </div>
@@ -318,9 +364,10 @@ qrn1, pass123, Ustadz Ali, alquran
             document.querySelectorAll('.tab-btn').forEach((btn, i) => {
                 btn.classList.toggle('active',
                     (tab === 'siswa' && i === 0) ||
-                    (tab === 'penguji' && i === 1) ||
-                    (tab === 'ruangan' && i === 2) ||
-                    (tab === 'export' && i === 3)
+                    (tab === 'panitia' && i === 1) ||
+                    (tab === 'penguji' && i === 2) ||
+                    (tab === 'ruangan' && i === 3) ||
+                    (tab === 'export' && i === 4)
                 );
             });
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -331,8 +378,8 @@ qrn1, pass123, Ustadz Ali, alquran
             const students = getStudents();
             const examiners = getExaminers();
             document.getElementById('statTotal').textContent = students.length;
-            document.getElementById('statSiswa').textContent = students.filter(s => s.type !== 'guru').length;
-            document.getElementById('statGuru').textContent = students.filter(s => s.type === 'guru').length;
+            document.getElementById('statSiswa').textContent = students.filter(s => s.type === 'siswa').length;
+            document.getElementById('statPanitia').textContent = students.filter(s => s.type === 'panitia').length;
             document.getElementById('statPenguji').textContent = examiners.length;
         }
 
@@ -346,15 +393,38 @@ qrn1, pass123, Ustadz Ali, alquran
             lines.forEach(line => {
                 const parts = line.split(',').map(p => p.trim());
                 if (parts[0]) {
-                    addStudent(parts[0], parts[1] || '-', (parts[2] || 'siswa').toLowerCase());
+                    // Type is always siswa in this tab
+                    addStudent(parts[0], parts[1] || '-', 'siswa');
                     count++;
                 }
             });
 
             document.getElementById('bulkStudents').value = '';
-            showResult('studentImportResult', `✅ ${count} data berhasil diimport!`);
+            showResult('studentImportResult', `✅ ${count} siswa berhasil diimport!`);
             updateStats();
             loadStudentList();
+        }
+
+        function importPanitia() {
+            const input = document.getElementById('bulkPanitia').value.trim();
+            if (!input) return alert('Masukkan data!');
+
+            const lines = input.split('\n').filter(l => l.trim());
+            let count = 0;
+
+            lines.forEach(line => {
+                const parts = line.split(',').map(p => p.trim());
+                if (parts[0]) {
+                    // Type is panitia
+                    addStudent(parts[0], parts[1] || 'Panitia', 'panitia');
+                    count++;
+                }
+            });
+
+            document.getElementById('bulkPanitia').value = '';
+            showResult('panitiaImportResult', `✅ ${count} panitia berhasil diimport!`);
+            updateStats();
+            loadPanitiaList();
         }
 
         function importExaminers() {
@@ -390,18 +460,16 @@ qrn1, pass123, Ustadz Ali, alquran
         }
 
         function loadStudentList() {
-            let students = getStudents();
+            let students = getStudents().filter(s => s.type === 'siswa');
             const search = document.getElementById('searchStudent').value.toLowerCase();
-            const filter = document.getElementById('filterType').value;
 
             if (search) students = students.filter(s => s.name.toLowerCase().includes(search) || s.class.toLowerCase().includes(search));
-            if (filter !== 'all') students = students.filter(s => (s.type || 'siswa') === filter);
 
-            document.getElementById('studentCount').textContent = getStudents().length;
+            document.getElementById('studentCount').textContent = students.length;
             const container = document.getElementById('studentList');
 
             if (!students.length) {
-                container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 1rem;">Tidak ada data</p>';
+                container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 1rem;">Tidak ada data siswa</p>';
                 return;
             }
 
@@ -415,7 +483,7 @@ qrn1, pass123, Ustadz Ali, alquran
                   <td>${i + 1}</td>
                   <td>${s.name}</td>
                   <td>${s.class}</td>
-                  <td><span class="badge badge-${s.type === 'guru' ? 'info' : 'success'}">${s.type || 'siswa'}</span></td>
+                  <td><span class="badge badge-success">Siswa</span></td>
                   <td>
                     <button class="btn btn-sm btn-secondary" onclick="downloadSingleQR('${s.id}', 'student')">📱</button>
                     <button class="btn btn-sm btn-danger" onclick="delStudent('${s.id}')">🗑️</button>
@@ -426,6 +494,43 @@ qrn1, pass123, Ustadz Ali, alquran
           </table>
         </div>
         ${students.length > 50 ? `<p style="text-align: center; color: var(--text-muted); margin-top: 0.5rem;">Menampilkan 50 dari ${students.length}</p>` : ''}
+      `;
+        }
+
+        function loadPanitiaList() {
+            let panitia = getStudents().filter(s => s.type === 'panitia' || s.type === 'guru'); // Include legacy 'guru'
+            const search = document.getElementById('searchPanitia').value.toLowerCase();
+
+            if (search) panitia = panitia.filter(s => s.name.toLowerCase().includes(search) || s.class.toLowerCase().includes(search));
+
+            document.getElementById('panitiaCount').textContent = panitia.length;
+            const container = document.getElementById('panitiaList');
+
+            if (!panitia.length) {
+                container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 1rem;">Tidak ada data panitia</p>';
+                return;
+            }
+
+            container.innerHTML = `
+        <div class="table-container">
+          <table class="table">
+            <thead><tr><th>No</th><th>Nama</th><th>Jabatan/Unit</th><th>Jenis</th><th>Aksi</th></tr></thead>
+            <tbody>
+              ${panitia.slice(0, 50).map((s, i) => `
+                <tr>
+                  <td>${i + 1}</td>
+                  <td>${s.name}</td>
+                  <td>${s.class}</td>
+                  <td><span class="badge badge-info">Panitia</span></td>
+                  <td>
+                    <button class="btn btn-sm btn-secondary" onclick="downloadSingleQR('${s.id}', 'student')">📱</button>
+                    <button class="btn btn-sm btn-danger" onclick="delStudent('${s.id}')">🗑️</button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
       `;
         }
 
@@ -602,9 +707,10 @@ qrn1, pass123, Ustadz Ali, alquran
             } else if (category === 'siswa') {
                 items = getStudents().filter(s => s.type !== 'guru').map(s => ({ name: s.name, room: s.class, type: 'siswa', qr: s.qrCode }));
                 title = 'Siswa';
-            } else if (category === 'guru') {
-                items = getStudents().filter(s => s.type === 'guru').map(s => ({ name: s.name, room: s.class, type: 'guru', qr: s.qrCode }));
-                title = 'Guru';
+            } else if (category === 'panitia') {
+                items = getStudents().filter(s => s.type === 'panitia' || s.type === 'guru')
+                    .map(s => ({ name: s.name, room: s.class, type: 'panitia', qr: s.qrCode }));
+                title = 'Panitia';
             } else if (category === 'penguji') {
                 items = getExaminers().map(e => ({ name: e.name, room: e.subject, type: 'penguji', qr: e.id }));
                 title = 'Penguji';
@@ -834,6 +940,11 @@ function downloadSingle(data, name, room) {
             event.target.value = '';
         }
 
+        function togglePrintSettings() {
+            const el = document.getElementById('printSettings');
+            el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        }
+
         // Print QR cards with paper size, card count options, and custom Logos
         async function printQRCards() {
             const students = getStudents();
@@ -842,10 +953,28 @@ function downloadSingle(data, name, room) {
                 return;
             }
 
-            const btn = document.querySelector('div[onclick="printQRCards()"]');
+            const startIdx = parseInt(document.getElementById('printStart').value) - 1;
+            const limit = parseInt(document.getElementById('printLimit').value);
+            const isHD = document.getElementById('printHighQuality').checked;
+
+            if (startIdx < 0 || startIdx >= students.length) {
+                alert('Indeks mulai tidak valid!');
+                return;
+            }
+
+            const targetStudents = students.slice(startIdx, startIdx + limit);
+            if (!targetStudents.length) {
+                alert('Tidak ada siswa dalam rentang ini!');
+                return;
+            }
+
+            const btn = document.querySelector('#printSettings button');
+            const progressEl = document.getElementById('printProgress');
+
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<h5>⏳ Generating QRs...</h5><p>Mohon tunggu sebentar...</p>';
-            btn.style.pointerEvents = 'none';
+            btn.innerHTML = '⏳ Generating...';
+            btn.disabled = true;
+            progressEl.style.display = 'block';
 
             const paperSize = document.getElementById('printPaperSize').value;
             const cardCount = parseInt(document.getElementById('printCardCount').value);
@@ -867,198 +996,180 @@ function downloadSingle(data, name, room) {
             const paper = paperDims[paperSize];
             const grid = gridLayouts[cardCount];
 
-            // QR size scales with card count
-            const qrSize = cardCount <= 4 ? 300 : (cardCount <= 6 ? 250 : 200);
+            // QR size scales with card count but High Res for printing
+            // If HD, generate at 1000px, otherwise 300px
+            const qrGenSize = isHD ? 1000 : 300;
+
+            // Display size in CSS (visual size on paper)
             const displaySize = cardCount <= 4 ? 120 : (cardCount <= 6 ? 100 : 85);
             const fontSize = cardCount <= 4 ? 14 : (cardCount <= 6 ? 12 : 11);
 
             // Helper to generate QR Data URI
-            const generateQRDataUri = async (data) => {
-                const qrCode = new QRCodeStyling({
-                    width: qrSize,
-                    height: qrSize,
-                    type: "png",
-                    data: data,
-                    image: "img/logo-alwildan.png",
-                    dotsOptions: { color: "#000", type: "rounded" },
-                    backgroundOptions: { color: "#fff" },
-                    imageOptions: { crossOrigin: "anonymous", margin: 10 }
+            const generateQRDataUri = (data) => {
+                return new Promise((resolve, reject) => {
+                    const qrCode = new QRCodeStyling({
+                        width: qrGenSize,
+                        height: qrGenSize,
+                        type: "png", // PNG is better for compatibility than SVG in blob url for print
+                        data: data,
+                        image: "img/logo-alwildan.png",
+                        dotsOptions: { color: "#000", type: "rounded" },
+                        backgroundOptions: { color: "#fff" },
+                        imageOptions: { crossOrigin: "anonymous", margin: isHD ? 20 : 10 }
+                    });
+
+                    qrCode.getRawData('png').then(blob => {
+                        resolve(URL.createObjectURL(blob));
+                    }).catch(reject);
                 });
-                const blob = await qrCode.getRawData('png');
-                return URL.createObjectURL(blob);
             };
 
             try {
-                // Pre-generate all QRs (batching could be added for huge lists)
+                // Batch generation with delay to keep UI responsive
                 const studentQRs = [];
-                for (const s of students) {
+                for (let i = 0; i < targetStudents.length; i++) {
+                    const s = targetStudents[i];
+                    progressEl.textContent = `Generating ${i + 1}/${targetStudents.length}: ${s.name}`;
+
                     const url = await generateQRDataUri(s.qrCode || s.id);
                     studentQRs.push({ ...s, qrUrl: url });
+
+                    // Small delay every 5 items to breathe
+                    if (i % 5 === 0) await new Promise(r => setTimeout(r, 10));
                 }
 
+                progressEl.textContent = 'Membuka jendela cetak...';
+
                 const printWindow = window.open('', '_blank');
+                if (!printWindow) {
+                    alert('Pop-up blocked! Izinkan pop-up untuk mencetak.');
+                    return;
+                }
+
                 printWindow.document.write(`
     <!DOCTYPE html>
     <html>
-
     <head>
         <meta charset="UTF-8">
-        <title>Print QR Cards - EXOT (${paperSize}, ${cardCount} kartu)</title>
+        <title>Print QR Cards - EXOT (${paperSize})</title>
         <style>
-            * {
-                box-sizing: border-box;
-                margin: 0;
-                padding: 0;
-            }
-
-            body {
-                font-family: Arial, sans-serif;
-            }
-
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; }
+            
             .page {
-                width: $ {
-                    paper.width
-                }
-
-                mm;
-
-                min-height: $ {
-                    paper.height
-                }
-
-                mm;
+                width: ${paper.width}mm;
+                min-height: ${paper.height}mm;
                 padding: 10mm;
                 display: grid;
-
-                grid-template-columns: repeat($ {
-                        grid.cols
-                    }
-
-                    , 1fr);
-
-                grid-template-rows: repeat($ {
-                        grid.rows
-                    }
-
-                    , 1fr);
+                grid-template-columns: repeat(${grid.cols}, 1fr);
+                grid-template-rows: repeat(${grid.rows}, 1fr);
                 gap: 8mm;
                 page-break-after: always;
             }
+            .page:last-child { page-break-after: auto; }
 
             .card {
-                border: 2px solid #333;
-                border-radius: 10px;
+                border: 2px solid #0f172a;
+                border-radius: 12px;
                 padding: 10px;
                 text-align: center;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
+                position: relative;
+                overflow: hidden;
+            }
+            
+            /* Background decoration */
+            .card::before {
+                content: '';
+                position: absolute;
+                top: 0; left: 0; right: 0; height: 6px;
+                background: linear-gradient(90deg, #0ea5e9, #6366f1);
             }
 
             .card img {
-                width: $ {
-                    displaySize
-                }
-
-                px;
-
-                height: $ {
-                    displaySize
-                }
-
-                px;
+                width: ${displaySize}px;
+                height: ${displaySize}px;
                 margin-bottom: 8px;
+                /* Crisp rendering for QR */
+                image-rendering: -webkit-optimize-contrast;
             }
 
             .card h3 {
-                font-size: $ {
-                    fontSize
-                }
-
-                px;
+                font-size: ${fontSize}px;
                 margin-bottom: 4px;
                 word-break: break-word;
+                line-height: 1.3;
+                color: #0f172a;
+                font-weight: 700;
+                max-width: 100%;
             }
 
             .card p {
-                font-size: $ {
-                    fontSize - 2
-                }
-
-                px;
-                color: #666;
+                font-size: ${fontSize - 2}px;
+                color: #64748b;
+                font-weight: 500;
             }
 
             .card .type {
                 display: inline-block;
-                padding: 2px 8px;
-                border-radius: 10px;
-
-                font-size: $ {
-                    fontSize - 3
-                }
-
-                px;
+                padding: 3px 10px;
+                border-radius: 20px;
+                font-size: ${fontSize - 3}px;
                 margin-top: 6px;
-                background: #e0f2fe;
-                color: #0369a1;
+                background: #f1f5f9;
+                color: #475569;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
             }
 
             .card .code {
-                font-size: 10px;
-                margin-top: 4px;
+                font-size: 9px;
+                margin-top: 5px;
                 font-family: monospace;
-                color: #555;
+                color: #94a3b8;
             }
 
             @media print {
-                @page {
-                    size: $ {
-                        paperSize
-                    }
-
-                    ;
-                    margin: 0;
-                }
-
-                .page {
-                    page-break-after: always;
-                }
-
-                .page:last-child {
-                    page-break-after: auto;
-                }
+                @page { size: ${paperSize}; margin: 0; }
+                body { margin: 0; }
             }
         </style>
     </head>
-
     <body>
         ${(() => {
                         let html = '';
                         for (let i = 0; i < studentQRs.length; i += cardCount) {
-                            const pageItems = studentQRs.slice(i, i + cardCount); html
-                                += '<div class="page">'; pageItems.forEach(s => {
-                                    html += '<div class="card">' +
-                                        '<img src="' + s.qrUrl + '" alt="QR">' +
-                                        '<h3>' + s.name + '</h3>' +
-                                        '<p>' + s.class + '</p>' +
-                                        '<span class="type">' + (s.type || 'siswa') + '</span>' +
-                                        '<span class="code">' + (s.qrCode || s.id) + '</span>' +
-                                        '</div>';
-                                });
+                            const pageItems = studentQRs.slice(i, i + cardCount);
+                            html += '<div class="page">';
+                            pageItems.forEach(s => {
+                                html += '<div class="card">' +
+                                    '<img src="' + s.qrUrl + '" alt="QR">' +
+                                    '<h3>' + s.name + '</h3>' +
+                                    '<p>' + s.class + '</p>' +
+                                    '<span class="type">' + (s.type || 'siswa') + '</span>' +
+                                    '<span class="code">' + (s.qrCode || s.id) + '</span>' +
+                                    '</div>';
+                            });
                             html += '</div>';
                         }
                         return html;
                     })()}
     </body>
-
     </html>
     `);
                 printWindow.document.close();
+
+                // Allow images to load
                 printWindow.onload = function () {
-                    // Give images a moment to render
-                    setTimeout(() => printWindow.print(), 500);
+                    setTimeout(() => {
+                        printWindow.focus();
+                        printWindow.print();
+                        // printWindow.close(); // Optional: close after print
+                    }, 1000);
                 };
 
             } catch (e) {
@@ -1066,7 +1177,9 @@ function downloadSingle(data, name, room) {
                 alert('Gagal generate QR: ' + e.message);
             } finally {
                 btn.innerHTML = originalText;
-                btn.style.pointerEvents = 'auto';
+                btn.disabled = false;
+                progressEl.textContent = 'Selesai!';
+                setTimeout(() => progressEl.style.display = 'none', 3000);
             }
         }
     </script>
