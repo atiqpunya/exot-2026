@@ -574,11 +574,40 @@ qrn1, pass123, Ustadz Ali, alquran
             if (confirm('Hapus?')) { deleteStudent(id); updateStats(); loadStudentList(); }
         }
 
-        function clearAllStudents() {
-            if (confirm('Hapus SEMUA siswa & guru?')) {
-                localStorage.setItem('exot_students', '[]');
-                updateStats();
-                loadStudentList();
+        async function clearAllStudents() {
+            if (confirm('⚠️ PERINGATAN: Apakah Anda yakin ingin menghapus SEMUA data siswa?\nData yang dihapus tidak dapat dikembalikan!')) {
+                const btn = document.querySelector('button[onclick="clearAllStudents()"]'); // Assuming there's a button calling this
+                if (btn) {
+                    btn.innerHTML = '⏳ Deleting...';
+                    btn.disabled = true;
+                }
+
+                try {
+                    // Update Local
+                    saveStudents([]);
+
+                    // Force Cloud Sync Immediately
+                    alert('⏳ Sedang menghapus data dari server cloud (Google Sheets)...\nMohon tunggu hingga selesai.');
+
+                    const result = await window.googleSheetsAPI.syncToCloud();
+
+                    if (result && !result.error) {
+                        alert('✅ Data berhasil dihapus permanen!');
+                    } else {
+                        throw new Error(result.error || 'Gagal sinkronisasi ke cloud');
+                    }
+
+                } catch (e) {
+                    alert('⚠️ Data lokal terhapus, namun gagal menghapus di cloud: ' + e.message + '\nData mungkin kembali saat reload.');
+                    console.error(e);
+                } finally {
+                    updateStats();
+                    loadStudentList();
+                    if (btn) {
+                        btn.innerHTML = '🗑️ Hapus Semua';
+                        btn.disabled = false;
+                    }
+                }
             }
         }
 

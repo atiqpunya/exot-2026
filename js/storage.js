@@ -215,7 +215,7 @@ function saveToFirebase(path, data) { // Keeping name for compatibility, but act
           updateSyncStatus('offline');
         });
     }
-  }, 2000); // 2 second debounce
+  }, 3000); // 3 second debounce to bundle rapid changes
 }
 
 // ========================================
