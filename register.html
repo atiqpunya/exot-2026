@@ -769,11 +769,12 @@ qrn1, pass123, Ustadz Ali, alquran
             btn.disabled = true;
 
             try {
-                const result = await window.googleSheetsAPI.syncToCloud();
-                if (result && !result.error) {
-                    alert('✅ Data berhasil disimpan ke Google Sheets!');
+                // Use Firebase Upload
+                const result = await window.firebaseService.uploadLocalData();
+                if (result) {
+                    alert('✅ Data berhasil disimpan ke Firebase!');
                 } else {
-                    throw new Error(result.error || 'Unknown error');
+                    throw new Error('Gagal upload sebagian data');
                 }
             } catch (e) {
                 alert('❌ Gagal menyimpan: ' + e.message);
@@ -793,9 +794,11 @@ qrn1, pass123, Ustadz Ali, alquran
             btn.disabled = true;
 
             try {
-                const success = await window.googleSheetsAPI.syncFromCloud();
+                // Use Firebase Manual Pull
+                const success = await window.firebaseService.syncFromCloud();
                 if (success) {
-                    alert('✅ Data berhasil diambil dari Google Sheets!');
+                    alert('✅ Data berhasil diambil dari Firebase!');
+                    location.reload(); // Refresh to show new data
                 } else {
                     throw new Error('Gagal mengambil data');
                 }
@@ -1302,8 +1305,8 @@ function downloadSingle(data, name, room) {
     <!-- Footer Credit -->
 
 
-    <script src="js/google-sheets-api.js"></script>
-    <!-- <script type="module" src="js/firebase-config.js"></script> -->
+    <script type="module" src="js/firebase-config.js"></script>
+    <script type="module" src="js/firebase-service.js"></script>
 </body>
 
 </html>

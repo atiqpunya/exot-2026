@@ -61,22 +61,22 @@ function initStorage() {
     localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(DEFAULT_SETTINGS));
   }
 
-  // GOOGLE SHEETS SYNC LISTENERS
-  const setupGoogleSync = () => {
-    if (window.googleSheetsAPI) {
-      console.log('📊 Google Sheets API initialized');
-      // Update sync status to online
-      updateSyncStatus('online');
+  // FIREBASE SYNC LISTENERS
+  const setupFirebaseSync = () => {
+    // Wait for firebaseService to be available (it's a module, might load later)
+    const checkService = setInterval(() => {
+      if (window.firebaseService) {
+        clearInterval(checkService);
+        console.log('🔥 Firebase Service initialized');
+        updateSyncStatus('online'); // Assume online if loaded
 
-      // Perform initial sync from cloud (optional, or manual)
-      window.googleSheetsAPI.syncFromCloud().then(success => {
-        if (success) console.log('✅ Initial sync successful');
-        else console.warn('⚠️ Initial sync failed or no data');
-      });
-    }
+        // Listen for real-time updates
+        window.firebaseService.initSync();
+      }
+    }, 500);
   };
 
-  setupGoogleSync();
+  setupFirebaseSync();
   // Auto-heal: Ensure all students have a qrCode
   let modified = false;
   const students = JSON.parse(localStorage.getItem(STORAGE_KEYS.STUDENTS)) || [];
@@ -195,27 +195,49 @@ function updateSyncStatus(status) {
   }
 }
 
-// Helper to save to Google Sheets (Throttled)
+// Helper to save to Firebase (Throttled)
 let syncTimeout;
-function saveToFirebase(path, data) { // Keeping name for compatibility, but acts as saveToGoogleSheets
-  // We ignore 'path' and 'data' args because Google Sheets syncs EVERYTHING at once in this MVP
+function saveToFirebase(path, data) {
+  // path example: 'students' -> mapped to 'exot_students' internally or by service
+  // But wait, storage.js calls it with 'students', 'users', etc.
+  // firebaseService.save expects 'exot_students' or 'students'?
+  // Let's check firebase-service.js... it expects the full key like 'exot_students'?
+  // No, I implemented it to take 'exot_students' and strip 'exot_'.
+  // Actually, let's look at storage.js calls:
+  // saveToFirebase('students', students)
+  // saveToFirebase('users', users)
+
+  // My firebase-service.js: 
+  // async save(key, data) { ... const cleanKey = key.replace('exot_', ''); ... }
+  // So if I pass 'students', cleanKey is 'students'. content saved to doc 'students'.
+  // If I pass 'exot_students', cleanKey is 'students'. content saved to doc 'students'.
+  // Consistent.
 
   clearTimeout(syncTimeout);
   updateSyncStatus('syncing');
 
   syncTimeout = setTimeout(() => {
-    if (window.googleSheetsAPI) {
-      window.googleSheetsAPI.syncToCloud()
+    if (window.firebaseService) {
+      // We use the full storage key format for consistency with initSync
+      const fullKey = path.startsWith('exot_') ? path : `exot_${path}`;
+
+      // Get local timestamp
+      const ts = parseInt(localStorage.getItem(fullKey + '_timestamp') || Date.now());
+
+      window.firebaseService.save(fullKey, data, ts)
         .then(res => {
-          if (res && !res.error) updateSyncStatus('online');
+          if (res) updateSyncStatus('online');
           else updateSyncStatus('error');
         })
         .catch(err => {
           console.error(err);
           updateSyncStatus('offline');
         });
+    } else {
+      console.warn('Firebase service not ready');
+      updateSyncStatus('offline');
     }
-  }, 3000); // 3 second debounce to bundle rapid changes
+  }, 1000); // 1 second debounce
 }
 
 // ========================================
@@ -231,6 +253,9 @@ function getSettings() {
 
 function saveSettings(settings) {
   localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
+  // Track local update time
+  const ts = Date.now();
+  localStorage.setItem(STORAGE_KEYS.SETTINGS + '_timestamp', ts);
   saveToFirebase('settings', settings);
 }
 
@@ -534,6 +559,9 @@ function getClasses() {
 
 function saveClasses(classes) {
   localStorage.setItem(STORAGE_KEYS.CLASSES, JSON.stringify(classes));
+  // Track local update time
+  const ts = Date.now();
+  localStorage.setItem(STORAGE_KEYS.CLASSES + '_timestamp', ts);
   saveToFirebase('classes', classes);
 }
 
@@ -583,6 +611,9 @@ function getUsers() {
 
 function saveUsers(users) {
   localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+  // Track local update time
+  const ts = Date.now();
+  localStorage.setItem(STORAGE_KEYS.USERS + '_timestamp', ts);
   saveToFirebase('users', users);
 }
 
@@ -652,6 +683,9 @@ function getStudents() {
 
 function saveStudents(students) {
   localStorage.setItem(STORAGE_KEYS.STUDENTS, JSON.stringify(students));
+  // Track local update time
+  const ts = Date.now();
+  localStorage.setItem(STORAGE_KEYS.STUDENTS + '_timestamp', ts);
   saveToFirebase('students', students);
 }
 
@@ -793,6 +827,9 @@ function getExaminerRewards() {
 
 function saveExaminerRewards(rewards) {
   localStorage.setItem(STORAGE_KEYS.EXAMINER_REWARDS, JSON.stringify(rewards));
+  // Track local update time
+  const ts = Date.now();
+  localStorage.setItem(STORAGE_KEYS.EXAMINER_REWARDS + '_timestamp', ts);
   saveToFirebase('rewards', rewards);
 }
 

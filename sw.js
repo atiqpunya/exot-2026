@@ -12,7 +12,8 @@ const STATIC_ASSETS = [
     '/examiner-reward.html',
     '/scan-examiner.html',
     '/css/styles.css',
-    '/js/google-sheets-api.js',
+    '/js/firebase-config.js',
+    '/js/firebase-service.js',
     '/js/storage.js',
     '/img/logo-alwildan.png'
 ];
