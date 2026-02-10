@@ -1,5 +1,5 @@
-// EXOT Service Worker v1.2
-const CACHE_NAME = 'exot-v1.2';
+// EXOT Service Worker v1.3
+const CACHE_NAME = 'exot-v1.3';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
