@@ -361,9 +361,11 @@ qrn1, pass123, Ustadz Ali, alquran
                 // Hide restricted tabs for regular Panitia
                 if (document.getElementById('btnTabPanitia')) document.getElementById('btnTabPanitia').style.display = 'none';
                 if (document.getElementById('btnTabPenguji')) document.getElementById('btnTabPenguji').style.display = 'none';
-
-                // Also hide Stat Cards for Panitia/Penguji if desired, or keep them for visibility
             }
+
+            // Show content and update button
+            document.getElementById('mainContent').style.display = 'block';
+            if (document.getElementById('floatingBtn')) document.getElementById('floatingBtn').innerHTML = '🚪 Logout';
 
             // Initial load
             updateStats();
@@ -382,7 +384,9 @@ qrn1, pass123, Ustadz Ali, alquran
                     loadPanitiaList();
                     loadExaminerList();
                 }
-            }); loadClassList();
+            });
+
+            if (typeof loadClassList === 'function') loadClassList();
 
             document.getElementById('searchStudent').addEventListener('input', loadStudentList);
             document.getElementById('filterType').addEventListener('change', loadStudentList);
@@ -738,7 +742,7 @@ qrn1, pass123, Ustadz Ali, alquran
                     throw new Error(result.error || 'Unknown error');
                 }
             } catch (e) {
-                alert('❌ Gagal menyimpam: ' + e.message);
+                alert('❌ Gagal menyimpan: ' + e.message);
                 console.error(e);
             } finally {
                 btn.innerHTML = originalText;
