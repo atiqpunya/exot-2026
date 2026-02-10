@@ -769,6 +769,11 @@ qrn1, pass123, Ustadz Ali, alquran
             btn.disabled = true;
 
             try {
+                // Check if Firebase is ready
+                if (!window.firebaseService) {
+                    throw new Error("Firebase belum siap atau gagal dimuat.\nPeriksa koneksi internet Anda dan coba refresh halaman.");
+                }
+
                 // Use Firebase Upload
                 const result = await window.firebaseService.uploadLocalData();
                 if (result.success) {
