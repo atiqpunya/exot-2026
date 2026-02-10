@@ -1,6 +1,5 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { initializeApp } from "https://cdn.jsdelivr.net/npm/firebase@10.8.0/app/+esm";
+import { getFirestore, enableIndexedDbPersistence } from "https://cdn.jsdelivr.net/npm/firebase@10.8.0/firestore/+esm";
 
 // Your web app's Firebase configuration
 // (Restored from previous setup)

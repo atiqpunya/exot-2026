@@ -2,7 +2,7 @@
 // Menggantikan google-sheets-api.js
 
 import { db } from "./firebase-config.js";
-import { collection, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { collection, doc, setDoc, onSnapshot, getDoc } from "https://cdn.jsdelivr.net/npm/firebase@10.8.0/firestore/+esm";
 
 // Mapping localStorage keys to Firestore paths
 // Collection: "schools" -> Doc: "alwildan4" -> Subcollection: "data" -> Doc: [key]
