@@ -1,5 +1,5 @@
 
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxNhxnVd3a3hP_M_nm7X94t1Y6nqUU4akaMc5H2emzlG0sR6UFV9Szuucf5aY2n6UUsVA/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxUUexN0c4yfrQWNCWjP9IS1F_PpTaDn5OLZ-eJ4pJUIA8QNwbnhknlUhNsrri0GzhT/exec';
 
 /**
  * Generic fetch function for Google Apps Script
@@ -7,10 +7,10 @@ const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxNhxnVd3a3hP
 async function callSheetAPI(action, payload = null) {
     // Show sync status
     updateSyncStatus('syncing');
-    
+
     try {
         let response;
-        
+
         if (payload) {
             // POST request
             response = await fetch(GOOGLE_SCRIPT_URL, {
@@ -29,14 +29,14 @@ async function callSheetAPI(action, payload = null) {
         }
 
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        
+
         const data = await response.json();
-        
+
         if (data.error) throw new Error(data.error);
-        
+
         updateSyncStatus('online');
         return data;
-        
+
     } catch (error) {
         console.error('Sheet API Error:', error);
         updateSyncStatus('offline');
@@ -55,7 +55,7 @@ async function syncFromCloud() {
     if (data.students) localStorage.setItem('exot_students', JSON.stringify(data.students));
     if (data.classes) localStorage.setItem('exot_classes', JSON.stringify(data.classes));
     if (data.settings) localStorage.setItem('exot_settings', JSON.stringify(data.settings));
-    
+
     // Trigger update
     window.dispatchEvent(new Event('storage-update'));
     return true;
@@ -71,7 +71,7 @@ async function syncToCloud() {
         classes: JSON.parse(localStorage.getItem('exot_classes') || '[]'),
         settings: JSON.parse(localStorage.getItem('exot_settings') || '{}')
     };
-    
+
     return await callSheetAPI('sync', payload);
 }
 

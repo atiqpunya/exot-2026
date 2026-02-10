@@ -1,5 +1,5 @@
-// EXOT Service Worker v1.0
-const CACHE_NAME = 'exot-v1';
+// EXOT Service Worker v1.1
+const CACHE_NAME = 'exot-v1.1';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -12,6 +12,7 @@ const STATIC_ASSETS = [
     '/examiner-reward.html',
     '/scan-examiner.html',
     '/css/styles.css',
+    '/js/google-sheets-api.js',
     '/js/storage.js',
     '/img/logo-alwildan.png'
 ];

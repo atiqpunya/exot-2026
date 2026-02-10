@@ -95,6 +95,13 @@
                     <img id="rewardQR" src="" alt="Reward QR">
                 </div>
 
+                <div
+                    style="background: rgba(255,255,255,0.2); padding: 0.5rem; border-radius: 8px; margin-bottom: 1rem;">
+                    <p style="margin: 0; font-size: 0.9rem; opacity: 0.9;">Kode Manual:</p>
+                    <p id="rewardCodeDisplay"
+                        style="margin: 0; font-size: 2rem; font-weight: 800; letter-spacing: 2px;">-</p>
+                </div>
+
                 <p style="font-weight: 600; margin: 0;">Tunjukkan QR ini ke Panitia Utama</p>
                 <p style="opacity: 0.9;">untuk menukarkan souvenir</p>
 
@@ -222,6 +229,7 @@
 
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(reward.qrCode)}`;
             document.getElementById('rewardQR').src = qrUrl;
+            document.getElementById('rewardCodeDisplay').textContent = reward.qrCode;
 
             const downloadLink = document.getElementById('downloadReward');
             downloadLink.href = qrUrl;

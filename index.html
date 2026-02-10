@@ -222,7 +222,16 @@
             }
 
             // Check for redirect
-            const redirect = sessionStorage.getItem('loginRedirect');
+            // Check for redirect
+            let redirect = sessionStorage.getItem('loginRedirect');
+
+            // Validate redirect (Security & Bugfix)
+            if (redirect && redirect.includes('exot2026.com')) {
+                console.warn('Blocked invalid redirect to exot2026.com');
+                sessionStorage.removeItem('loginRedirect');
+                redirect = null;
+            }
+
             if (redirect) {
                 sessionStorage.removeItem('loginRedirect');
                 window.location.href = redirect;

@@ -191,8 +191,8 @@
                 await html5QrCode.start(
                     { facingMode: "environment" },
                     {
-                        fps: 10,
-                        qrbox: { width: 200, height: 200 }
+                        fps: 25, // Optimized for speed
+                        qrbox: { width: 250, height: 250 } // Larger scan area
                     },
                     (decodedText) => {
                         if (decodedText && decodedText !== lastScannedId) {

@@ -73,6 +73,16 @@ function generateId() {
   return 'EXOT-' + Date.now().toString(36) + '-' + Math.random().toString(36).substr(2, 9);
 }
 
+// Generate 5-char short code (A-Z, 0-9)
+function generateShortCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Removed I, O, 1, 0 to avoid confusion
+  let code = '';
+  for (let i = 0; i < 5; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
 // ========================================
 // Toast Notification System
 // ========================================
@@ -120,17 +130,34 @@ function showToast(message, type = 'info', duration = 3000) {
 // Sync Status Tracking
 // ========================================
 
+// Enhanced Sync Status with Auto-UI
 function updateSyncStatus(status) {
-  const indicator = document.getElementById('syncStatus');
-  if (!indicator) return;
+  let indicator = document.getElementById('syncStatus');
 
-  indicator.classList.remove('online', 'offline', 'syncing');
-  indicator.classList.add(status);
+  if (!indicator) {
+    indicator = document.createElement('div');
+    indicator.id = 'syncStatus';
+    indicator.style.cssText = 'position:fixed;bottom:20px;right:20px;background:white;padding:10px 20px;border-radius:30px;box-shadow:0 4px 20px rgba(0,0,0,0.1);display:flex;align-items:center;gap:10px;font-family:inherit;font-size:14px;z-index:9999;border:1px solid #e2e8f0;transition:all 0.3s ease;';
+    indicator.innerHTML = `<div class="sync-dot" style="width:10px;height:10px;border-radius:50%;background:#cbd5e1;transition:background-color 0.3s;"></div><span class="sync-text" style="font-weight:600;color:#475569;">Connecting...</span>`;
+    document.body.appendChild(indicator);
+  }
 
-  const textEl = indicator.querySelector('.sync-text');
-  if (textEl) {
-    const texts = { online: 'Online', offline: 'Offline', syncing: 'Syncing...' };
-    textEl.textContent = texts[status] || 'Unknown';
+  const colors = { online: '#22c55e', offline: '#ef4444', syncing: '#f59e0b', error: '#ef4444' };
+  const texts = { online: 'Terhubung', offline: 'Offline', syncing: 'Menyinkronkan...', error: 'Gagal Sync' };
+
+  const dot = indicator.querySelector('.sync-dot');
+  const text = indicator.querySelector('.sync-text');
+
+  if (dot) dot.style.backgroundColor = colors[status] || '#cbd5e1';
+  if (text) text.textContent = texts[status] || status;
+
+  // Visual feedback
+  if (status === 'syncing') {
+    if (dot) dot.style.boxShadow = `0 0 0 4px ${colors.syncing}30`;
+    indicator.style.borderColor = colors.syncing;
+  } else {
+    if (dot) dot.style.boxShadow = 'none';
+    indicator.style.borderColor = status === 'online' ? '#bbf7d0' : '#e2e8f0';
   }
 }
 
@@ -736,12 +763,22 @@ function generateExaminerReward(examinerId) {
     return { error: 'Reward sudah di-generate sebelumnya!' };
   }
 
+  // Generate unique short code
+  let shortCode;
+  let isUnique = false;
+  while (!isUnique) {
+    shortCode = generateShortCode();
+    if (!rewards.find(r => r.qrCode === shortCode)) {
+      isUnique = true;
+    }
+  }
+
   const reward = {
     id: 'REWARD-' + Date.now().toString(36),
     examinerId: examinerId,
     examinerName: examiner.name,
     subject: examiner.subject,
-    qrCode: 'REWARD-' + examinerId,
+    qrCode: shortCode, // Use short code for QR and manual input
     generatedAt: new Date().toISOString(),
     claimed: false,
     claimedAt: null
@@ -749,7 +786,7 @@ function generateExaminerReward(examinerId) {
 
   rewards.push(reward);
   saveExaminerRewards(rewards);
-  logActivity('reward_generate', `Generated reward for ${examiner.name}`);
+  logActivity('reward_generate', `Generated reward for ${examiner.name} (Code: ${shortCode})`);
   return reward;
 }
 

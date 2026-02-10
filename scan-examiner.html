@@ -100,7 +100,8 @@
                 <div style="margin-top: 1rem;">
                     <label class="form-label">Atau input manual:</label>
                     <div style="display: flex; gap: 0.5rem;">
-                        <input type="text" id="manualInput" class="form-input" placeholder="Kode reward...">
+                        <input type="text" id="manualInput" class="form-input" placeholder="Masukkan 5 kode karakter..."
+                            style="text-transform: uppercase;">
                         <button class="btn btn-secondary" onclick="claimManual()">Klaim</button>
                     </div>
                 </div>
@@ -176,11 +177,11 @@
                 await html5QrCode.start(
                     { facingMode: "environment" },
                     {
-                        fps: 10,
-                        qrbox: { width: 200, height: 200 }
+                        fps: 25, // Increased from 10
+                        qrbox: { width: 250, height: 250 } // Increased scan area
                     },
                     (decodedText) => {
-                        if (decodedText && decodedText.includes('REWARD')) {
+                        if (decodedText) {
                             processReward(decodedText);
                         }
                     },
