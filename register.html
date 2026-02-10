@@ -89,6 +89,18 @@
     </div>
 
     <main id="mainContent" class="container" style="padding: 1.5rem; display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <a href="index.html" class="btn btn-secondary">🏠 Home</a>
+                <h2 style="margin: 0; color: var(--text-primary);">Data Registrasi</h2>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <button class="btn btn-secondary" onclick="forceLoadCloud()" title="Ambil data dari Spreadsheet">☁️
+                    Load</button>
+                <button class="btn btn-primary" onclick="forceSaveCloud()" title="Simpan data ke Spreadsheet">💾
+                    Save</button>
+            </div>
+        </div>
         <!-- Stats -->
         <div class="grid grid-4 fade-in" style="margin-bottom: 1.5rem;">
             <div class="card stat-card">
@@ -689,6 +701,52 @@ qrn1, pass123, Ustadz Ali, alquran
           <button class="btn btn-sm btn-primary" onclick="downloadSingleQR('${item.id}', '${item.isStudent ? 'student' : 'examiner'}')">📥 Download</button>
         </div>
       `).join('');
+        }
+
+        // Force Cloud Operations
+        async function forceSaveCloud() {
+            const btn = document.querySelector('button[title="Simpan data ke Spreadsheet"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ Saving...';
+            btn.disabled = true;
+
+            try {
+                const result = await window.googleSheetsAPI.syncToCloud();
+                if (result && !result.error) {
+                    alert('✅ Data berhasil disimpan ke Google Sheets!');
+                } else {
+                    throw new Error(result.error || 'Unknown error');
+                }
+            } catch (e) {
+                alert('❌ Gagal menyimpam: ' + e.message);
+                console.error(e);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        async function forceLoadCloud() {
+            if (!confirm('Ini akan menimpa data lokal dengan data dari Cloud. Lanjutkan?')) return;
+
+            const btn = document.querySelector('button[title="Ambil data dari Spreadsheet"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ Loading...';
+            btn.disabled = true;
+
+            try {
+                const success = await window.googleSheetsAPI.syncFromCloud();
+                if (success) {
+                    alert('✅ Data berhasil diambil dari Google Sheets!');
+                } else {
+                    throw new Error('Gagal mengambil data');
+                }
+            } catch (e) {
+                alert('❌ Error: ' + e.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         }
 
         // Export QR by category
