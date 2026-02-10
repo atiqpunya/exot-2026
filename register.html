@@ -799,103 +799,105 @@ function downloadSingle(data, name, room) {
     });
     qrCode.download({ name: \`QR_\${name.replace(/\\s+/g, '_')}_\${room}\`, extension: "png" });
 }
-        </script>
+<\/script>
     </body>
 
 </html>`;
 
-const blob = new Blob([html], { type: 'text/html' });
-const a = document.createElement('a');
-a.href = URL.createObjectURL(blob);
-a.download = `EXOT_QR_${title.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.html`;
-document.body.appendChild(a);
-a.click();
-document.body.removeChild(a);
-}
+                const blob = new Blob([html], { type: 'text/html' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `EXOT_QR_${title.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.html`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
 
-// Handle restore from backup
-function handleRestore(event) {
-const file = event.target.files[0];
-if (!file) return;
+            // Handle restore from backup
+            function handleRestore(event) {
+                const file = event.target.files[0];
+                if (!file) return;
 
-const reader = new FileReader();
-reader.onload = function (e) {
-if (confirm('Ini akan mengganti semua data yang ada. Lanjutkan?')) {
-const result = restoreBackup(e.target.result);
-if (result.error) {
-alert('Error: ' + result.error);
-} else {
-alert('Data berhasil dipulihkan dari backup ' + result.date);
-location.reload();
-}
-}
-};
-reader.readAsText(file);
-event.target.value = '';
-}
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    if (confirm('Ini akan mengganti semua data yang ada. Lanjutkan?')) {
+                        const result = restoreBackup(e.target.result);
+                        if (result.error) {
+                            alert('Error: ' + result.error);
+                        } else {
+                            alert('Data berhasil dipulihkan dari backup ' + result.date);
+                            location.reload();
+                        }
+                    }
+                };
+                reader.readAsText(file);
+                event.target.value = '';
+            }
 
-// Print QR cards with paper size, card count options, and custom Logos
-async function printQRCards() {
-const students = getStudents();
-if (!students.length) {
-alert('Tidak ada data siswa!');
-return;
-}
+            // Print QR cards with paper size, card count options, and custom Logos
+            async function printQRCards() {
+                const students = getStudents();
+                if (!students.length) {
+                    alert('Tidak ada data siswa!');
+                    return;
+                }
 
-const btn = document.querySelector('div[onclick="printQRCards()"]');
-const originalText = btn.innerHTML;
-btn.innerHTML = '<h5>⏳ Generating QRs...</h5>
-<p>Mohon tunggu sebentar...</p>';
-btn.style.pointerEvents = 'none';
+                const btn = document.querySelector('div[onclick="printQRCards()"]');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<h5>⏳ Generating QRs...</h5><p>Mohon tunggu sebentar...</p>';
+                btn.style.pointerEvents = 'none';
 
-const paperSize = document.getElementById('printPaperSize').value;
-const cardCount = parseInt(document.getElementById('printCardCount').value);
+                const paperSize = document.getElementById('printPaperSize').value;
+                const cardCount = parseInt(document.getElementById('printCardCount').value);
 
-// Paper dimensions in mm
-const paperDims = {
-'A4': { width: 210, height: 297 },
-'A3': { width: 297, height: 420 }
-};
+                // Paper dimensions in mm
+                const paperDims = {
+                    'A4': { width: 210, height: 297 },
+                    'A3': { width: 297, height: 420 }
+                };
 
-// Grid layouts based on card count
-const gridLayouts = {
-4: { cols: 2, rows: 2 },
-6: { cols: 2, rows: 3 },
-8: { cols: 2, rows: 4 },
-9: { cols: 3, rows: 3 }
-};
+                // Grid layouts based on card count
+                const gridLayouts = {
+                    4: { cols: 2, rows: 2 },
+                    6: { cols: 2, rows: 3 },
+                    8: { cols: 2, rows: 4 },
+                    9: { cols: 3, rows: 3 }
+                };
 
-const paper = paperDims[paperSize];
-const grid = gridLayouts[cardCount];
+                const paper = paperDims[paperSize];
+                const grid = gridLayouts[cardCount];
 
-// QR size scales with card count
-const qrSize = cardCount <= 4 ? 300 : (cardCount <=6 ? 250 : 200); // Higher res for print const displaySize=cardCount
-    <=4 ? 120 : (cardCount <=6 ? 100 : 85); const fontSize=cardCount <=4 ? 14 : (cardCount <=6 ? 12 : 11); // Helper to
-    generate QR Data URI const generateQRDataUri=async (data)=> {
-    const qrCode = new QRCodeStyling({
-    width: qrSize,
-    height: qrSize,
-    type: "png",
-    data: data,
-    image: "img/logo-alwildan.png",
-    dotsOptions: { color: "#000", type: "rounded" },
-    backgroundOptions: { color: "#fff" },
-    imageOptions: { crossOrigin: "anonymous", margin: 10 }
-    });
-    const blob = await qrCode.getRawData('png');
-    return URL.createObjectURL(blob);
-    };
+                // QR size scales with card count
+                const qrSize = cardCount <= 4 ? 300 : (cardCount <= 6 ? 250 : 200);
+                const displaySize = cardCount <= 4 ? 120 : (cardCount <= 6 ? 100 : 85);
+                const fontSize = cardCount <= 4 ? 14 : (cardCount <= 6 ? 12 : 11);
 
-    try {
-    // Pre-generate all QRs (batching could be added for huge lists)
-    const studentQRs = [];
-    for (const s of students) {
-    const url = await generateQRDataUri(s.qrCode || s.id);
-    studentQRs.push({ ...s, qrUrl: url });
-    }
+                // Helper to generate QR Data URI
+                const generateQRDataUri = async (data) => {
+                    const qrCode = new QRCodeStyling({
+                        width: qrSize,
+                        height: qrSize,
+                        type: "png",
+                        data: data,
+                        image: "img/logo-alwildan.png",
+                        dotsOptions: { color: "#000", type: "rounded" },
+                        backgroundOptions: { color: "#fff" },
+                        imageOptions: { crossOrigin: "anonymous", margin: 10 }
+                    });
+                    const blob = await qrCode.getRawData('png');
+                    return URL.createObjectURL(blob);
+                };
 
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
+                try {
+                    // Pre-generate all QRs (batching could be added for huge lists)
+                    const studentQRs = [];
+                    for (const s of students) {
+                        const url = await generateQRDataUri(s.qrCode || s.id);
+                        studentQRs.push({ ...s, qrUrl: url });
+                    }
+
+                    const printWindow = window.open('', '_blank');
+                    printWindow.document.write(`
     <!DOCTYPE html>
     <html>
 
@@ -1033,47 +1035,48 @@ const qrSize = cardCount <= 4 ? 300 : (cardCount <=6 ? 250 : 200); // Higher res
 
     <body>
         ${(() => {
-        let html = '';
-        for (let i = 0; i < studentQRs.length; i +=cardCount) { const pageItems=studentQRs.slice(i, i + cardCount); html
-            +='<div class="page">' ; pageItems.forEach(s=> {
-            html += '<div class="card">' +
-                '<img src="' + s.qrUrl + '" alt="QR">' +
-                '<h3>' + s.name + '</h3>' +
-                '<p>' + s.class + '</p>' +
-                '<span class="type">' + (s.type || 'siswa') + '</span>' +
-                '<span class="code">' + (s.qrCode || s.id) + '</span>' +
-                '</div>';
-            });
-            html += '</div>';
-            }
-            return html;
-            })()}
+                            let html = '';
+                            for (let i = 0; i < studentQRs.length; i += cardCount) {
+                                const pageItems = studentQRs.slice(i, i + cardCount); html
+                                    += '<div class="page">'; pageItems.forEach(s => {
+                                        html += '<div class="card">' +
+                                            '<img src="' + s.qrUrl + '" alt="QR">' +
+                                            '<h3>' + s.name + '</h3>' +
+                                            '<p>' + s.class + '</p>' +
+                                            '<span class="type">' + (s.type || 'siswa') + '</span>' +
+                                            '<span class="code">' + (s.qrCode || s.id) + '</span>' +
+                                            '</div>';
+                                    });
+                                html += '</div>';
+                            }
+                            return html;
+                        })()}
     </body>
 
     </html>
     `);
-    printWindow.document.close();
-    printWindow.onload = function () {
-    // Give images a moment to render
-    setTimeout(() => printWindow.print(), 500);
-    };
+                    printWindow.document.close();
+                    printWindow.onload = function () {
+                        // Give images a moment to render
+                        setTimeout(() => printWindow.print(), 500);
+                    };
 
-    } catch (e) {
-    console.error(e);
-    alert('Gagal generate QR: ' + e.message);
-    } finally {
-    btn.innerHTML = originalText;
-    btn.style.pointerEvents = 'auto';
-    }
-    }
-    </script>
-    <!-- Footer Credit -->
-    <div class="footer-credit">
-        Dibuat oleh <a href="#">Muhammad Atiq Qoidul Islam</a>
-    </div>
+                } catch (e) {
+                    console.error(e);
+                    alert('Gagal generate QR: ' + e.message);
+                } finally {
+                    btn.innerHTML = originalText;
+                    btn.style.pointerEvents = 'auto';
+                }
+            }
+        </script>
+        <!-- Footer Credit -->
+        <div class="footer-credit">
+            Dibuat oleh <a href="#">Muhammad Atiq Qoidul Islam</a>
+        </div>
 
-    <script src="js/google-sheets-api.js"></script>
-    <!-- <script type="module" src="js/firebase-config.js"></script> -->
+        <script src="js/google-sheets-api.js"></script>
+        <!-- <script type="module" src="js/firebase-config.js"></script> -->
     </body>
 
-    </html>
+</html>

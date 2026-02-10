@@ -66,6 +66,29 @@ function initStorage() {
   };
 
   setupGoogleSync();
+  // Auto-heal: Ensure all students have a qrCode
+  let modified = false;
+  const students = JSON.parse(localStorage.getItem(STORAGE_KEYS.STUDENTS)) || [];
+
+  students.forEach(s => {
+    if (!s.qrCode) {
+      let shortCode;
+      let isUnique = false;
+      while (!isUnique) {
+        shortCode = generateShortCode();
+        if (!students.find(existing => existing.qrCode === shortCode)) {
+          isUnique = true;
+        }
+      }
+      s.qrCode = shortCode;
+      modified = true;
+    }
+  });
+
+  if (modified) {
+    localStorage.setItem(STORAGE_KEYS.STUDENTS, JSON.stringify(students));
+    saveToFirebase('students', students);
+  }
 }
 
 // Generate unique ID
