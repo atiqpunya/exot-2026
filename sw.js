@@ -1,5 +1,5 @@
-// EXOT Service Worker v1.4
-const CACHE_NAME = 'exot-v1.4';
+// EXOT Service Worker v1.5
+const CACHE_NAME = 'exot-v1.5';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -9,13 +9,16 @@ const STATIC_ASSETS = [
     '/exam-english.html',
     '/exam-arabic.html',
     '/exam-alquran.html',
-    '/examiner-reward.html',
     '/scan-examiner.html',
+    '/examiner-reward.html',
     '/css/styles.css',
+    '/js/storage.js',
     '/js/firebase-config.js',
     '/js/firebase-service.js',
-    '/js/storage.js',
-    '/img/logo-alwildan.png'
+    '/js/firebase-app.js',
+    '/js/firebase-firestore.js',
+    '/img/logo-alwildan.png',
+    '/manifest.json'
 ];
 
 // Install - cache static assets
