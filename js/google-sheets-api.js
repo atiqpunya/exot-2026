@@ -56,8 +56,8 @@ async function syncFromCloud() {
     if (data.classes) localStorage.setItem('exot_classes', JSON.stringify(data.classes));
     if (data.settings) localStorage.setItem('exot_settings', JSON.stringify(data.settings));
 
-    // Trigger update
-    window.dispatchEvent(new Event('storage-update'));
+    // Force UI refresh
+    location.reload();
     return true;
 }
 
