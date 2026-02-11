@@ -14,7 +14,9 @@ const firebaseConfig = {
 // Initialize Firebase
 if (typeof firebase === 'undefined') {
     console.error("CRITICAL: Firebase SDK not loaded!");
-    alert("Firebase failed to load. Please refresh the page.");
+    console.error("CRITICAL: Firebase SDK not loaded!");
+    // Silent failure - allow app to work with cached data if possible
+    console.warn("Firebase failed to load. functionality may be limited.");
 } else {
     try {
         firebase.initializeApp(firebaseConfig);

@@ -83,15 +83,7 @@ function initStorage() {
 
   students.forEach(s => {
     if (!s.qrCode) {
-      let shortCode;
-      let isUnique = false;
-      while (!isUnique) {
-        shortCode = generateShortCode();
-        if (!students.find(existing => existing.qrCode === shortCode)) {
-          isUnique = true;
-        }
-      }
-      s.qrCode = shortCode;
+      s.qrCode = generateUniqueShortCode(students);
       modified = true;
     }
   });
@@ -99,6 +91,22 @@ function initStorage() {
   if (modified) {
     localStorage.setItem(STORAGE_KEYS.STUDENTS, JSON.stringify(students));
     saveToFirebase('students', students);
+  }
+
+  // Auto-heal: Ensure all USERS have a qrCode
+  let modifiedUsers = false;
+  const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS)) || [];
+
+  users.forEach(u => {
+    if (!u.qrCode) {
+      u.qrCode = generateUniqueShortCode(users);
+      modifiedUsers = true;
+    }
+  });
+
+  if (modifiedUsers) {
+    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+    saveToFirebase('users', users);
   }
 }
 
@@ -115,6 +123,21 @@ function generateShortCode() {
     code += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return code;
+}
+
+// Helper for unique short code
+function generateUniqueShortCode(collection) {
+  let shortCode;
+  let isUnique = false;
+  let attempts = 0;
+  while (!isUnique && attempts < 1000) {
+    shortCode = generateShortCode();
+    if (!collection.find(item => item.qrCode === shortCode)) {
+      isUnique = true;
+    }
+    attempts++;
+  }
+  return shortCode || generateId().substr(0, 5); // Fallback
 }
 
 // ========================================
@@ -633,6 +656,7 @@ function addUser(username, password, name, role, subject = null, assignedClasses
     role: role, // panitia_utama, penguji
     subject: subject, // english, arabic, alquran (for penguji)
     assignedClasses: assignedClasses,
+    qrCode: generateUniqueShortCode(users), // Generate 5-digit code
     createdAt: new Date().toISOString()
   };
 
@@ -1033,6 +1057,60 @@ function exportToCSV() {
   document.body.removeChild(link);
 
   logActivity('export', 'Exported results to CSV');
+}
+
+function exportCanvaCSV() {
+  const students = getStudents();
+  const panitia = getUsers().filter(u => u.role === 'panitia');
+  const penguji = getUsers().filter(u => u.role === 'penguji');
+
+  // Canva Bulk Create Header
+  // We need: Name, Role (or Class), Code (for QR)
+  const headers = ['Name', 'Role', 'Code'];
+
+  const rows = [];
+
+  // Add Students
+  students.forEach(s => {
+    rows.push([
+      s.name,
+      s.class, // Role is Class for students
+      s.qrCode || s.id // The 5-digit code or ID
+    ]);
+  });
+
+  // Add Panitia
+  panitia.forEach(p => {
+    rows.push([
+      p.name,
+      p.subject || 'Panitia',
+      p.qrCode || p.id
+    ]);
+  });
+
+  // Add Penguji
+  penguji.forEach(e => {
+    rows.push([
+      e.name,
+      e.subject || 'Penguji',
+      e.qrCode || e.id
+    ]);
+  });
+
+  // CSV content
+  const csvContent = [headers, ...rows]
+    .map(e => e.map(i => `"${i}"`).join(',')) // Quote fields to handle commas in names
+    .join('\n');
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `EXOT_Canva_Bulk_${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  logActivity('export', 'Exported Canva Bulk CSV');
 }
 
 // ========================================

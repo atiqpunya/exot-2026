@@ -166,13 +166,14 @@ Siti Aminah, 7B
             <div id="panitiaTab" class="tab-content">
                 <h4 style="margin-bottom: 1rem;">👔 Bulk Input Panitia</h4>
                 <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.9rem;">
-                    Format: <code>Nama, Jabatan/Unit</code>
+                    Format: <code>Username, Password, Nama, Jabatan/Unit</code>
                 </p>
-                <textarea id="bulkPanitia" class="bulk-textarea" placeholder="Budi Santoso, Ketua Panitia
-Siti Rahma, Sekretaris
+                <textarea id="bulkPanitia" class="bulk-textarea" placeholder="panitia1, pass123, Budi Santoso, Ketua Panitia
+sekretaris, securepass, Siti Rahma, Sekretaris
 ..."></textarea>
                 <div style="display: flex; gap: 1rem; margin-top: 1rem;">
                     <button class="btn btn-primary" onclick="importPanitia()">📥 Import Panitia</button>
+                    <button class="btn btn-danger" onclick="clearAllPanitia()">🗑️ Hapus Semua</button>
                 </div>
                 <div id="panitiaImportResult" class="alert alert-success" style="display: none; margin-top: 1rem;">
                 </div>
@@ -316,6 +317,12 @@ qrn1, pass123, Ustadz Ali, alquran
                             <p>Download data peserta ke file CSV</p>
                         </div>
 
+                        <div class="export-option" onclick="exportCanvaCSV()"
+                            style="margin-top: 10px; border-left: 4px solid #8b5cf6;">
+                            <h5 style="color: #8b5cf6;">🎨 Export Canva CSV</h5>
+                            <p>Format khusus untuk Bulk Create di Canva (Nama, Role, Kode)</p>
+                        </div>
+
                         <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
                             <h5 style="margin-bottom: 0.75rem;">💾 Backup & Restore</h5>
 
@@ -418,9 +425,10 @@ qrn1, pass123, Ustadz Ali, alquran
         function updateStats() {
             const students = getStudents();
             const examiners = getExaminers();
+            const panitia = getPanitia();
             document.getElementById('statTotal').textContent = students.length;
             document.getElementById('statSiswa').textContent = students.filter(s => s.type === 'siswa').length;
-            document.getElementById('statPanitia').textContent = students.filter(s => s.type === 'panitia').length;
+            document.getElementById('statPanitia').textContent = panitia.length;
             document.getElementById('statPenguji').textContent = examiners.length;
         }
 
@@ -451,21 +459,53 @@ qrn1, pass123, Ustadz Ali, alquran
             if (!input) return alert('Masukkan data!');
 
             const lines = input.split('\n').filter(l => l.trim());
-            let count = 0;
+            let count = 0, errors = [];
 
             lines.forEach(line => {
                 const parts = line.split(',').map(p => p.trim());
-                if (parts[0]) {
-                    // Type is panitia
-                    addStudent(parts[0], parts[1] || 'Panitia', 'panitia');
-                    count++;
+                if (parts.length >= 3) {
+                    const username = parts[0];
+                    const password = parts[1];
+                    const name = parts[2];
+                    const jabatan = parts[3] || 'Panitia';
+
+                    // Use 'panitia' role. Store Jabatan in 'subject' property temporarily as it's unused for panitia
+                    const result = addUser(username, password, name, 'panitia', jabatan);
+                    if (result.error) errors.push(`${parts[0]}: ${result.error}`);
+                    else count++;
+                } else if (parts[0]) {
+                    errors.push(`${parts[0]}: Format salah (Butuh: Username, Password, Nama)`);
                 }
             });
 
             document.getElementById('bulkPanitia').value = '';
-            showResult('panitiaImportResult', `✅ ${count} panitia berhasil diimport!`);
+            let msg = `✅ ${count} panitia berhasil ditambahkan!`;
+            if (errors.length) msg += `<br>⚠️ ${errors.join(', ')}`;
+            showResult('panitiaImportResult', msg);
             updateStats();
             loadPanitiaList();
+        }
+
+        function clearAllPanitia() {
+            if (confirm('⚠️ PERINGATAN: Apakah Anda yakin ingin menghapus SEMUA panitia?\n\nIni akan menghapus:\n1. Panitia dengan login (Baru)\n2. Panitia tanpa login (Lama)\n\nData tidak dapat dikembalikan!')) {
+                // 1. Delete from Users (New System)
+                const allUsers = getUsers();
+                const panitiaUsers = allUsers.filter(u => u.role === 'panitia' && u.id !== 'admin-001');
+                panitiaUsers.forEach(u => deleteUser(u.id));
+
+                // 2. Delete from Students (Legacy System)
+                const students = getStudents();
+                const initialCount = students.length;
+                const newStudents = students.filter(s => s.type !== 'panitia' && s.type !== 'guru');
+
+                if (students.length !== newStudents.length) {
+                    saveStudents(newStudents);
+                }
+
+                updateStats();
+                loadPanitiaList();
+                alert('✅ Data panitia berhasil dibersihkan.');
+            }
         }
 
         function importExaminers() {
@@ -538,11 +578,15 @@ qrn1, pass123, Ustadz Ali, alquran
       `;
         }
 
+        function getPanitia() {
+            return getUsers().filter(u => u.role === 'panitia');
+        }
+
         function loadPanitiaList() {
-            let panitia = getStudents().filter(s => s.type === 'panitia' || s.type === 'guru'); // Include legacy 'guru'
+            let panitia = getPanitia();
             const search = document.getElementById('searchPanitia').value.toLowerCase();
 
-            if (search) panitia = panitia.filter(s => s.name.toLowerCase().includes(search) || s.class.toLowerCase().includes(search));
+            if (search) panitia = panitia.filter(s => s.name.toLowerCase().includes(search) || (s.subject && s.subject.toLowerCase().includes(search)));
 
             document.getElementById('panitiaCount').textContent = panitia.length;
             const container = document.getElementById('panitiaList');
@@ -555,17 +599,16 @@ qrn1, pass123, Ustadz Ali, alquran
             container.innerHTML = `
         <div class="table-container">
           <table class="table">
-            <thead><tr><th>No</th><th>Nama</th><th>Jabatan/Unit</th><th>Jenis</th><th>Aksi</th></tr></thead>
+            <thead><tr><th>Username</th><th>Nama</th><th>Jabatan</th><th>Aksi</th></tr></thead>
             <tbody>
               ${panitia.slice(0, 50).map((s, i) => `
                 <tr>
-                  <td>${i + 1}</td>
+                  <td><strong>${s.username}</strong><br><small style="color:var(--text-muted)">${s.password}</small></td>
                   <td>${s.name}</td>
-                  <td>${s.class}</td>
-                  <td><span class="badge badge-info">Panitia</span></td>
+                  <td>${s.subject || '-'}</td>
                   <td>
-                    <button class="btn btn-sm btn-secondary" onclick="downloadSingleQR('${s.id}', 'student')">📱</button>
-                    <button class="btn btn-sm btn-danger" onclick="delStudent('${s.id}')">🗑️</button>
+                    <button class="btn btn-sm btn-secondary" onclick="downloadSingleQR('${s.id}', 'panitia')">📱</button>
+                    <button class="btn btn-sm btn-danger" onclick="delPanitia('${s.id}')">🗑️</button>
                   </td>
                 </tr>
               `).join('')}
@@ -573,6 +616,10 @@ qrn1, pass123, Ustadz Ali, alquran
           </table>
         </div>
       `;
+        }
+
+        function delPanitia(id) {
+            if (confirm('Hapus panitia ini?')) { deleteUser(id); updateStats(); loadPanitiaList(); }
         }
 
         function delStudent(id) {
@@ -706,8 +753,9 @@ qrn1, pass123, Ustadz Ali, alquran
                 if (!e) return;
                 data = e.qrCode || e.id;
                 name = e.name;
-                room = e.subject;
-                label = 'penguji';
+                // For panitia, subject is Jabatan
+                room = e.subject || (e.role === 'panitia' ? 'Panitia' : '-');
+                label = e.role === 'panitia' ? 'panitia' : 'penguji';
             }
 
             const qrCode = new QRCodeStyling({
@@ -715,7 +763,7 @@ qrn1, pass123, Ustadz Ali, alquran
                 height: 300,
                 type: "png",
                 data: data,
-                image: "img/logo-alwildan.png",
+                // image: "img/logo-alwildan.png", // REMOVED
                 dotsOptions: {
                     color: "#000",
                     type: "rounded"
@@ -725,7 +773,7 @@ qrn1, pass123, Ustadz Ali, alquran
                 },
                 imageOptions: {
                     crossOrigin: "anonymous",
-                    margin: 10
+                    margin: 0
                 }
             });
 
@@ -738,10 +786,11 @@ qrn1, pass123, Ustadz Ali, alquran
             if (!search) return;
 
             const students = getStudents().filter(s => s.name.toLowerCase().includes(search));
-            const examiners = getExaminers().filter(e => e.name.toLowerCase().includes(search));
+            // Search all users (examiners and panitia)
+            const users = getUsers().filter(u => u.name.toLowerCase().includes(search) && (u.role === 'penguji' || u.role === 'panitia'));
 
             const container = document.getElementById('individualQRResult');
-            const all = [...students.map(s => ({ ...s, isStudent: true })), ...examiners.map(e => ({ ...e, isExaminer: true }))];
+            const all = [...students.map(s => ({ ...s, isStudent: true })), ...users.map(e => ({ ...e, isUser: true }))];
 
             if (!all.length) {
                 container.innerHTML = '<p style="color: var(--text-muted);">Tidak ditemukan</p>';
@@ -753,10 +802,10 @@ qrn1, pass123, Ustadz Ali, alquran
           <div>
             <strong>${item.name}</strong>
             <span class="badge badge-${item.isStudent ? 'success' : 'info'}" style="margin-left: 0.5rem;">
-              ${item.isStudent ? (item.type || 'siswa') : 'penguji'}
+              ${item.isStudent ? (item.type || 'siswa') : (item.role || 'User')}
             </span>
           </div>
-          <button class="btn btn-sm btn-primary" onclick="downloadSingleQR('${item.id}', '${item.isStudent ? 'student' : 'examiner'}')">📥 Download</button>
+          <button class="btn btn-sm btn-primary" onclick="downloadSingleQR('${item.id}', '${item.isStudent ? 'student' : (item.role === 'panitia' ? 'panitia' : 'examiner')}')">📥 Download</button>
         </div>
       `).join('');
         }
@@ -824,8 +873,10 @@ qrn1, pass123, Ustadz Ali, alquran
             if (category === 'all') {
                 const students = getStudents();
                 const examiners = getExaminers();
+                const panitia = getPanitia();
                 items = [
                     ...students.map(s => ({ name: s.name, room: s.class, type: s.type || 'siswa', qr: s.qrCode })),
+                    ...panitia.map(p => ({ name: p.name, room: p.subject || 'Panitia', type: 'panitia', qr: p.id })),
                     ...examiners.map(e => ({ name: e.name, room: e.subject, type: 'penguji', qr: e.id }))
                 ];
                 title = 'Semua Data';
@@ -833,8 +884,7 @@ qrn1, pass123, Ustadz Ali, alquran
                 items = getStudents().filter(s => s.type !== 'guru').map(s => ({ name: s.name, room: s.class, type: 'siswa', qr: s.qrCode }));
                 title = 'Siswa';
             } else if (category === 'panitia') {
-                items = getStudents().filter(s => s.type === 'panitia' || s.type === 'guru')
-                    .map(s => ({ name: s.name, room: s.class, type: 'panitia', qr: s.qrCode }));
+                items = getPanitia().map(s => ({ name: s.name, room: s.subject || 'Panitia', type: 'panitia', qr: s.id }));
                 title = 'Panitia';
             } else if (category === 'penguji') {
                 items = getExaminers().map(e => ({ name: e.name, room: e.subject, type: 'penguji', qr: e.id }));
@@ -846,11 +896,39 @@ qrn1, pass123, Ustadz Ali, alquran
                 return;
             }
 
+            // Implement Batching Prompt
+            const total = items.length;
+            const range = prompt(`Total data: ${total}.\nMasukkan rentang yang ingin digenerate (contoh: 1-50):`, `1-${total > 50 ? 50 : total}`);
+
+            if (!range) return; // Users cancelled
+
+            const match = range.match(/^(\d+)-(\d+)$/);
+            if (!match) {
+                alert('Format salah! Gunakan format angka-angka (contoh: 1-50)');
+                return;
+            }
+
+            const start = parseInt(match[1]);
+            const end = parseInt(match[2]);
+
+            if (start < 1 || end < start || start > total) {
+                alert(`Rentang tidak valid! Harus antara 1 sampai ${total}.`);
+                return;
+            }
+
+            // Slice items (convert 1-based index to 0-based)
+            const slicedItems = items.slice(start - 1, end);
+
+            // Warn if too many
+            if (slicedItems.length > 100 && !confirm(`Anda akan generate ${slicedItems.length} QR code sekaligus. Ini mungkin membuat browser berat/hang. Lanjutkan?`)) {
+                return;
+            }
+
             // Convert items to JSON for the template
-            const itemsJson = JSON.stringify(items);
+            const itemsJson = JSON.stringify(slicedItems);
 
             const html = `<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>EXOT QR - ${title}</title>
+<html><head><meta charset="UTF-8"><title>EXOT QR - ${title} (${start}-${end})</title>
 <script src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"><\/script>
     <style>
         * {
@@ -919,10 +997,18 @@ qrn1, pass123, Ustadz Ali, alquran
 
         .card .code {
             display: block;
-            font-size: 10px;
-            margin-top: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin: 8px 0;
             font-family: monospace;
-            color: #555;
+            color: #333;
+        }
+
+        .card .meta {
+            font-size: 10px;
+            color: #666;
+            margin-bottom: 5px;
         }
 
         .siswa {
@@ -975,30 +1061,19 @@ qrn1, pass123, Ustadz Ali, alquran
     </head>
 
     <body>
-        <h1>📝 EXOT QR Codes - ${title}</h1>
-        <p class="info">Total: ${items.length} | Generated: ${new Date().toLocaleString('id-ID')}</p>
+        <h1>📝 EXOT QR Codes - ${title} (${start}-${end})</h1>
+        <p class="info">Total: ${slicedItems.length} (from ${total}) | Generated: ${new Date().toLocaleString('id-ID')}</p>
         <div class="grid" id="grid"></div>
 
         <script>
 const items = ${itemsJson};
 const grid = document.getElementById('grid');
 
-items.forEach((item, index) => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    
-    // Create container for QR
-    const qrDiv = document.createElement('div');
-    qrDiv.className = 'qr-container';
-    qrDiv.id = 'qr-' + index;
-    
-    card.appendChild(qrDiv);
-    card.innerHTML += \`
-        <h3>\${item.name}</h3>
-        <p>\${item.room}</p>
-        <span class="type \${item.type}">\${item.type}</span>
-        <span class="code">\${item.qr}</span>
-        <br>
+    card.innerHTML = \`
+        <h3 style="font-size:14px; margin-bottom:8px;">\${item.name.toUpperCase()}</h3>
+        <div id="qr-\${index}" class="qr-container"></div>
+        <div class="code">\${item.qr.split('').join(' ')}</div>
+        <div class="meta">\${item.room} <span class="type \${item.type}">\${item.type}</span></div>
         <button class="download-btn" onclick="downloadSingle('\${item.qr}', '\${item.name}', '\${item.room}')">📥 Download PNG</button>
     \`;
     grid.appendChild(card);
@@ -1009,10 +1084,10 @@ items.forEach((item, index) => {
         height: 130,
         type: "svg",
         data: item.qr,
-        image: "https://exot-2026.vercel.app/img/logo-alwildan.png", // Use absolute URL if possible, or relative if local
+        // image: "img/logo-alwildan.png", // REMOVED
         dotsOptions: { color: "#000", type: "rounded" },
         backgroundOptions: { color: "#fff" },
-        imageOptions: { crossOrigin: "anonymous", margin: 5 }
+        imageOptions: { crossOrigin: "anonymous", margin: 0 }
     });
     qrCode.append(document.getElementById('qr-' + index));
 });
@@ -1023,10 +1098,10 @@ function downloadSingle(data, name, room) {
         height: 300,
         type: "png",
         data: data,
-        image: "https://exot-2026.vercel.app/img/logo-alwildan.png",
+        // image: "img/logo-alwildan.png", // REMOVED
         dotsOptions: { color: "#000", type: "rounded" },
         backgroundOptions: { color: "#fff" },
-        imageOptions: { crossOrigin: "anonymous", margin: 10 }
+        imageOptions: { crossOrigin: "anonymous", margin: 0 }
     });
     qrCode.download({ name: \`QR_\${name.replace(/\\s+/g, '_')}_\${room}\`, extension: "png" });
 }
@@ -1137,10 +1212,10 @@ function downloadSingle(data, name, room) {
                         height: qrGenSize,
                         type: "png", // PNG is better for compatibility than SVG in blob url for print
                         data: data,
-                        image: "img/logo-alwildan.png",
+                        // image: "img/logo-alwildan.png", // REMOVED
                         dotsOptions: { color: "#000", type: "rounded" },
                         backgroundOptions: { color: "#fff" },
-                        imageOptions: { crossOrigin: "anonymous", margin: isHD ? 20 : 10 }
+                        imageOptions: { crossOrigin: "anonymous", margin: isHD ? 20 : 0 }
                     });
 
                     qrCode.getRawData('png').then(blob => {
@@ -1223,12 +1298,13 @@ function downloadSingle(data, name, room) {
             }
 
             .card h3 {
-                font-size: ${fontSize}px;
-                margin-bottom: 4px;
+                font-size: ${fontSize + 4}px;
+                margin-bottom: 8px;
                 word-break: break-word;
-                line-height: 1.3;
-                color: #0f172a;
-                font-weight: 700;
+                line-height: 1.2;
+                color: #000;
+                font-weight: 800;
+                text-transform: uppercase;
                 max-width: 100%;
             }
 
@@ -1240,22 +1316,23 @@ function downloadSingle(data, name, room) {
 
             .card .type {
                 display: inline-block;
-                padding: 3px 10px;
-                border-radius: 20px;
-                font-size: ${fontSize - 3}px;
-                margin-top: 6px;
-                background: #f1f5f9;
-                color: #475569;
+                padding: 2px 8px;
+                border-radius: 4px;
+                font-size: ${fontSize - 4}px;
+                margin-left: 5px;
+                border: 1px solid #ccc;
+                color: #444;
                 font-weight: 600;
                 text-transform: uppercase;
-                letter-spacing: 0.5px;
             }
 
             .card .code {
-                font-size: 9px;
-                margin-top: 5px;
+                font-size: 20px;
+                margin: 5px 0 0 0;
                 font-family: monospace;
-                color: #94a3b8;
+                font-weight: 800;
+                color: #000;
+                letter-spacing: 4px;
             }
 
             @media print {
@@ -1271,20 +1348,20 @@ function downloadSingle(data, name, room) {
                             const pageItems = studentQRs.slice(i, i + cardCount);
                             html += '<div class="page">';
                             pageItems.forEach(s => {
+                                const code = (s.qrCode || s.id).split('').join(' ');
                                 html += '<div class="card">' +
-                                    '<img src="' + s.qrUrl + '" alt="QR">' +
                                     '<h3>' + s.name + '</h3>' +
-                                    '<p>' + s.class + '</p>' +
-                                    '<span class="type">' + (s.type || 'siswa') + '</span>' +
-                                    '<span class="code">' + (s.qrCode || s.id) + '</span>' +
+                                    '<img src="' + s.qrUrl + '" alt="QR">' +
+                                    '<div class="code">' + code + '</div>' +
+                                    '<p>' + s.class + '<span class="type">' + (s.type || 'siswa') + '</span></p>' +
                                     '</div>';
                             });
                             html += '</div>';
                         }
                         return html;
                     })()}
-    </body>
-    </html>
+    </body >
+    </html >
     `);
                 printWindow.document.close();
 
@@ -1321,8 +1398,8 @@ function downloadSingle(data, name, room) {
     <script src="js/firebase-firestore-compat.js"></script
 
     <!-- App Scripts (Compat Mode) -->
-    <script src="js/firebase-config.js?v=2.3"></script>
-    <script src="js/firebase-service.js?v=2.3"></script>
+    <script src="js/firebase-config.js?v=2.5"></script>
+    <script src="js/firebase-service.js?v=2.5"></script>
 </body>
 
 </html>
