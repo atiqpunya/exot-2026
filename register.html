@@ -1084,6 +1084,10 @@ qrn1, pass123, Ustadz Ali, alquran
 const items = ${itemsJson};
 const grid = document.getElementById('grid');
 
+items.forEach((item, index) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    
     card.innerHTML = \`
         <h3 style="font-size:14px; margin-bottom:8px;">\${item.name.toUpperCase()}</h3>
         <div id="qr-\${index}" class="qr-container"></div>
