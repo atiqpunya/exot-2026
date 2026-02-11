@@ -235,211 +235,215 @@ qrn1, pass123, Ustadz Ali, alquran
                             </select>
                         </div>
                     </div>
-                    <div style="margin-bottom: 1rem;">
-                        <label style="font-size: 0.85rem; margin-bottom: 0.5rem; display: block;">Isi Soal
-                            (Teks)</label>
-                        <textarea id="questionContent" class="form-input" rows="5"
-                            placeholder="Tuliskan soal ujian di sini..."></textarea>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="font-size: 0.85rem; margin-bottom: 0.5rem; display: block;">Link File Soal (PDF /
+                        Drive)</label>
+                    <input type="text" id="questionContent" class="form-input"
+                        placeholder="Paste link PDF atau Google Drive di sini..." required>
+                    <small style="color: var(--text-muted); display: block; margin-top: 0.25rem;">Pastikan link bisa
+                        diakses publik (Anyone with the link)</small>
+                </div>
+                <button class="btn btn-primary" onclick="submitQuestion()">💾 Simpan Soal</button>
+            </div>
+
+            <div style="margin-top: 2rem; border-top: 1px dashed var(--border-color); padding-top: 1rem;">
+                <h4 style="margin-bottom: 1rem;">📋 Daftar Soal Tersimpan</h4>
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                    <select id="filterQuestionRoom" class="form-input form-select" style="width: auto;"
+                        onchange="loadQuestionList()">
+                        <option value="all">Semua Ruangan</option>
+                    </select>
+                    <select id="filterQuestionSubject" class="form-input form-select" style="width: auto;"
+                        onchange="loadQuestionList()">
+                        <option value="all">Semua Mapel</option>
+                        <option value="english">English</option>
+                        <option value="arabic">Arabic</option>
+                        <option value="alquran">Al-Quran</option>
+                    </select>
+                </div>
+                <!-- Fixed height container for list -->
+                <div id="questionList" style="max-height: 400px; overflow-y: auto;"></div>
+            </div>
+        </div>
+
+        <!-- Ruangan Tab -->
+        <div id="ruanganTab" class="tab-content">
+            <h4 style="margin-bottom: 1rem;">🏫 Kelola Ruangan</h4>
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                <input type="text" id="newClassName" class="form-input" placeholder="Nama ruangan baru..."
+                    style="flex: 1;">
+                <button class="btn btn-primary" onclick="addNewClass()">+ Tambah</button>
+            </div>
+            <div id="classList" style="margin-top: 1rem;"></div>
+
+            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                <h4>✏️ Edit Nama Ruangan</h4>
+                <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap;">
+                    <select id="editClassOld" class="form-input form-select" style="width: auto;"></select>
+                    <span style="align-self: center;">→</span>
+                    <input type="text" id="editClassNew" class="form-input" placeholder="Nama baru"
+                        style="width: 150px;">
+                    <button class="btn btn-secondary" onclick="editClass()">Simpan</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Tab -->
+        <div id="exportTab" class="tab-content">
+            <h4 style="margin-bottom: 1rem;">📦 Export & Backup</h4>
+
+            <div class="grid grid-2" style="gap: 1.5rem;">
+                <div>
+                    <h5 style="margin-bottom: 0.75rem;">📄 Download QR sebagai HTML</h5>
+
+                    <div class="export-option" onclick="exportQR('all')">
+                        <h5>📦 Semua Data</h5>
+                        <p>Download QR semua siswa, guru, dan penguji</p>
                     </div>
-                    <button class="btn btn-primary" onclick="submitQuestion()">💾 Simpan Soal</button>
+
+                    <div class="export-option" onclick="exportQR('siswa')">
+                        <h5>👨‍🎓 Hanya Siswa</h5>
+                        <p>Download QR code semua siswa saja</p>
+                    </div>
+
+                    <div class="export-option" onclick="exportQR('panitia')">
+                        <h5>👔 Hanya Panitia</h5>
+                        <p>Download QR code semua panitia saja</p>
+                    </div>
+
+                    <div class="export-option" onclick="exportQR('penguji')">
+                        <h5>📋 Hanya Penguji</h5>
+                        <p>Download QR code semua penguji saja</p>
+                    </div>
+
+                    <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                        <h5 style="margin-bottom: 0.75rem;">🖨️ Print QR Cards</h5>
+                        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
+                            <select id="printPaperSize" class="form-input form-select" style="width: auto;">
+                                <option value="A4">A4 (210×297mm)</option>
+                                <option value="A3">A3 (297×420mm)</option>
+                            </select>
+                            <select id="printCardCount" class="form-input form-select" style="width: auto;">
+                                <option value="4">4 kartu/halaman (2×2)</option>
+                                <option value="6">6 kartu/halaman (2×3)</option>
+                                <option value="8">8 kartu/halaman (2×4)</option>
+                                <option value="9">9 kartu/halaman (3×3)</option>
+                            </select>
+                        </div>
+                        <div class="export-option" onclick="togglePrintSettings()">
+                            <h5>🖨️ Cetak QR Cards</h5>
+                            <p>Cetak kartu QR sesuai pengaturan</p>
+                        </div>
+
+                        <div id="printSettings"
+                            style="display: none; background: var(--bg-surface); padding: 1rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); margin-top: 0.5rem;">
+                            <h6 style="margin-bottom: 0.5rem;">Pengaturan Batch</h6>
+                            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                <div style="flex: 1;">
+                                    <label style="font-size: 0.8rem;">Mulai dari</label>
+                                    <input type="number" id="printStart" class="form-input" value="1" min="1">
+                                </div>
+                                <div style="flex: 1;">
+                                    <label style="font-size: 0.8rem;">Jumlah</label>
+                                    <input type="number" id="printLimit" class="form-input" value="50" min="1">
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 0.5rem;">
+                                <label class="form-control">
+                                    <input type="checkbox" id="printHighQuality" checked>
+                                    High Quality (HD)
+                                </label>
+                            </div>
+                            <button class="btn btn-primary btn-sm" style="width: 100%;" onclick="printQRCards()">🖨️
+                                Generate & Print</button>
+                            <div id="printProgress"
+                                style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-muted); display: none;">
+                                Siap...</div>
+                        </div>
+                    </div>
                 </div>
 
                 <div>
-                    <h4 style="margin-bottom: 1rem;">📋 Daftar Soal Tersimpan</h4>
-                    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
-                        <select id="filterQuestionRoom" class="form-input form-select" style="width: auto;"
-                            onchange="loadQuestionList()">
-                            <option value="all">Semua Ruangan</option>
-                        </select>
-                        <select id="filterQuestionSubject" class="form-input form-select" style="width: auto;"
-                            onchange="loadQuestionList()">
-                            <option value="all">Semua Mapel</option>
-                            <option value="english">English</option>
-                            <option value="arabic">Arabic</option>
-                            <option value="alquran">Al-Quran</option>
-                        </select>
-                    </div>
-                    <div id="questionList"></div>
-                </div>
-            </div>
+                    <div
+                        style="background: var(--bg-surface); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+                        <h5 style="margin-bottom: 1rem; color: var(--text-primary);">🛠️ Data Center</h5>
 
-            <!-- Ruangan Tab -->
-            <div id="ruanganTab" class="tab-content">
-                <h4 style="margin-bottom: 1rem;">🏫 Kelola Ruangan</h4>
-                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
-                    <input type="text" id="newClassName" class="form-input" placeholder="Nama ruangan baru..."
-                        style="flex: 1;">
-                    <button class="btn btn-primary" onclick="addNewClass()">+ Tambah</button>
-                </div>
-                <div id="classList" style="margin-top: 1rem;"></div>
-
-                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
-                    <h4>✏️ Edit Nama Ruangan</h4>
-                    <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap;">
-                        <select id="editClassOld" class="form-input form-select" style="width: auto;"></select>
-                        <span style="align-self: center;">→</span>
-                        <input type="text" id="editClassNew" class="form-input" placeholder="Nama baru"
-                            style="width: 150px;">
-                        <button class="btn btn-secondary" onclick="editClass()">Simpan</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Export Tab -->
-            <div id="exportTab" class="tab-content">
-                <h4 style="margin-bottom: 1rem;">📦 Export & Backup</h4>
-
-                <div class="grid grid-2" style="gap: 1.5rem;">
-                    <div>
-                        <h5 style="margin-bottom: 0.75rem;">📄 Download QR sebagai HTML</h5>
-
-                        <div class="export-option" onclick="exportQR('all')">
-                            <h5>📦 Semua Data</h5>
-                            <p>Download QR semua siswa, guru, dan penguji</p>
-                        </div>
-
-                        <div class="export-option" onclick="exportQR('siswa')">
-                            <h5>👨‍🎓 Hanya Siswa</h5>
-                            <p>Download QR code semua siswa saja</p>
-                        </div>
-
-                        <div class="export-option" onclick="exportQR('panitia')">
-                            <h5>👔 Hanya Panitia</h5>
-                            <p>Download QR code semua panitia saja</p>
-                        </div>
-
-                        <div class="export-option" onclick="exportQR('penguji')">
-                            <h5>📋 Hanya Penguji</h5>
-                            <p>Download QR code semua penguji saja</p>
-                        </div>
-
-                        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
-                            <h5 style="margin-bottom: 0.75rem;">🖨️ Print QR Cards</h5>
-                            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
-                                <select id="printPaperSize" class="form-input form-select" style="width: auto;">
-                                    <option value="A4">A4 (210×297mm)</option>
-                                    <option value="A3">A3 (297×420mm)</option>
-                                </select>
-                                <select id="printCardCount" class="form-input form-select" style="width: auto;">
-                                    <option value="4">4 kartu/halaman (2×2)</option>
-                                    <option value="6">6 kartu/halaman (2×3)</option>
-                                    <option value="8">8 kartu/halaman (2×4)</option>
-                                    <option value="9">9 kartu/halaman (3×3)</option>
-                                </select>
+                        <!-- Row 1: Quick Actions -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem;">
+                            <div class="export-option" onclick="exportToCSV()"
+                                style="margin: 0; padding: 10px; text-align: center;">
+                                <h6 style="margin: 0; font-size: 0.9rem;">📊 Full CSV</h6>
+                                <small style="font-size: 0.75rem;">All Backup</small>
                             </div>
-                            <div class="export-option" onclick="togglePrintSettings()">
-                                <h5>🖨️ Cetak QR Cards</h5>
-                                <p>Cetak kartu QR sesuai pengaturan</p>
-                            </div>
-
-                            <div id="printSettings"
-                                style="display: none; background: var(--bg-surface); padding: 1rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); margin-top: 0.5rem;">
-                                <h6 style="margin-bottom: 0.5rem;">Pengaturan Batch</h6>
-                                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
-                                    <div style="flex: 1;">
-                                        <label style="font-size: 0.8rem;">Mulai dari</label>
-                                        <input type="number" id="printStart" class="form-input" value="1" min="1">
-                                    </div>
-                                    <div style="flex: 1;">
-                                        <label style="font-size: 0.8rem;">Jumlah</label>
-                                        <input type="number" id="printLimit" class="form-input" value="50" min="1">
-                                    </div>
-                                </div>
-                                <div style="margin-bottom: 0.5rem;">
-                                    <label class="form-control">
-                                        <input type="checkbox" id="printHighQuality" checked>
-                                        High Quality (HD)
-                                    </label>
-                                </div>
-                                <button class="btn btn-primary btn-sm" style="width: 100%;" onclick="printQRCards()">🖨️
-                                    Generate & Print</button>
-                                <div id="printProgress"
-                                    style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-muted); display: none;">
-                                    Siap...</div>
+                            <div class="export-option" onclick="createBackup()"
+                                style="margin: 0; padding: 10px; text-align: center;">
+                                <h6 style="margin: 0; font-size: 0.9rem;">💾 Backup JSON</h6>
+                                <small style="font-size: 0.75rem;">Save Data</small>
                             </div>
                         </div>
-                    </div>
 
-                    <div>
+                        <!-- Row 2: Canva Export -->
                         <div
-                            style="background: var(--bg-surface); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
-                            <h5 style="margin-bottom: 1rem; color: var(--text-primary);">🛠️ Data Center</h5>
-
-                            <!-- Row 1: Quick Actions -->
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem;">
-                                <div class="export-option" onclick="exportToCSV()"
-                                    style="margin: 0; padding: 10px; text-align: center;">
-                                    <h6 style="margin: 0; font-size: 0.9rem;">📊 Full CSV</h6>
-                                    <small style="font-size: 0.75rem;">All Backup</small>
-                                </div>
-                                <div class="export-option" onclick="createBackup()"
-                                    style="margin: 0; padding: 10px; text-align: center;">
-                                    <h6 style="margin: 0; font-size: 0.9rem;">💾 Backup JSON</h6>
-                                    <small style="font-size: 0.75rem;">Save Data</small>
-                                </div>
+                            style="background: #fdf4ff; border: 1px solid #e879f9; border-radius: 8px; padding: 10px; margin-bottom: 10px;">
+                            <h6 style="margin: 0 0 8px 0; color: #9333ea; font-size: 0.9rem;">🎨 Canva Export (Bulk)
+                            </h6>
+                            <div style="display: flex; gap: 15px; margin-bottom: 8px; flex-wrap: wrap;">
+                                <label
+                                    style="cursor: pointer; font-size: 0.8rem; display: flex; align-items: center;"><input
+                                        type="checkbox" id="checkStudent" checked style="margin-right:4px;">
+                                    Student</label>
+                                <label
+                                    style="cursor: pointer; font-size: 0.8rem; display: flex; align-items: center;"><input
+                                        type="checkbox" id="checkExaminer" checked style="margin-right:4px;">
+                                    Examiner</label>
+                                <label
+                                    style="cursor: pointer; font-size: 0.8rem; display: flex; align-items: center;"><input
+                                        type="checkbox" id="checkCommittee" checked style="margin-right:4px;">
+                                    Committee</label>
                             </div>
+                            <button class="btn btn-sm" style="width: 100%; background: #9333ea; color: white;"
+                                onclick="exportCanvaCSV()">⬇️ Download CSV</button>
+                        </div>
 
-                            <!-- Row 2: Canva Export -->
-                            <div
-                                style="background: #fdf4ff; border: 1px solid #e879f9; border-radius: 8px; padding: 10px; margin-bottom: 10px;">
-                                <h6 style="margin: 0 0 8px 0; color: #9333ea; font-size: 0.9rem;">🎨 Canva Export (Bulk)
-                                </h6>
-                                <div style="display: flex; gap: 15px; margin-bottom: 8px; flex-wrap: wrap;">
-                                    <label
-                                        style="cursor: pointer; font-size: 0.8rem; display: flex; align-items: center;"><input
-                                            type="checkbox" id="checkStudent" checked style="margin-right:4px;">
-                                        Student</label>
-                                    <label
-                                        style="cursor: pointer; font-size: 0.8rem; display: flex; align-items: center;"><input
-                                            type="checkbox" id="checkExaminer" checked style="margin-right:4px;">
-                                        Examiner</label>
-                                    <label
-                                        style="cursor: pointer; font-size: 0.8rem; display: flex; align-items: center;"><input
-                                            type="checkbox" id="checkCommittee" checked style="margin-right:4px;">
-                                        Committee</label>
-                                </div>
-                                <button class="btn btn-sm" style="width: 100%; background: #9333ea; color: white;"
-                                    onclick="exportCanvaCSV()">⬇️ Download CSV</button>
-                            </div>
-
-                            <!-- Row 3: HTML QR Export -->
-                            <div style="margin-bottom: 10px;">
-                                <h6 style="margin-bottom: 5px; font-size: 0.9rem;">📄 Export QR (HTML)</h6>
-                                <div style="display: flex; gap: 5px;">
-                                    <select id="exportHtmlCategory" class="form-input"
-                                        style="padding: 6px; font-size: 0.85rem;">
-                                        <option value="all">Semua Data</option>
-                                        <option value="siswa">Hanya Siswa</option>
-                                        <option value="panitia">Hanya Panitia</option>
-                                        <option value="penguji">Hanya Penguji</option>
-                                    </select>
-                                    <button class="btn btn-primary btn-sm"
-                                        onclick="exportQR(document.getElementById('exportHtmlCategory').value)">Go</button>
-                                </div>
-                            </div>
-
-                            <!-- Restore Link -->
-                            <div style="text-align: center; margin-top: 10px;">
-                                <small style="cursor: pointer; text-decoration: underline; color: var(--primary);"
-                                    onclick="document.getElementById('restoreFile').click()">📥 Restore from Backup
-                                    File</small>
+                        <!-- Row 3: HTML QR Export -->
+                        <div style="margin-bottom: 10px;">
+                            <h6 style="margin-bottom: 5px; font-size: 0.9rem;">📄 Export QR (HTML)</h6>
+                            <div style="display: flex; gap: 5px;">
+                                <select id="exportHtmlCategory" class="form-input"
+                                    style="padding: 6px; font-size: 0.85rem;">
+                                    <option value="all">Semua Data</option>
+                                    <option value="siswa">Hanya Siswa</option>
+                                    <option value="panitia">Hanya Panitia</option>
+                                    <option value="penguji">Hanya Penguji</option>
+                                </select>
+                                <button class="btn btn-primary btn-sm"
+                                    onclick="exportQR(document.getElementById('exportHtmlCategory').value)">Go</button>
                             </div>
                         </div>
-                        <p>Pulihkan data dari file backup</p>
-                    </div>
-                    <input type="file" id="restoreFile" accept=".json" style="display: none;"
-                        onchange="handleRestore(event)">
-                </div>
 
-                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
-                    <h5 style="margin-bottom: 0.75rem;">🔍 Download QR Individual</h5>
-                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                        <input type="text" id="searchQR" class="form-input" placeholder="Cari nama..." style="flex: 1;">
-                        <button class="btn btn-secondary" onclick="searchAndShowQR()">Cari</button>
+                        <!-- Restore Link -->
+                        <div style="text-align: center; margin-top: 10px;">
+                            <small style="cursor: pointer; text-decoration: underline; color: var(--primary);"
+                                onclick="document.getElementById('restoreFile').click()">📥 Restore from Backup
+                                File</small>
+                        </div>
                     </div>
-                    <div id="individualQRResult" style="margin-top: 1rem;"></div>
+                    <p>Pulihkan data dari file backup</p>
                 </div>
+                <input type="file" id="restoreFile" accept=".json" style="display: none;"
+                    onchange="handleRestore(event)">
             </div>
+
+            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                <h5 style="margin-bottom: 0.75rem;">🔍 Download QR Individual</h5>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <input type="text" id="searchQR" class="form-input" placeholder="Cari nama..." style="flex: 1;">
+                    <button class="btn btn-secondary" onclick="searchAndShowQR()">Cari</button>
+                </div>
+                <div id="individualQRResult" style="margin-top: 1rem;"></div>
+            </div>
+        </div>
         </div>
         </div>
         </div>
@@ -494,6 +498,106 @@ qrn1, pass123, Ustadz Ali, alquran
             document.getElementById('searchStudent').addEventListener('input', loadStudentList);
             document.getElementById('filterType').addEventListener('change', loadStudentList);
         });
+
+        // ==========================================
+        // QUESTION MANAGEMENT (SOAL UJIAN)
+        // ==========================================
+
+        function loadQuestionRooms() {
+            const classes = getClasses();
+            const qRoom = document.getElementById('questionRoom');
+            const fRoom = document.getElementById('filterQuestionRoom');
+
+            if (qRoom) {
+                const current = qRoom.value;
+                qRoom.innerHTML = classes.map(c => `<option value="${c}">${c}</option>`).join('');
+                if (current && classes.includes(current)) qRoom.value = current;
+                else if (classes.length > 0) qRoom.value = classes[0];
+            }
+            if (fRoom) {
+                const current = fRoom.value;
+                fRoom.innerHTML = '<option value="all">Semua Ruangan</option>' + classes.map(c => `<option value="${c}">${c}</option>`).join('');
+                fRoom.value = current;
+            }
+        }
+
+        function submitQuestion() {
+            const subject = document.getElementById('questionSubject').value;
+            const room = document.getElementById('questionRoom').value;
+            const content = document.getElementById('questionContent').value.trim();
+
+            if (!content) return alert('Link soal tidak boleh kosong!');
+
+            // Basic URL validation
+            if (!content.startsWith('http')) {
+                if (!confirm('Link sepertinya tidak valid (tidak diawali http/https). Tetap simpan?')) return;
+            }
+
+            addQuestion(room, subject, content); // Using storage.js function
+
+            document.getElementById('questionContent').value = '';
+            alert('✅ Link Soal berhasil disimpan!');
+            loadQuestionList();
+        }
+
+        function removeQuestion(id) {
+            if (confirm('Hapus soal ini?')) {
+                deleteQuestion(id); // Using storage.js function
+                loadQuestionList();
+            }
+        }
+
+        function loadQuestionList() {
+            const fRoom = document.getElementById('filterQuestionRoom').value;
+            const fSubject = document.getElementById('filterQuestionSubject').value;
+
+            let questions = getQuestions();
+
+            if (fRoom !== 'all') questions = questions.filter(q => q.room === fRoom);
+            if (fSubject !== 'all') questions = questions.filter(q => q.subject === fSubject);
+
+            const container = document.getElementById('questionList');
+
+            if (!questions.length) {
+                container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 1rem;">Belum ada soal tersimpan</p>';
+                return;
+            }
+            container.innerHTML = 'Wait...'; // placeholder
+
+            // Group by room then subject
+            const grouped = {};
+            questions.forEach(q => {
+                const key = `${q.room} - ${q.subject.toUpperCase()}`;
+                if (!grouped[key]) grouped[key] = [];
+                grouped[key].push(q);
+            });
+
+            let html = '';
+            for (const [group, items] of Object.entries(grouped)) {
+                html += `
+                    <div class="card" style="margin-bottom: 1rem; border-left: 4px solid var(--primary);">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                            <h5 style="margin: 0;">${group}</h5>
+                            <span class="badge badge-info">${items.length} Soal</span>
+                        </div>
+                        <div style="max-height: 200px; overflow-y: auto; background: var(--bg-surface); padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border-color);">
+                            ${items.map(q => `
+                                <div style="margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px dashed var(--border-color);">
+                                    <div style="font-size: 0.9rem; margin-bottom: 0.25rem;">
+                                        <a href="${q.content}" target="_blank" style="color: var(--primary); text-decoration: underline;">📄 Buka Link</a>
+                                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top:2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${q.content}</div>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <button class="btn btn-sm btn-danger" onclick="removeQuestion('${q.id}')" style="font-size: 0.7rem; padding: 2px 6px;">Hapus</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
 
         function toggleAuth() {
             if (isLoggedIn()) { logout(); window.location.href = 'index.html'; }
