@@ -236,6 +236,35 @@ qrn1, pass123, Ustadz Ali, alquran
                         </div>
                     </div>
                 </div>
+
+                <!-- Bulk Upload Section -->
+                <div class="card"
+                    style="background: var(--bg-surface); padding: 1.5rem; margin-bottom: 1.5rem; border-left: 4px solid var(--accent);">
+                    <h5 style="margin-top: 0;">📤 Bulk Upload PDF</h5>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+                        Upload banyak file sekaligus. Sistem akan menargetkan siswa secara otomatis.<br>
+                        <strong>Format Nama File:</strong> <code>SUBJECT-RUANGAN-NAMA SISWA.pdf</code><br>
+                        Contoh: <code>ENGLISH-7A-AHMAD FAUZI.pdf</code>
+                    </p>
+
+                    <div id="dropZone"
+                        style="border: 2px dashed var(--border-color); border-radius: 8px; padding: 2rem; text-align: center; cursor: pointer; transition: all 0.2s;"
+                        ondragover="event.preventDefault(); this.style.borderColor='var(--primary)';"
+                        ondragleave="this.style.borderColor='var(--border-color)';" ondrop="handleDrop(event)">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">📂</div>
+                        <p style="margin: 0;">Drag & Drop file PDF di sini</p>
+                        <p style="font-size: 0.8rem; color: var(--text-muted);">atau</p>
+                        <button class="btn btn-sm btn-secondary"
+                            onclick="document.getElementById('fileInput').click()">Pilih File</button>
+                        <input type="file" id="fileInput" multiple accept="application/pdf" style="display: none;"
+                            onchange="handleFiles(this.files)">
+                    </div>
+
+                    <div id="uploadProgress" style="margin-top: 1rem; display: none;">
+                        <h6 style="margin-bottom: 0.5rem;">Upload Progress:</h6>
+                        <div id="progressList" style="max-height: 150px; overflow-y: auto;"></div>
+                    </div>
+                </div>
                 <div style="margin-bottom: 1rem;">
                     <label style="font-size: 0.85rem; margin-bottom: 0.5rem; display: block;">Link File Soal (PDF /
                         Drive)</label>
@@ -1600,11 +1629,111 @@ function downloadSingle(data, name, room) {
 
     <!-- Firebase Compat SDK (Local) -->
     <script src="js/firebase-app-compat.js"></script>
-    <script src="js/firebase-firestore-compat.js"></script
+    <script src="js/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-storage-compat.js"></script>
 
     <!-- App Scripts (Compat Mode) -->
     <script src="js/firebase-config.js?v=2.5"></script>
     <script src="js/firebase-service.js?v=2.5"></script>
+    <!-- Bulk Upload Logic -->
+    <script>
+        function handleDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('dropZone').style.borderColor = 'var(--border-color)';
+            const files = e.dataTransfer.files;
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            const progressList = document.getElementById('progressList');
+            document.getElementById('uploadProgress').style.display = 'block';
+            progressList.innerHTML = '';
+
+            Array.from(files).forEach(file => processFile(file));
+        }
+
+        async function processFile(file) {
+            // Parse filename: SUBJECT-ROOM-NAME.pdf
+            // Example: ENGLISH-7A-AHMAD FAUZI.pdf
+            const cleanName = file.name.replace(/\.pdf$/i, ''); // case insensitive
+            const parts = cleanName.split('-');
+
+            if (parts.length < 3) {
+                updateProgress(file.name, 'error', 'Format nama file salah. Harus SUBJECT-ROOM-NAMA.pdf');
+                return;
+            }
+
+            const subject = parts[0].trim().toLowerCase();
+            const room = parts[1].trim();
+            const studentName = parts.slice(2).join('-').trim(); // Join rest in case name has hyphens
+
+            // Validate Subject
+            if (!['english', 'arabic', 'alquran'].includes(subject)) {
+                updateProgress(file.name, 'error', `Subject '${subject}' tidak valid. Gunakan english, arabic, atau alquran.`);
+                return;
+            }
+
+            updateProgress(file.name, 'uploading', 'Mengupload ke Firebase...');
+
+            try {
+                // Check if storage is available
+                if (!window.storage) {
+                    // Try to init if missing (fallback)
+                    if (firebase.storage) window.storage = firebase.storage();
+                    else throw new Error('Firebase Storage unavailable');
+                }
+
+                const ref = window.storage.ref().child('exam-questions/' + file.name);
+                const snapshot = await ref.put(file);
+                const downloadURL = await snapshot.ref.getDownloadURL();
+
+                // Save to database
+                // addQuestion(room, subject, content, type, targetStudent)
+                // content is downloadURL, type is 'pdf' (or 'link' pointing to pdf)
+
+                addQuestion(room, subject, downloadURL, 'pdf', studentName);
+
+                updateProgress(file.name, 'success', 'Berhasil diupload dan disimpan untuk siswa: ' + studentName);
+                loadQuestionList(); // Refresh list
+
+            } catch (error) {
+                console.error(error);
+                updateProgress(file.name, 'error', 'Gagal upload: ' + error.message);
+            }
+        }
+
+        function updateProgress(filename, status, message) {
+            const list = document.getElementById('progressList');
+            let item = document.getElementById('prog-' + filename);
+
+            if (!item) {
+                item = document.createElement('div');
+                item.id = 'prog-' + filename;
+                item.style.marginBottom = '8px';
+                item.style.padding = '8px';
+                item.style.borderRadius = '4px';
+                item.style.fontSize = '0.85rem';
+                list.appendChild(item);
+            }
+
+            let bg = '#f1f5f9';
+            let color = '#334155';
+            let icon = '⏳';
+
+            if (status === 'success') {
+                bg = '#dcfce7'; color = '#166534'; icon = '✅';
+            } else if (status === 'error') {
+                bg = '#fee2e2'; color = '#991b1b'; icon = '❌';
+            } else if (status === 'uploading') {
+                bg = '#e0f2fe'; color = '#075985'; icon = '⬆️';
+            }
+
+            item.style.background = bg;
+            item.style.color = color;
+            item.innerHTML = `<strong>${icon} ${filename}</strong><br>${message}`;
+        }
+    </script>
 </body>
 
 </html>

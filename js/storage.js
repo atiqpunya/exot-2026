@@ -825,7 +825,7 @@ function saveQuestions(questions) {
   saveToFirebase('questions', questions);
 }
 
-function addQuestion(room, subject, content, type = 'text') {
+function addQuestion(room, subject, content, type = 'text', targetStudent = null) {
   const questions = getQuestions();
   const newQuestion = {
     id: generateId(),
@@ -833,6 +833,7 @@ function addQuestion(room, subject, content, type = 'text') {
     subject: subject, // english, arabic, alquran
     content: content,
     type: type, // text, link, image
+    targetStudent: targetStudent, // null or student name
     createdAt: new Date().toISOString()
   };
   questions.push(newQuestion);
@@ -845,8 +846,21 @@ function deleteQuestion(id) {
   saveQuestions(questions);
 }
 
-function getQuestionsByRoomAndSubject(room, subject) {
-  return getQuestions().filter(q => q.room === room && q.subject === subject);
+function getQuestionsByRoomAndSubject(room, subject, studentName = null) {
+  const questions = getQuestions().filter(q => q.room === room && q.subject === subject);
+
+  if (studentName) {
+    // Prioritize student specific questions
+    const studentSpecific = questions.filter(q => q.targetStudent && q.targetStudent.toLowerCase() === studentName.toLowerCase());
+    if (studentSpecific.length > 0) return studentSpecific;
+
+    // If no student specific, return general questions (where targetStudent is null)
+    return questions.filter(q => !q.targetStudent);
+  }
+
+  // If no studentName provided (e.g. admin view), return all? or just general?
+  // For safety, return all so admin sees everything.
+  return questions;
 }
 
 

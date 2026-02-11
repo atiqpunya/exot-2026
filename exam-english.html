@@ -303,7 +303,10 @@
               ${students.map((s, i) => `
                 <tr>
                   <td>${i + 1}</td>
-                  <td><strong>${s.name}</strong></td>
+                  <td>
+                    <strong>${s.name}</strong>
+                    <button class="btn btn-xs btn-secondary" style="margin-left:5px; padding:2px 6px; font-size:10px;" onclick="viewStudentQuestion('${s.name}', '${s.class}')">📄 Lihat Soal</button>
+                  </td>
                   <td>${s.class}</td>
                   <td>
                     <div class="score-cell">
@@ -365,22 +368,34 @@
             loadExamQuestions();
         }
 
-        function loadExamQuestions() {
+        function loadExamQuestions(studentName = null) {
             const room = document.getElementById('examRoomSelect').value;
-            const questions = getQuestionsByRoomAndSubject(room, SUBJECT); // from storage.js
+            // Pass studentName to storage function (it handles priority)
+            const questions = getQuestionsByRoomAndSubject(room, SUBJECT, studentName);
             const container = document.getElementById('questionsList');
+
+            const title = studentName ? `Soal untuk ${studentName}` : `Soal Ruangan ${room}`;
+
+            // Optional: update header to show we are viewing specific student questions
+            // We can add a temporary header or just rely on the content
 
             if (!questions.length) {
                 container.innerHTML = `
                     <div style="text-align: center; padding: 2rem; border: 1px dashed var(--border-color); border-radius: 8px; color: var(--text-muted);">
                         <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">📭</div>
-                        <p>Belum ada soal untuk ruangan <strong>${room}</strong></p>
+                        <p>Belum ada soal untuk <strong>${title}</strong></p>
+                        ${studentName ? '<button class="btn btn-sm btn-secondary" onclick="loadExamQuestions()">Tampilkan Soal Umum</button>' : ''}
                     </div>
                 `;
                 return;
             }
 
-            container.innerHTML = questions.map((q, i) => {
+            let html = studentName ? `<div class="alert alert-info" style="margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center;">
+                <span>Menampilkan soal khusus untuk <strong>${studentName}</strong></span>
+                <button class="btn btn-xs btn-outline" onclick="loadExamQuestions()">Reset ke Umum</button>
+            </div>` : '';
+
+            html += questions.map((q, i) => {
                 let contentHtml = '';
                 if (q.content.startsWith('http')) {
                     // Convert Drive view links to preview for embedding
@@ -401,11 +416,35 @@
                 return `
                 <div class="card" style="margin-bottom: 1rem; border-left: 4px solid var(--primary); background: var(--bg-surface);">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                        <strong style="color: var(--primary);">Soal #${i + 1}</strong>
+                        <strong style="color: var(--primary);">Soal #${i + 1} ${q.targetStudent ? '(Khusus)' : ''}</strong>
                     </div>
                     ${contentHtml}
                 </div>
             `}).join('');
+
+            container.innerHTML = html;
+        }
+
+        function viewStudentQuestion(name, className) {
+            // 1. Open the panel if closed
+            const panel = document.getElementById('examMaterialPanel');
+            const btn = document.getElementById('toggleExamMaterialBtn');
+            if (panel.style.display === 'none') {
+                panel.style.display = 'block';
+                btn.textContent = '▲ Sembunyikan';
+            }
+
+            // 2. Set the room select to student's class
+            const select = document.getElementById('examRoomSelect');
+            if (select.querySelector(`option[value="${className}"]`)) {
+                select.value = className;
+            }
+
+            // 3. Load questions for this student
+            loadExamQuestions(name);
+
+            // 4. Scroll to panel
+            panel.scrollIntoView({ behavior: 'smooth' });
         }
 
         function toggleExamMaterial() {
@@ -427,6 +466,7 @@
     <!-- Firebase Compat SDK (Local) -->
     <script src="js/firebase-app-compat.js"></script>
     <script src="js/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-storage-compat.js"></script>
     <script src="js/firebase-config.js?v=2.5"></script>
     <script src="js/firebase-service.js?v=2.5"></script>
     <!-- <script type="module" src="js/firebase-config.js"></script> -->
