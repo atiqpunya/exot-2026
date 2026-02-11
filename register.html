@@ -237,242 +237,257 @@ qrn1, pass123, Ustadz Ali, alquran
                     </div>
                 </div>
 
-                <!-- Bulk Upload Section -->
-                <div class="card"
-                    style="background: var(--bg-surface); padding: 1.5rem; margin-bottom: 1.5rem; border-left: 4px solid var(--accent);">
-                    <h5 style="margin-top: 0;">📤 Bulk Upload PDF</h5>
-                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
-                        Upload banyak file sekaligus. Sistem akan menargetkan siswa secara otomatis.<br>
-                        <strong>Format Nama File:</strong> <code>SUBJECT-RUANGAN-NAMA SISWA.pdf</code><br>
-                        Contoh: <code>ENGLISH-7A-AHMAD FAUZI.pdf</code>
+                <!-- Bulk Upload Section (Subject Separation) -->
+                <div style="margin-bottom: 2rem;">
+                    <h5 style="margin-top: 0; margin-bottom: 1rem;">📤 Bulk Upload PDF (Per Mapel)</h5>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+                        Drag & Drop file PDF ke kotak mapel yang sesuai. Sistem akan otomatis menargetkan siswa.<br>
+                        <strong>Format Nama File:</strong> <code>RUANGAN-NAMA SISWA.pdf</code><br>
+                        Contoh: <code>7A-AHMAD FAUZI.pdf</code> (Subject ditentukan oleh kotak tempat Anda drop file)
                     </p>
 
-                    <div id="dropZone"
-                        style="border: 2px dashed var(--border-color); border-radius: 8px; padding: 2rem; text-align: center; cursor: pointer; transition: all 0.2s;"
-                        ondragover="event.preventDefault(); this.style.borderColor='var(--primary)';"
-                        ondragleave="this.style.borderColor='var(--border-color)';" ondrop="handleDrop(event)">
-                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">📂</div>
-                        <p style="margin: 0;">Drag & Drop file PDF di sini</p>
-                        <p style="font-size: 0.8rem; color: var(--text-muted);">atau</p>
-                        <button class="btn btn-sm btn-secondary"
-                            onclick="document.getElementById('fileInput').click()">Pilih File</button>
-                        <input type="file" id="fileInput" multiple accept="application/pdf" style="display: none;"
-                            onchange="handleFiles(this.files)">
+                    <div class="grid grid-3" style="gap: 1rem;">
+                        <!-- English Zone -->
+                        <div class="card upload-card" data-subject="english"
+                            style="border: 2px dashed #3b82f6; background: #eff6ff; text-align: center; cursor: pointer; transition: all 0.2s;"
+                            ondragover="handleDragOver(event, this)" ondragleave="handleDragLeave(event, this)"
+                            ondrop="handleDrop(event, 'english')">
+                            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🇬🇧</div>
+                            <h6 style="color: #1e40af; margin: 0;">ENGLISH</h6>
+                            <p style="font-size: 0.75rem; color: #1e3a8a;">Drop PDF here</p>
+                        </div>
+
+                        <!-- Arabic Zone -->
+                        <div class="card upload-card" data-subject="arabic"
+                            style="border: 2px dashed #10b981; background: #ecfdf5; text-align: center; cursor: pointer; transition: all 0.2s;"
+                            ondragover="handleDragOver(event, this)" ondragleave="handleDragLeave(event, this)"
+                            ondrop="handleDrop(event, 'arabic')">
+                            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🇸🇦</div>
+                            <h6 style="color: #065f46; margin: 0;">ARABIC</h6>
+                            <p style="font-size: 0.75rem; color: #064e3b;">Drop PDF here</p>
+                        </div>
+
+                        <!-- Al-Quran Zone -->
+                        <div class="card upload-card" data-subject="alquran"
+                            style="border: 2px dashed #f59e0b; background: #fffbeb; text-align: center; cursor: pointer; transition: all 0.2s;"
+                            ondragover="handleDragOver(event, this)" ondragleave="handleDragLeave(event, this)"
+                            ondrop="handleDrop(event, 'alquran')">
+                            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📖</div>
+                            <h6 style="color: #92400e; margin: 0;">AL-QURAN</h6>
+                            <p style="font-size: 0.75rem; color: #78350f;">Drop PDF here</p>
+                        </div>
                     </div>
 
-                    <div id="uploadProgress" style="margin-top: 1rem; display: none;">
-                        <h6 style="margin-bottom: 0.5rem;">Upload Progress:</h6>
-                        <div id="progressList" style="max-height: 150px; overflow-y: auto;"></div>
+                    <!-- Hidden Input for click-to-upload (Optional/Advanced, mostly relying on DragDrop for now) -->
+                    <input type="file" id="bulkFileInput" multiple accept="application/pdf" style="display: none;"
+                        onchange="handleSelectedFiles(this.files)">
+                </div>
+
+                <div id="uploadProgressContainer" style="margin-bottom: 2rem; display: none;">
+                    <h6 style="margin-bottom: 0.5rem;">Upload Status:</h6>
+                    <div id="progressList" style="max-height: 200px; overflow-y: auto;"></div>
+                </div>
+
+                <!-- Hidden manual input removed per request, but keeping Submit button container structured if needed -->
+                <!-- button class="btn btn-primary" onclick="submitQuestion()">💾 Simpan Soal</button> (Use for manual only if re-added) -->
+
+                <div style="margin-top: 2rem; border-top: 1px dashed var(--border-color); padding-top: 1rem;">
+                    <h4 style="margin-bottom: 1rem;">📋 Daftar Soal Tersimpan</h4>
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                        <select id="filterQuestionRoom" class="form-input form-select" style="width: auto;"
+                            onchange="loadQuestionList()">
+                            <option value="all">Semua Ruangan</option>
+                        </select>
+                        <select id="filterQuestionSubject" class="form-input form-select" style="width: auto;"
+                            onchange="loadQuestionList()">
+                            <option value="all">Semua Mapel</option>
+                            <option value="english">English</option>
+                            <option value="arabic">Arabic</option>
+                            <option value="alquran">Al-Quran</option>
+                        </select>
                     </div>
+                    <!-- Fixed height container for list -->
+                    <div id="questionList" style="max-height: 400px; overflow-y: auto;"></div>
                 </div>
-                <div style="margin-bottom: 1rem;">
-                    <label style="font-size: 0.85rem; margin-bottom: 0.5rem; display: block;">Link File Soal (PDF /
-                        Drive)</label>
-                    <input type="text" id="questionContent" class="form-input"
-                        placeholder="Paste link PDF atau Google Drive di sini..." required>
-                    <small style="color: var(--text-muted); display: block; margin-top: 0.25rem;">Pastikan link bisa
-                        diakses publik (Anyone with the link)</small>
-                </div>
-                <button class="btn btn-primary" onclick="submitQuestion()">💾 Simpan Soal</button>
             </div>
 
-            <div style="margin-top: 2rem; border-top: 1px dashed var(--border-color); padding-top: 1rem;">
-                <h4 style="margin-bottom: 1rem;">📋 Daftar Soal Tersimpan</h4>
+            <!-- Ruangan Tab -->
+            <div id="ruanganTab" class="tab-content">
+                <h4 style="margin-bottom: 1rem;">🏫 Kelola Ruangan</h4>
                 <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
-                    <select id="filterQuestionRoom" class="form-input form-select" style="width: auto;"
-                        onchange="loadQuestionList()">
-                        <option value="all">Semua Ruangan</option>
-                    </select>
-                    <select id="filterQuestionSubject" class="form-input form-select" style="width: auto;"
-                        onchange="loadQuestionList()">
-                        <option value="all">Semua Mapel</option>
-                        <option value="english">English</option>
-                        <option value="arabic">Arabic</option>
-                        <option value="alquran">Al-Quran</option>
-                    </select>
+                    <input type="text" id="newClassName" class="form-input" placeholder="Nama ruangan baru..."
+                        style="flex: 1;">
+                    <button class="btn btn-primary" onclick="addNewClass()">+ Tambah</button>
                 </div>
-                <!-- Fixed height container for list -->
-                <div id="questionList" style="max-height: 400px; overflow-y: auto;"></div>
-            </div>
-        </div>
+                <div id="classList" style="margin-top: 1rem;"></div>
 
-        <!-- Ruangan Tab -->
-        <div id="ruanganTab" class="tab-content">
-            <h4 style="margin-bottom: 1rem;">🏫 Kelola Ruangan</h4>
-            <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
-                <input type="text" id="newClassName" class="form-input" placeholder="Nama ruangan baru..."
-                    style="flex: 1;">
-                <button class="btn btn-primary" onclick="addNewClass()">+ Tambah</button>
-            </div>
-            <div id="classList" style="margin-top: 1rem;"></div>
-
-            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
-                <h4>✏️ Edit Nama Ruangan</h4>
-                <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap;">
-                    <select id="editClassOld" class="form-input form-select" style="width: auto;"></select>
-                    <span style="align-self: center;">→</span>
-                    <input type="text" id="editClassNew" class="form-input" placeholder="Nama baru"
-                        style="width: 150px;">
-                    <button class="btn btn-secondary" onclick="editClass()">Simpan</button>
+                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                    <h4>✏️ Edit Nama Ruangan</h4>
+                    <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap;">
+                        <select id="editClassOld" class="form-input form-select" style="width: auto;"></select>
+                        <span style="align-self: center;">→</span>
+                        <input type="text" id="editClassNew" class="form-input" placeholder="Nama baru"
+                            style="width: 150px;">
+                        <button class="btn btn-secondary" onclick="editClass()">Simpan</button>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Export Tab -->
-        <div id="exportTab" class="tab-content">
-            <h4 style="margin-bottom: 1rem;">📦 Export & Backup</h4>
+            <!-- Export Tab -->
+            <div id="exportTab" class="tab-content">
+                <h4 style="margin-bottom: 1rem;">📦 Export & Backup</h4>
 
-            <div class="grid grid-2" style="gap: 1.5rem;">
-                <div>
-                    <h5 style="margin-bottom: 0.75rem;">📄 Download QR sebagai HTML</h5>
+                <div class="grid grid-2" style="gap: 1.5rem;">
+                    <div>
+                        <h5 style="margin-bottom: 0.75rem;">📄 Download QR sebagai HTML</h5>
 
-                    <div class="export-option" onclick="exportQR('all')">
-                        <h5>📦 Semua Data</h5>
-                        <p>Download QR semua siswa, guru, dan penguji</p>
-                    </div>
-
-                    <div class="export-option" onclick="exportQR('siswa')">
-                        <h5>👨‍🎓 Hanya Siswa</h5>
-                        <p>Download QR code semua siswa saja</p>
-                    </div>
-
-                    <div class="export-option" onclick="exportQR('panitia')">
-                        <h5>👔 Hanya Panitia</h5>
-                        <p>Download QR code semua panitia saja</p>
-                    </div>
-
-                    <div class="export-option" onclick="exportQR('penguji')">
-                        <h5>📋 Hanya Penguji</h5>
-                        <p>Download QR code semua penguji saja</p>
-                    </div>
-
-                    <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
-                        <h5 style="margin-bottom: 0.75rem;">🖨️ Print QR Cards</h5>
-                        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
-                            <select id="printPaperSize" class="form-input form-select" style="width: auto;">
-                                <option value="A4">A4 (210×297mm)</option>
-                                <option value="A3">A3 (297×420mm)</option>
-                            </select>
-                            <select id="printCardCount" class="form-input form-select" style="width: auto;">
-                                <option value="4">4 kartu/halaman (2×2)</option>
-                                <option value="6">6 kartu/halaman (2×3)</option>
-                                <option value="8">8 kartu/halaman (2×4)</option>
-                                <option value="9">9 kartu/halaman (3×3)</option>
-                            </select>
-                        </div>
-                        <div class="export-option" onclick="togglePrintSettings()">
-                            <h5>🖨️ Cetak QR Cards</h5>
-                            <p>Cetak kartu QR sesuai pengaturan</p>
+                        <div class="export-option" onclick="exportQR('all')">
+                            <h5>📦 Semua Data</h5>
+                            <p>Download QR semua siswa, guru, dan penguji</p>
                         </div>
 
-                        <div id="printSettings"
-                            style="display: none; background: var(--bg-surface); padding: 1rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); margin-top: 0.5rem;">
-                            <h6 style="margin-bottom: 0.5rem;">Pengaturan Batch</h6>
-                            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
-                                <div style="flex: 1;">
-                                    <label style="font-size: 0.8rem;">Mulai dari</label>
-                                    <input type="number" id="printStart" class="form-input" value="1" min="1">
-                                </div>
-                                <div style="flex: 1;">
-                                    <label style="font-size: 0.8rem;">Jumlah</label>
-                                    <input type="number" id="printLimit" class="form-input" value="50" min="1">
-                                </div>
-                            </div>
-                            <div style="margin-bottom: 0.5rem;">
-                                <label class="form-control">
-                                    <input type="checkbox" id="printHighQuality" checked>
-                                    High Quality (HD)
-                                </label>
-                            </div>
-                            <button class="btn btn-primary btn-sm" style="width: 100%;" onclick="printQRCards()">🖨️
-                                Generate & Print</button>
-                            <div id="printProgress"
-                                style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-muted); display: none;">
-                                Siap...</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <div
-                        style="background: var(--bg-surface); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
-                        <h5 style="margin-bottom: 1rem; color: var(--text-primary);">🛠️ Data Center</h5>
-
-                        <!-- Row 1: Quick Actions -->
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem;">
-                            <div class="export-option" onclick="exportToCSV()"
-                                style="margin: 0; padding: 10px; text-align: center;">
-                                <h6 style="margin: 0; font-size: 0.9rem;">📊 Full CSV</h6>
-                                <small style="font-size: 0.75rem;">All Backup</small>
-                            </div>
-                            <div class="export-option" onclick="createBackup()"
-                                style="margin: 0; padding: 10px; text-align: center;">
-                                <h6 style="margin: 0; font-size: 0.9rem;">💾 Backup JSON</h6>
-                                <small style="font-size: 0.75rem;">Save Data</small>
-                            </div>
+                        <div class="export-option" onclick="exportQR('siswa')">
+                            <h5>👨‍🎓 Hanya Siswa</h5>
+                            <p>Download QR code semua siswa saja</p>
                         </div>
 
-                        <!-- Row 2: Canva Export -->
-                        <div
-                            style="background: #fdf4ff; border: 1px solid #e879f9; border-radius: 8px; padding: 10px; margin-bottom: 10px;">
-                            <h6 style="margin: 0 0 8px 0; color: #9333ea; font-size: 0.9rem;">🎨 Canva Export (Bulk)
-                            </h6>
-                            <div style="display: flex; gap: 15px; margin-bottom: 8px; flex-wrap: wrap;">
-                                <label
-                                    style="cursor: pointer; font-size: 0.8rem; display: flex; align-items: center;"><input
-                                        type="checkbox" id="checkStudent" checked style="margin-right:4px;">
-                                    Student</label>
-                                <label
-                                    style="cursor: pointer; font-size: 0.8rem; display: flex; align-items: center;"><input
-                                        type="checkbox" id="checkExaminer" checked style="margin-right:4px;">
-                                    Examiner</label>
-                                <label
-                                    style="cursor: pointer; font-size: 0.8rem; display: flex; align-items: center;"><input
-                                        type="checkbox" id="checkCommittee" checked style="margin-right:4px;">
-                                    Committee</label>
-                            </div>
-                            <button class="btn btn-sm" style="width: 100%; background: #9333ea; color: white;"
-                                onclick="exportCanvaCSV()">⬇️ Download CSV</button>
+                        <div class="export-option" onclick="exportQR('panitia')">
+                            <h5>👔 Hanya Panitia</h5>
+                            <p>Download QR code semua panitia saja</p>
                         </div>
 
-                        <!-- Row 3: HTML QR Export -->
-                        <div style="margin-bottom: 10px;">
-                            <h6 style="margin-bottom: 5px; font-size: 0.9rem;">📄 Export QR (HTML)</h6>
-                            <div style="display: flex; gap: 5px;">
-                                <select id="exportHtmlCategory" class="form-input"
-                                    style="padding: 6px; font-size: 0.85rem;">
-                                    <option value="all">Semua Data</option>
-                                    <option value="siswa">Hanya Siswa</option>
-                                    <option value="panitia">Hanya Panitia</option>
-                                    <option value="penguji">Hanya Penguji</option>
+                        <div class="export-option" onclick="exportQR('penguji')">
+                            <h5>📋 Hanya Penguji</h5>
+                            <p>Download QR code semua penguji saja</p>
+                        </div>
+
+                        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                            <h5 style="margin-bottom: 0.75rem;">🖨️ Print QR Cards</h5>
+                            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
+                                <select id="printPaperSize" class="form-input form-select" style="width: auto;">
+                                    <option value="A4">A4 (210×297mm)</option>
+                                    <option value="A3">A3 (297×420mm)</option>
                                 </select>
-                                <button class="btn btn-primary btn-sm"
-                                    onclick="exportQR(document.getElementById('exportHtmlCategory').value)">Go</button>
+                                <select id="printCardCount" class="form-input form-select" style="width: auto;">
+                                    <option value="4">4 kartu/halaman (2×2)</option>
+                                    <option value="6">6 kartu/halaman (2×3)</option>
+                                    <option value="8">8 kartu/halaman (2×4)</option>
+                                    <option value="9">9 kartu/halaman (3×3)</option>
+                                </select>
+                            </div>
+                            <div class="export-option" onclick="togglePrintSettings()">
+                                <h5>🖨️ Cetak QR Cards</h5>
+                                <p>Cetak kartu QR sesuai pengaturan</p>
+                            </div>
+
+                            <div id="printSettings"
+                                style="display: none; background: var(--bg-surface); padding: 1rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); margin-top: 0.5rem;">
+                                <h6 style="margin-bottom: 0.5rem;">Pengaturan Batch</h6>
+                                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                    <div style="flex: 1;">
+                                        <label style="font-size: 0.8rem;">Mulai dari</label>
+                                        <input type="number" id="printStart" class="form-input" value="1" min="1">
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <label style="font-size: 0.8rem;">Jumlah</label>
+                                        <input type="number" id="printLimit" class="form-input" value="50" min="1">
+                                    </div>
+                                </div>
+                                <div style="margin-bottom: 0.5rem;">
+                                    <label class="form-control">
+                                        <input type="checkbox" id="printHighQuality" checked>
+                                        High Quality (HD)
+                                    </label>
+                                </div>
+                                <button class="btn btn-primary btn-sm" style="width: 100%;" onclick="printQRCards()">🖨️
+                                    Generate & Print</button>
+                                <div id="printProgress"
+                                    style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-muted); display: none;">
+                                    Siap...</div>
                             </div>
                         </div>
-
-                        <!-- Restore Link -->
-                        <div style="text-align: center; margin-top: 10px;">
-                            <small style="cursor: pointer; text-decoration: underline; color: var(--primary);"
-                                onclick="document.getElementById('restoreFile').click()">📥 Restore from Backup
-                                File</small>
-                        </div>
                     </div>
-                    <p>Pulihkan data dari file backup</p>
-                </div>
-                <input type="file" id="restoreFile" accept=".json" style="display: none;"
-                    onchange="handleRestore(event)">
-            </div>
 
-            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
-                <h5 style="margin-bottom: 0.75rem;">🔍 Download QR Individual</h5>
-                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                    <input type="text" id="searchQR" class="form-input" placeholder="Cari nama..." style="flex: 1;">
-                    <button class="btn btn-secondary" onclick="searchAndShowQR()">Cari</button>
+                    <div>
+                        <div
+                            style="background: var(--bg-surface); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+                            <h5 style="margin-bottom: 1rem; color: var(--text-primary);">🛠️ Data Center</h5>
+
+                            <!-- Row 1: Quick Actions -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem;">
+                                <div class="export-option" onclick="exportToCSV()"
+                                    style="margin: 0; padding: 10px; text-align: center;">
+                                    <h6 style="margin: 0; font-size: 0.9rem;">📊 Full CSV</h6>
+                                    <small style="font-size: 0.75rem;">All Backup</small>
+                                </div>
+                                <div class="export-option" onclick="createBackup()"
+                                    style="margin: 0; padding: 10px; text-align: center;">
+                                    <h6 style="margin: 0; font-size: 0.9rem;">💾 Backup JSON</h6>
+                                    <small style="font-size: 0.75rem;">Save Data</small>
+                                </div>
+                            </div>
+
+                            <!-- Row 2: Canva Export -->
+                            <div
+                                style="background: #fdf4ff; border: 1px solid #e879f9; border-radius: 8px; padding: 10px; margin-bottom: 10px;">
+                                <h6 style="margin: 0 0 8px 0; color: #9333ea; font-size: 0.9rem;">🎨 Canva Export (Bulk)
+                                </h6>
+                                <div style="display: flex; gap: 15px; margin-bottom: 8px; flex-wrap: wrap;">
+                                    <label
+                                        style="cursor: pointer; font-size: 0.8rem; display: flex; align-items: center;"><input
+                                            type="checkbox" id="checkStudent" checked style="margin-right:4px;">
+                                        Student</label>
+                                    <label
+                                        style="cursor: pointer; font-size: 0.8rem; display: flex; align-items: center;"><input
+                                            type="checkbox" id="checkExaminer" checked style="margin-right:4px;">
+                                        Examiner</label>
+                                    <label
+                                        style="cursor: pointer; font-size: 0.8rem; display: flex; align-items: center;"><input
+                                            type="checkbox" id="checkCommittee" checked style="margin-right:4px;">
+                                        Committee</label>
+                                </div>
+                                <button class="btn btn-sm" style="width: 100%; background: #9333ea; color: white;"
+                                    onclick="exportCanvaCSV()">⬇️ Download CSV</button>
+                            </div>
+
+                            <!-- Row 3: HTML QR Export -->
+                            <div style="margin-bottom: 10px;">
+                                <h6 style="margin-bottom: 5px; font-size: 0.9rem;">📄 Export QR (HTML)</h6>
+                                <div style="display: flex; gap: 5px;">
+                                    <select id="exportHtmlCategory" class="form-input"
+                                        style="padding: 6px; font-size: 0.85rem;">
+                                        <option value="all">Semua Data</option>
+                                        <option value="siswa">Hanya Siswa</option>
+                                        <option value="panitia">Hanya Panitia</option>
+                                        <option value="penguji">Hanya Penguji</option>
+                                    </select>
+                                    <button class="btn btn-primary btn-sm"
+                                        onclick="exportQR(document.getElementById('exportHtmlCategory').value)">Go</button>
+                                </div>
+                            </div>
+
+                            <!-- Restore Link -->
+                            <div style="text-align: center; margin-top: 10px;">
+                                <small style="cursor: pointer; text-decoration: underline; color: var(--primary);"
+                                    onclick="document.getElementById('restoreFile').click()">📥 Restore from Backup
+                                    File</small>
+                            </div>
+                        </div>
+                        <p>Pulihkan data dari file backup</p>
+                    </div>
+                    <input type="file" id="restoreFile" accept=".json" style="display: none;"
+                        onchange="handleRestore(event)">
                 </div>
-                <div id="individualQRResult" style="margin-top: 1rem;"></div>
+
+                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                    <h5 style="margin-bottom: 0.75rem;">🔍 Download QR Individual</h5>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <input type="text" id="searchQR" class="form-input" placeholder="Cari nama..." style="flex: 1;">
+                        <button class="btn btn-secondary" onclick="searchAndShowQR()">Cari</button>
+                    </div>
+                    <div id="individualQRResult" style="margin-top: 1rem;"></div>
+                </div>
             </div>
-        </div>
         </div>
         </div>
         </div>
@@ -553,20 +568,8 @@ qrn1, pass123, Ustadz Ali, alquran
         function submitQuestion() {
             const subject = document.getElementById('questionSubject').value;
             const room = document.getElementById('questionRoom').value;
-            const content = document.getElementById('questionContent').value.trim();
-
-            if (!content) return alert('Link soal tidak boleh kosong!');
-
-            // Basic URL validation
-            if (!content.startsWith('http')) {
-                if (!confirm('Link sepertinya tidak valid (tidak diawali http/https). Tetap simpan?')) return;
-            }
-
-            addQuestion(room, subject, content); // Using storage.js function
-
-            document.getElementById('questionContent').value = '';
-            alert('✅ Link Soal berhasil disimpan!');
-            loadQuestionList();
+            // Removed manual content input
+            alert('Silakan gunakan Bulk Upload PDF untuk menambahkan soal.');
         }
 
         function removeQuestion(id) {
@@ -614,6 +617,7 @@ qrn1, pass123, Ustadz Ali, alquran
                                 <div style="margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px dashed var(--border-color);">
                                     <div style="font-size: 0.9rem; margin-bottom: 0.25rem;">
                                         <a href="${q.content}" target="_blank" style="color: var(--primary); text-decoration: underline;">📄 Buka Link</a>
+                                        ${q.targetStudent ? `<span class="badge badge-warning" style="margin-left:5px; font-size: 0.7rem;">Khusus: ${q.targetStudent}</span>` : ''}
                                         <div style="font-size: 0.8rem; color: var(--text-muted); margin-top:2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${q.content}</div>
                                     </div>
                                     <div style="text-align: right;">
@@ -803,26 +807,25 @@ qrn1, pass123, Ustadz Ali, alquran
               `).join('')}
             </tbody>
           </table>
+          ${students.length > 50 ? `<p style="text-align:center; color:var(--text-muted); padding:0.5rem;">...dan ${students.length - 50} siswa lainnya</p>` : ''}
         </div>
-        ${students.length > 50 ? `<p style="text-align: center; color: var(--text-muted); margin-top: 0.5rem;">Menampilkan 50 dari ${students.length}</p>` : ''}
       `;
         }
 
-        function getPanitia() {
-            return getUsers().filter(u => u.role === 'panitia');
-        }
-
         function loadPanitiaList() {
-            let panitia = getPanitia();
+            // Get Panitia from Users (New) and Legacy Panitia (if any)
+            const allUsers = getUsers();
+            const panitiaUsers = allUsers.filter(u => u.role === 'panitia');
+
             const search = document.getElementById('searchPanitia').value.toLowerCase();
+            let displayList = panitiaUsers;
 
-            if (search) panitia = panitia.filter(s => s.name.toLowerCase().includes(search) || (s.subject && s.subject.toLowerCase().includes(search)));
+            if (search) displayList = displayList.filter(s => s.name.toLowerCase().includes(search));
+            document.getElementById('panitiaCount').textContent = displayList.length;
 
-            document.getElementById('panitiaCount').textContent = panitia.length;
             const container = document.getElementById('panitiaList');
-
-            if (!panitia.length) {
-                container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 1rem;">Tidak ada data panitia</p>';
+            if (displayList.length === 0) {
+                container.innerHTML = '<p style="text-align:center; padding:1rem; color:var(--text-muted);">Belum ada panitia</p>';
                 return;
             }
 
@@ -831,14 +834,14 @@ qrn1, pass123, Ustadz Ali, alquran
           <table class="table">
             <thead><tr><th>Username</th><th>Nama</th><th>Jabatan</th><th>Aksi</th></tr></thead>
             <tbody>
-              ${panitia.slice(0, 50).map((s, i) => `
+              ${displayList.map(p => `
                 <tr>
-                  <td><strong>${s.username}</strong><br><small style="color:var(--text-muted)">${s.password}</small></td>
-                  <td>${s.name}</td>
-                  <td>${s.subject || '-'}</td>
+                  <td>${p.username}</td>
+                  <td>${p.name}</td>
+                  <td>${p.subject || '-'}</td>
                   <td>
-                    <button class="btn btn-sm btn-secondary" onclick="downloadSingleQR('${s.id}', 'panitia')">📱</button>
-                    <button class="btn btn-sm btn-danger" onclick="delPanitia('${s.id}')">🗑️</button>
+                    <button class="btn btn-sm btn-secondary" onclick="downloadSingleQR('${p.id}', 'panitia')">📱</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteUser('${p.id}'); loadPanitiaList(); updateStats();">🗑️</button>
                   </td>
                 </tr>
               `).join('')}
@@ -848,63 +851,15 @@ qrn1, pass123, Ustadz Ali, alquran
       `;
         }
 
-        function delPanitia(id) {
-            if (confirm('Hapus panitia ini?')) { deleteUser(id); updateStats(); loadPanitiaList(); }
-        }
-
-        function delStudent(id) {
-            if (confirm('Hapus?')) { deleteStudent(id); updateStats(); loadStudentList(); }
-        }
-
-        async function clearAllStudents() {
-            if (confirm('⚠️ PERINGATAN: Apakah Anda yakin ingin menghapus SEMUA data siswa?\nData yang dihapus tidak dapat dikembalikan!')) {
-                const btn = document.querySelector('button[onclick="clearAllStudents()"]'); // Assuming there's a button calling this
-                if (btn) {
-                    btn.innerHTML = '⏳ Deleting...';
-                    btn.disabled = true;
-                }
-
-                try {
-                    // Update Local
-                    saveStudents([]);
-
-                    // Force Cloud Sync Immediately
-                    alert('⏳ Sedang menghapus data dari server cloud (Google Sheets)...\nMohon tunggu hingga selesai.');
-
-                    const result = await window.googleSheetsAPI.syncToCloud();
-
-                    if (result && !result.error) {
-                        alert('✅ Data berhasil dihapus permanen!');
-                    } else {
-                        throw new Error(result.error || 'Gagal sinkronisasi ke cloud');
-                    }
-
-                } catch (e) {
-                    alert('⚠️ Data lokal terhapus, namun gagal menghapus di cloud: ' + e.message + '\nData mungkin kembali saat reload.');
-                    console.error(e);
-                } finally {
-                    updateStats();
-                    loadStudentList();
-                    if (btn) {
-                        btn.innerHTML = '🗑️ Hapus Semua';
-                        btn.disabled = false;
-                    }
-                }
-            }
-        }
-
         function loadExaminerList() {
             const examiners = getExaminers();
             document.getElementById('examinerCount').textContent = examiners.length;
-            const container = document.getElementById('examinerList');
 
+            const container = document.getElementById('examinerList');
             if (!examiners.length) {
-                container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 1rem;">Belum ada penguji</p>';
+                container.innerHTML = '<p style="text-align:center; padding:1rem; color:var(--text-muted);">Belum ada penguji</p>';
                 return;
             }
-
-            const subjectColors = { english: 'info', arabic: 'success', alquran: 'warning' };
-            const subjectNames = { english: 'English', arabic: 'Arabic', alquran: 'Al-Quran' };
 
             container.innerHTML = `
         <div class="table-container">
@@ -913,13 +868,13 @@ qrn1, pass123, Ustadz Ali, alquran
             <tbody>
               ${examiners.map(e => `
                 <tr>
-                  <td><code>${e.username}</code></td>
+                  <td>${e.username}</td>
                   <td>${e.name}</td>
-                  <td><span class="badge badge-${subjectColors[e.subject]}">${subjectNames[e.subject]}</span></td>
-                  <td>${e.assignedClasses?.join(', ') || 'Semua'}</td>
+                  <td>${e.subject}</td>
+                  <td>${e.assignedClasses ? e.assignedClasses.map(c => `<span class="badge badge-info">${c}</span>`).join('') : '-'}</td>
                   <td>
-                    <button class="btn btn-sm btn-secondary" onclick="downloadSingleQR('${e.id}', 'examiner')">📱</button>
-                    <button class="btn btn-sm btn-danger" onclick="delExaminer('${e.id}')">🗑️</button>
+                    <button class="btn btn-sm btn-secondary" onclick="downloadSingleQR('${e.id}', 'penguji')">📱</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteUser('${e.id}'); loadExaminerList(); updateStats();">🗑️</button>
                   </td>
                 </tr>
               `).join('')}
@@ -929,641 +884,130 @@ qrn1, pass123, Ustadz Ali, alquran
       `;
         }
 
-        function delExaminer(id) {
-            if (confirm('Hapus penguji ini?')) { deleteUser(id); updateStats(); loadExaminerList(); }
-        }
-
-        function loadClassList() {
-            const classes = getClasses();
-            const container = document.getElementById('classList');
-            const select = document.getElementById('editClassOld');
-
-            container.innerHTML = classes.map(c => `
-        <span class="class-tag">${c} <button onclick="delClass('${c}')">&times;</button></span>
-      `).join('') || '<p style="color: var(--text-muted);">Belum ada ruangan</p>';
-
-            select.innerHTML = classes.map(c => `<option value="${c}">${c}</option>`).join('');
-        }
-
-        function addNewClass() {
-            const name = document.getElementById('newClassName').value.trim();
-            if (!name) return;
-            addClass(name);
-            document.getElementById('newClassName').value = '';
-            loadClassList();
-        }
-
-        function delClass(name) {
-            if (confirm(`Hapus ruangan ${name}?`)) { removeClass(name); loadClassList(); }
-        }
-
-        function editClass() {
-            const oldName = document.getElementById('editClassOld').value;
-            const newName = document.getElementById('editClassNew').value.trim();
-            if (!oldName || !newName) return;
-            updateClass(oldName, newName);
-            document.getElementById('editClassNew').value = '';
-            loadClassList();
-            loadStudentList();
-        }
-
-        // Download single QR
-        function downloadSingleQR(id, type) {
-            let data, name, room, label;
-
-            if (type === 'student') {
-                const s = getStudentById(id);
-                if (!s) return;
-                data = s.qrCode || s.id;
-                name = s.name;
-                room = s.class;
-                label = s.type || 'siswa';
-            } else {
-                const e = getUserById(id);
-                if (!e) return;
-                data = e.qrCode || e.id;
-                name = e.name;
-                // For panitia, subject is Jabatan
-                room = e.subject || (e.role === 'panitia' ? 'Panitia' : '-');
-                label = e.role === 'panitia' ? 'panitia' : 'penguji';
-            }
-
-            const qrCode = new QRCodeStyling({
-                width: 300,
-                height: 300,
-                type: "png",
-                data: data,
-                // image: "img/logo-alwildan.png", // REMOVED
-                dotsOptions: {
-                    color: "#000",
-                    type: "rounded"
-                },
-                backgroundOptions: {
-                    color: "#fff",
-                },
-                imageOptions: {
-                    crossOrigin: "anonymous",
-                    margin: 0
-                }
-            });
-
-            qrCode.download({ name: `QR_${name.replace(/\s+/g, '_')}_${room}`, extension: "png" });
-        }
-
-        // Search and show individual QR
-        function searchAndShowQR() {
-            const search = document.getElementById('searchQR').value.toLowerCase().trim();
-            if (!search) return;
-
-            const students = getStudents().filter(s => s.name.toLowerCase().includes(search));
-            // Search all users (examiners and panitia)
-            const users = getUsers().filter(u => u.name.toLowerCase().includes(search) && (u.role === 'penguji' || u.role === 'panitia'));
-
-            const container = document.getElementById('individualQRResult');
-            const all = [...students.map(s => ({ ...s, isStudent: true })), ...users.map(e => ({ ...e, isUser: true }))];
-
-            if (!all.length) {
-                container.innerHTML = '<p style="color: var(--text-muted);">Tidak ditemukan</p>';
-                return;
-            }
-
-            container.innerHTML = all.slice(0, 5).map(item => `
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
-          <div>
-            <strong>${item.name}</strong>
-            <span class="badge badge-${item.isStudent ? 'success' : 'info'}" style="margin-left: 0.5rem;">
-              ${item.isStudent ? (item.type || 'siswa') : (item.role || 'User')}
-            </span>
-          </div>
-          <button class="btn btn-sm btn-primary" onclick="downloadSingleQR('${item.id}', '${item.isStudent ? 'student' : (item.role === 'panitia' ? 'panitia' : 'examiner')}')">📥 Download</button>
-        </div>
-      `).join('');
-        }
-
-        // Force Cloud Operations
-        // Force Cloud Operations
-        async function forceSaveCloud() {
-            const btn = document.querySelector('button[title="Simpan data ke Firebase"]');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '⏳ Saving...';
-            btn.disabled = true;
-
-            try {
-                // Check if Firebase is ready
-                if (!window.firebaseService) {
-                    throw new Error("Firebase belum siap atau gagal dimuat.\nPeriksa koneksi internet Anda dan coba refresh halaman.");
-                }
-
-                // Use Firebase Upload
-                const result = await window.firebaseService.uploadLocalData();
-                if (result.success) {
-                    alert('✅ Data berhasil disimpan ke Firebase!');
-                } else {
-                    throw new Error('Gagal upload:\n' + result.errors.join('\n'));
-                }
-            } catch (e) {
-                alert('❌ Gagal menyimpan: ' + e.message);
-                console.error(e);
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
+        function delStudent(id) {
+            if (confirm('Hapus siswa ini?')) {
+                deleteStudent(id);
+                loadStudentList();
+                updateStats();
             }
         }
 
-        async function forceLoadCloud() {
-            if (!confirm('Ini akan menimpa data lokal dengan data dari Cloud. Lanjutkan?')) return;
-
-            const btn = document.querySelector('button[title="Ambil data dari Cloud"]');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '⏳ Loading...';
-            btn.disabled = true;
-
-            try {
-                // Use Firebase Manual Pull
-                const success = await window.firebaseService.syncFromCloud();
-                if (success) {
-                    alert('✅ Data berhasil diambil dari Firebase!');
-                    location.reload(); // Refresh to show new data
-                } else {
-                    throw new Error('Gagal mengambil data');
-                }
-            } catch (e) {
-                alert('❌ Error: ' + e.message);
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        }
-
-        // Export QR by category
-        function exportQR(category) {
-            let items = [];
-            let title = '';
-
-            if (category === 'all') {
-                const students = getStudents();
-                const examiners = getExaminers();
-                const panitia = getPanitia();
-                items = [
-                    ...students.map(s => ({ name: s.name, room: s.class, type: s.type || 'siswa', qr: s.qrCode })),
-                    ...panitia.map(p => ({ name: p.name, room: p.subject || 'Panitia', type: 'panitia', qr: p.id })),
-                    ...examiners.map(e => ({ name: e.name, room: e.subject, type: 'penguji', qr: e.id }))
-                ];
-                title = 'Semua Data';
-            } else if (category === 'siswa') {
-                items = getStudents().filter(s => s.type !== 'guru').map(s => ({ name: s.name, room: s.class, type: 'siswa', qr: s.qrCode }));
-                title = 'Siswa';
-            } else if (category === 'panitia') {
-                items = getPanitia().map(s => ({ name: s.name, room: s.subject || 'Panitia', type: 'panitia', qr: s.id }));
-                title = 'Panitia';
-            } else if (category === 'penguji') {
-                items = getExaminers().map(e => ({ name: e.name, room: e.subject, type: 'penguji', qr: e.id }));
-                title = 'Penguji';
-            }
-
-            if (!items.length) {
-                alert('Tidak ada data untuk kategori ini!');
-                return;
-            }
-
-            // Implement Batching Prompt
-            const total = items.length;
-            const range = prompt(`Total data: ${total}.\nMasukkan rentang yang ingin digenerate (contoh: 1-50):`, `1-${total > 50 ? 50 : total}`);
-
-            if (!range) return; // Users cancelled
-
-            const match = range.match(/^(\d+)-(\d+)$/);
-            if (!match) {
-                alert('Format salah! Gunakan format angka-angka (contoh: 1-50)');
-                return;
-            }
-
-            const start = parseInt(match[1]);
-            const end = parseInt(match[2]);
-
-            if (start < 1 || end < start || start > total) {
-                alert(`Rentang tidak valid! Harus antara 1 sampai ${total}.`);
-                return;
-            }
-
-            // Slice items (convert 1-based index to 0-based)
-            const slicedItems = items.slice(start - 1, end);
-
-            // Warn if too many
-            if (slicedItems.length > 100 && !confirm(`Anda akan generate ${slicedItems.length} QR code sekaligus. Ini mungkin membuat browser berat/hang. Lanjutkan?`)) {
-                return;
-            }
-
-            // Convert items to JSON for the template
-            const itemsJson = JSON.stringify(slicedItems);
-
-            const html = `<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>EXOT QR - ${title} (${start}-${end})</title>
-<script src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"><\/script>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-            padding: 20px;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 10px;
-            color: #0ea5e9;
-        }
-
-        .info {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #666;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 15px;
-        }
-
-        .card {
-            background: white;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            padding: 12px;
-            text-align: center;
-            page-break-inside: avoid;
-        }
-
-        .qr-container {
-            width: 130px;
-            height: 130px;
-            margin: 0 auto 8px auto;
-        }
-
-        .card h3 {
-            font-size: 12px;
-            margin-bottom: 4px;
-            word-break: break-word;
-        }
-
-        .card p {
-            font-size: 11px;
-            color: #666;
-        }
-
-        .card .type {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 10px;
-            margin-top: 5px;
-        }
-
-        .card .code {
-            display: block;
-            font-size: 16px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            margin: 8px 0;
-            font-family: monospace;
-            color: #333;
-        }
-
-        .card .meta {
-            font-size: 10px;
-            color: #666;
-            margin-bottom: 5px;
-        }
-
-        .siswa {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .guru {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-
-        .penguji {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .download-btn {
-            display: inline-block;
-            margin-top: 8px;
-            padding: 4px 10px;
-            font-size: 11px;
-            background: #0ea5e9;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-        .download-btn:hover {
-            background: #0284c7;
-        }
-
-        @media print {
-            body {
-                padding: 0;
-                background: white;
-            }
-
-            .card {
-                border: 1px solid #000;
-            }
-
-            .download-btn {
-                display: none;
-            }
-        }
-    </style>
-    </head>
-
-    <body>
-        <h1>📝 EXOT QR Codes - ${title} (${start}-${end})</h1>
-        <p class="info">Total: ${slicedItems.length} (from ${total}) | Generated: ${new Date().toLocaleString('id-ID')}</p>
-        <div class="grid" id="grid"></div>
-
-        <script>
-const items = ${itemsJson};
-const grid = document.getElementById('grid');
-
-items.forEach((item, index) => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    
-    card.innerHTML = \`
-        <h3 style="font-size:14px; margin-bottom:8px;">\${item.name.toUpperCase()}</h3>
-        <div id="qr-\${index}" class="qr-container"></div>
-        <div class="code">\${item.qr.split('').join(' ')}</div>
-        <div class="meta">\${item.room} <span class="type \${item.type}">\${item.type}</span></div>
-        <button class="download-btn" onclick="downloadSingle('\${item.qr}', '\${item.name}', '\${item.room}')">📥 Download PNG</button>
-    \`;
-    grid.appendChild(card);
-
-    // Generate QR
-    const qrCode = new QRCodeStyling({
-        width: 130,
-        height: 130,
-        type: "svg",
-        data: item.qr,
-        // image: "img/logo-alwildan.png", // REMOVED
-        dotsOptions: { color: "#000", type: "rounded" },
-        backgroundOptions: { color: "#fff" },
-        imageOptions: { crossOrigin: "anonymous", margin: 0 }
-    });
-    qrCode.append(document.getElementById('qr-' + index));
-});
-
-function downloadSingle(data, name, room) {
-    const qrCode = new QRCodeStyling({
-        width: 300,
-        height: 300,
-        type: "png",
-        data: data,
-        // image: "img/logo-alwildan.png", // REMOVED
-        dotsOptions: { color: "#000", type: "rounded" },
-        backgroundOptions: { color: "#fff" },
-        imageOptions: { crossOrigin: "anonymous", margin: 0 }
-    });
-    qrCode.download({ name: \`QR_\${name.replace(/\\s+/g, '_')}_\${room}\`, extension: "png" });
-}
-<\/script>
-    </body>
-
-</html>`;
-
-            const blob = new Blob([html], { type: 'text/html' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `EXOT_QR_${title.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.html`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
-
-        // Handle restore from backup
-        function handleRestore(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                if (confirm('Ini akan mengganti semua data yang ada. Lanjutkan?')) {
-                    const result = restoreBackup(e.target.result);
-                    if (result.error) {
-                        alert('Error: ' + result.error);
-                    } else {
-                        alert('Data berhasil dipulihkan dari backup ' + result.date);
-                        location.reload();
-                    }
-                }
-            };
-            reader.readAsText(file);
-            event.target.value = '';
-        }
-
+        // QR Printing Logic
         function togglePrintSettings() {
             const el = document.getElementById('printSettings');
             el.style.display = el.style.display === 'none' ? 'block' : 'none';
         }
 
-        // Print QR cards with paper size, card count options, and custom Logos
         async function printQRCards() {
-            const students = getStudents();
-            if (!students.length) {
-                alert('Tidak ada data siswa!');
-                return;
-            }
-
-            const startIdx = parseInt(document.getElementById('printStart').value) - 1;
-            const limit = parseInt(document.getElementById('printLimit').value);
-            const isHD = document.getElementById('printHighQuality').checked;
-
-            if (startIdx < 0 || startIdx >= students.length) {
-                alert('Indeks mulai tidak valid!');
-                return;
-            }
-
-            const targetStudents = students.slice(startIdx, startIdx + limit);
-            if (!targetStudents.length) {
-                alert('Tidak ada siswa dalam rentang ini!');
-                return;
-            }
-
             const btn = document.querySelector('#printSettings button');
             const progressEl = document.getElementById('printProgress');
-
             const originalText = btn.innerHTML;
-            btn.innerHTML = '⏳ Generating...';
+            btn.innerHTML = 'Generating...';
             btn.disabled = true;
             progressEl.style.display = 'block';
+            progressEl.textContent = 'Menyiapkan data...';
 
-            const paperSize = document.getElementById('printPaperSize').value;
-            const cardCount = parseInt(document.getElementById('printCardCount').value);
+            // Get Paper Size
+            const paperSize = document.getElementById('printPaperSize').value; // 'A4' or 'A3'
+            const cardCount = parseInt(document.getElementById('printCardCount').value); // 4, 6, 8, 9
 
-            // Paper dimensions in mm
-            const paperDims = {
-                'A4': { width: 210, height: 297 },
-                'A3': { width: 297, height: 420 }
-            };
+            // Define card dimensions based on count
+            // A4 is 210x297mm.
+            let cardWidth, cardHeight, fontSize;
+            let rows, cols;
 
-            // Grid layouts based on card count
-            const gridLayouts = {
-                4: { cols: 2, rows: 2 },
-                6: { cols: 2, rows: 3 },
-                8: { cols: 2, rows: 4 },
-                9: { cols: 3, rows: 3 }
-            };
+            if (cardCount === 4) { cols = 2; rows = 2; }
+            if (cardCount === 6) { cols = 2; rows = 3; }
+            if (cardCount === 8) { cols = 2; rows = 4; }
+            if (cardCount === 9) { cols = 3; rows = 3; }
 
-            const paper = paperDims[paperSize];
-            const grid = gridLayouts[cardCount];
-
-            // QR size scales with card count but High Res for printing
-            // If HD, generate at 1000px, otherwise 300px
-            const qrGenSize = isHD ? 1000 : 300;
-
-            // Display size in CSS (visual size on paper)
-            const displaySize = cardCount <= 4 ? 120 : (cardCount <= 6 ? 100 : 85);
-            const fontSize = cardCount <= 4 ? 14 : (cardCount <= 6 ? 12 : 11);
-
-            // Helper to generate QR Data URI
-            const generateQRDataUri = (data) => {
-                return new Promise((resolve, reject) => {
-                    const qrCode = new QRCodeStyling({
-                        width: qrGenSize,
-                        height: qrGenSize,
-                        type: "png", // PNG is better for compatibility than SVG in blob url for print
-                        data: data,
-                        // image: "img/logo-alwildan.png", // REMOVED
-                        dotsOptions: { color: "#000", type: "rounded" },
-                        backgroundOptions: { color: "#fff" },
-                        imageOptions: { crossOrigin: "anonymous", margin: isHD ? 20 : 0 }
-                    });
-
-                    qrCode.getRawData('png').then(blob => {
-                        resolve(URL.createObjectURL(blob));
-                    }).catch(reject);
-                });
-            };
+            // CSS Grid style will handle layout
+            const gridTemplate = `repeat(${cols}, 1fr)`;
 
             try {
-                // Batch generation with delay to keep UI responsive
+                const students = getStudents(); // Get all people (students, panitia, etc.) based on export filter
+                // However, the exportQR functions are separate. This print features seems to target ALL shown in stats?
+                // Let's assume it prints whatever is in `students` array which includes everyone if `getStudents` returns all types?
+                // Actually `getStudents` returns mixed types now.
+                // Let's filter based on what user might expect. Usually students.
+                // But for now, let's just print ALL valid logical users (Student, Panitia, Penguji)
+                // Or maybe just Students?
+                // Let's print Students only by default for "Kartu Ujian" context
+                const studentsOnly = getStudents().filter(s => s.type === 'siswa');
+
+                const start = parseInt(document.getElementById('printStart').value) - 1;
+                const limit = parseInt(document.getElementById('printLimit').value);
+                const targetStudents = studentsOnly.slice(start, start + limit);
+
+                if (targetStudents.length === 0) throw new Error('Tidak ada data siswa untuk dicetak pada range ini.');
+
+                progressEl.textContent = `Generating QR for ${targetStudents.length} cards...`;
+
+                // Prepare QR data
                 const studentQRs = [];
-                for (let i = 0; i < targetStudents.length; i++) {
-                    const s = targetStudents[i];
-                    progressEl.textContent = `Generating ${i + 1}/${targetStudents.length}: ${s.name}`;
-
-                    const url = await generateQRDataUri(s.qrCode || s.id);
+                for (const s of targetStudents) {
+                    const qrCode = new QRCodeStyling({
+                        width: 1000, height: 1000, // High res for print
+                        data: s.qrCode || s.id,
+                        image: "img/logo-alwildan.png",
+                        dotsOptions: { color: "#000", type: "rounded" },
+                        backgroundOptions: { color: "#fff" },
+                        imageOptions: { crossOrigin: "anonymous", margin: 10 }
+                    });
+                    const blob = await qrCode.getRawData("png");
+                    const url = URL.createObjectURL(blob);
                     studentQRs.push({ ...s, qrUrl: url });
-
-                    // Small delay every 5 items to breathe
-                    if (i % 5 === 0) await new Promise(r => setTimeout(r, 10));
                 }
 
-                progressEl.textContent = 'Membuka jendela cetak...';
-
+                // Create Print Window
                 const printWindow = window.open('', '_blank');
-                if (!printWindow) {
-                    alert('Pop-up blocked! Izinkan pop-up untuk mencetak.');
-                    return;
-                }
-
                 printWindow.document.write(`
-    <!DOCTYPE html>
     <html>
     <head>
-        <meta charset="UTF-8">
-        <title>Print QR Cards - EXOT (${paperSize})</title>
+        <title>Print QR Cards</title>
         <style>
-            * { box-sizing: border-box; margin: 0; padding: 0; }
-            body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; }
-            
+            @page {
+                size: ${paperSize};
+                margin: 10mm;
+            }
+            body { 
+                font-family: 'Inter', sans-serif; 
+                margin: 0; 
+                padding: 0;
+                background: white;
+            }
             .page {
-                width: ${paper.width}mm;
-                min-height: ${paper.height}mm;
-                padding: 10mm;
+                width: 100%;
+                height: 98vh; /* Approximate full page height */
                 display: grid;
-                grid-template-columns: repeat(${grid.cols}, 1fr);
-                grid-template-rows: repeat(${grid.rows}, 1fr);
-                gap: 8mm;
+                grid-template-columns: ${gridTemplate};
+                grid-template-rows: repeat(${rows}, 1fr);
+                gap: 10mm;
                 page-break-after: always;
             }
             .page:last-child { page-break-after: auto; }
-
             .card {
-                border: 2px solid #0f172a;
-                border-radius: 12px;
+                border: 2px solid #000;
+                border-radius: 10px;
                 padding: 10px;
-                text-align: center;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                position: relative;
-                overflow: hidden;
+                text-align: center;
+                box-sizing: border-box;
+                height: 100%;
             }
-            
-            /* Background decoration */
-            .card::before {
-                content: '';
-                position: absolute;
-                top: 0; left: 0; right: 0; height: 6px;
-                background: linear-gradient(90deg, #0ea5e9, #6366f1);
+            .card h3 { margin: 5px 0; font-size: 16pt; font-weight: 800; text-transform: uppercase; }
+            .card p { margin: 5px 0; font-size: 12pt; }
+            .card img { width: 60%; height: auto; margin: 10px 0; }
+            .type { 
+                background: #000; color: #fff; padding: 2px 8px; border-radius: 4px; 
+                font-size: 10pt; text-transform: uppercase; margin-left: 5px;
             }
-
-            .card img {
-                width: ${displaySize}px;
-                height: ${displaySize}px;
-                margin-bottom: 8px;
-                /* Crisp rendering for QR */
-                image-rendering: -webkit-optimize-contrast;
-            }
-
-            .card h3 {
-                font-size: ${fontSize + 4}px;
-                margin-bottom: 8px;
-                word-break: break-word;
-                line-height: 1.2;
-                color: #000;
-                font-weight: 800;
-                text-transform: uppercase;
-                max-width: 100%;
-            }
-
-            .card p {
-                font-size: ${fontSize - 2}px;
-                color: #64748b;
-                font-weight: 500;
-            }
-
-            .card .type {
-                display: inline-block;
-                padding: 2px 8px;
-                border-radius: 4px;
-                font-size: ${fontSize - 4}px;
-                margin-left: 5px;
-                border: 1px solid #ccc;
-                color: #444;
-                font-weight: 600;
-                text-transform: uppercase;
-            }
-
-            .card .code {
-                font-size: 20px;
-                margin: 5px 0 0 0;
+            .code {
                 font-family: monospace;
+                font-size: 12pt;
                 font-weight: 800;
                 color: #000;
                 letter-spacing: 4px;
@@ -1637,101 +1081,198 @@ function downloadSingle(data, name, room) {
     <script src="js/firebase-service.js?v=2.5"></script>
     <!-- Bulk Upload Logic -->
     <script>
-        function handleDrop(e) {
+        // ==========================================
+        // BULK UPLOAD PDF LOGIC (REDESIGNED)
+        // ==========================================
+
+        function handleDragOver(e, el) {
             e.preventDefault();
             e.stopPropagation();
-            document.getElementById('dropZone').style.borderColor = 'var(--border-color)';
+            el.style.transform = 'scale(1.02)';
+            el.style.borderColor = getComputedStyle(el).color; // Use text color as border color
+            el.style.backgroundColor = '#fff';
+        }
+
+        function handleDragLeave(e, el) {
+            e.preventDefault();
+            e.stopPropagation();
+            el.style.transform = 'scale(1)';
+            // Reset to original colors based on data-subject
+            const subject = el.getAttribute('data-subject');
+            if (subject === 'english') {
+                el.style.borderColor = '#3b82f6';
+                el.style.backgroundColor = '#eff6ff';
+            } else if (subject === 'arabic') {
+                el.style.borderColor = '#10b981';
+                el.style.backgroundColor = '#ecfdf5';
+            } else if (subject === 'alquran') {
+                el.style.borderColor = '#f59e0b';
+                el.style.backgroundColor = '#fffbeb';
+            }
+        }
+
+        function handleDrop(e, subject) {
+            e.preventDefault();
+            e.stopPropagation();
+            const el = e.currentTarget;
+            handleDragLeave(e, el); // Reset style
+
             const files = e.dataTransfer.files;
-            handleFiles(files);
+            if (files.length > 0) {
+                processFiles(files, subject);
+            }
         }
 
-        function handleFiles(files) {
+        // For hidden file input (optional usage)
+        function handleSelectedFiles(files) {
+            if (files.length > 0) {
+                alert('Silakan drag & drop file ke kotak mapel yang sesuai.');
+            }
+        }
+
+        async function processFiles(files, subject) {
+            const progressContainer = document.getElementById('uploadProgressContainer');
             const progressList = document.getElementById('progressList');
-            document.getElementById('uploadProgress').style.display = 'block';
-            progressList.innerHTML = '';
+            progressContainer.style.display = 'block';
+            progressList.innerHTML = ''; // Clear previous
 
-            Array.from(files).forEach(file => processFile(file));
-        }
-
-        async function processFile(file) {
-            // Parse filename: SUBJECT-ROOM-NAME.pdf
-            // Example: ENGLISH-7A-AHMAD FAUZI.pdf
-            const cleanName = file.name.replace(/\.pdf$/i, ''); // case insensitive
-            const parts = cleanName.split('-');
-
-            if (parts.length < 3) {
-                updateProgress(file.name, 'error', 'Format nama file salah. Harus SUBJECT-ROOM-NAMA.pdf');
-                return;
-            }
-
-            const subject = parts[0].trim().toLowerCase();
-            const room = parts[1].trim();
-            const studentName = parts.slice(2).join('-').trim(); // Join rest in case name has hyphens
-
-            // Validate Subject
-            if (!['english', 'arabic', 'alquran'].includes(subject)) {
-                updateProgress(file.name, 'error', `Subject '${subject}' tidak valid. Gunakan english, arabic, atau alquran.`);
-                return;
-            }
-
-            updateProgress(file.name, 'uploading', 'Mengupload ke Firebase...');
-
-            try {
-                // Check if storage is available
-                if (!window.storage) {
-                    // Try to init if missing (fallback)
-                    if (firebase.storage) window.storage = firebase.storage();
-                    else throw new Error('Firebase Storage unavailable');
+            for (const file of files) {
+                if (file.type !== 'application/pdf') {
+                    addProgressItem(file.name, '❌ Bukan file PDF', 'error');
+                    continue;
                 }
 
-                const ref = window.storage.ref().child('exam-questions/' + file.name);
-                const snapshot = await ref.put(file);
-                const downloadURL = await snapshot.ref.getDownloadURL();
+                // Create Progress Item
+                const progressItem = addProgressItem(file.name, '⏳ Memulai upload...', 'pending');
 
-                // Save to database
-                // addQuestion(room, subject, content, type, targetStudent)
-                // content is downloadURL, type is 'pdf' (or 'link' pointing to pdf)
+                // Parse Filename: ROOM-NAME.pdf (Subject is passed implicitly)
+                const filename = file.name.replace('.pdf', '');
+                const parts = filename.split('-');
 
-                addQuestion(room, subject, downloadURL, 'pdf', studentName);
+                let room, name;
 
-                updateProgress(file.name, 'success', 'Berhasil diupload dan disimpan untuk siswa: ' + studentName);
-                loadQuestionList(); // Refresh list
+                // Heuristic: If 3 parts, assume SUBJECT-ROOM-NAME. If 2, ROOM-NAME.
+                if (parts.length >= 3) {
+                    // Legacy: ENGLISH-7A-AHMAD -> Ignore index 0
+                    room = parts[1].trim();
+                    name = parts.slice(2).join('-').trim(); // Join rest as name
+                } else if (parts.length === 2) {
+                    // New: 7A-AHMAD
+                    room = parts[0].trim();
+                    name = parts[1].trim();
+                } else {
+                    updateProgressItem(progressItem, '❌ Format nama file salah. Gunakan: RUANGAN-NAMA.pdf', 'error');
+                    continue;
+                }
 
-            } catch (error) {
-                console.error(error);
-                updateProgress(file.name, 'error', 'Gagal upload: ' + error.message);
+                // Find Student ID
+                const students = getStudents();
+                const student = students.find(s =>
+                    s.name.toLowerCase() === name.toLowerCase() &&
+                    s.class.toLowerCase() === room.toLowerCase()
+                );
+
+                if (!student) {
+                    updateProgressItem(progressItem, `❌ Siswa tidak ditemukan: ${name} di ${room}`, 'error');
+                    continue;
+                }
+
+                // Upload to Firebase
+                try {
+                    updateProgressItem(progressItem, '🚀 Mengupload ke Cloud...', 'loading');
+
+                    // Path: questions/SUBJECT/ROOM/FILENAME
+                    const path = `questions/${subject}/${room}/${file.name}`;
+                    const downloadURL = await uploadPDFToFirebase(file, path);
+
+                    // Add to Database (Storage.js)
+                    const question = addQuestion(room, subject, downloadURL);
+
+                    // Manually update the question to add 'targetStudent'
+                    const allQuestions = getQuestions();
+                    const idx = allQuestions.findIndex(x => x.id === question.id);
+                    if (idx !== -1) {
+                        allQuestions[idx].targetStudent = student.name;
+                        saveQuestions(allQuestions);
+                    }
+
+                    updateProgressItem(progressItem, `✅ Berhasil! Disimpan untuk ${name}`, 'success');
+
+                } catch (err) {
+                    console.error(err);
+                    updateProgressItem(progressItem, `❌ Gagal upload: ${err.message}`, 'error');
+                }
             }
+
+            loadQuestionList(); // Refresh list
         }
 
-        function updateProgress(filename, status, message) {
+        function addProgressItem(filename, status, type) {
             const list = document.getElementById('progressList');
-            let item = document.getElementById('prog-' + filename);
+            const id = 'prog-' + Math.random().toString(36).substr(2, 9);
 
-            if (!item) {
-                item = document.createElement('div');
-                item.id = 'prog-' + filename;
-                item.style.marginBottom = '8px';
-                item.style.padding = '8px';
-                item.style.borderRadius = '4px';
-                item.style.fontSize = '0.85rem';
-                list.appendChild(item);
+            let icon = '📄';
+            let color = 'var(--text-primary)';
+            let bg = 'var(--bg-surface)';
+
+            if (type === 'error') { color = 'var(--danger)'; bg = '#fee2e2'; icon = '❌'; }
+            if (type === 'success') { color = 'var(--success)'; bg = '#dcfce7'; icon = '✅'; }
+            if (type === 'loading') { color = 'var(--info)'; bg = '#e0f2fe'; icon = '⏳'; }
+
+            const html = `
+                <div id="${id}" style="
+                    display: flex; align-items: center; justify-content: space-between;
+                    padding: 0.75rem; margin-bottom: 0.5rem; border-radius: 6px;
+                    background: ${bg}; border: 1px solid var(--border-color); font-size: 0.85rem;
+                ">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span>${icon}</span>
+                        <strong>${filename}</strong>
+                    </div>
+                    <span class="status-text" style="color: ${color}; font-weight: 500;">${status}</span>
+                </div>
+            `;
+            list.insertAdjacentHTML('afterbegin', html);
+            return id;
+        }
+
+        function updateProgressItem(id, status, type) {
+            const el = document.getElementById(id);
+            if (!el) return;
+
+            let color = 'var(--text-primary)';
+            let bg = 'var(--bg-surface)';
+
+            if (type === 'error') { color = '#dc2626'; bg = '#fee2e2'; } // Tailwind red-600, red-100
+            if (type === 'success') { color = '#16a34a'; bg = '#dcfce7'; } // Tailwind green-600, green-100
+            if (type === 'loading') { color = '#0284c7'; bg = '#e0f2fe'; } // Tailwind sky-600, sky-100
+
+            el.style.background = bg;
+            el.querySelector('.status-text').textContent = status;
+            el.querySelector('.status-text').style.color = color;
+
+            // Add simple progress animation bar if loading
+            if (type === 'loading') {
+                if (!el.querySelector('.progress-bar')) {
+                    const bar = document.createElement('div');
+                    bar.className = 'progress-bar';
+                    bar.style.cssText = `
+                        position: absolute; bottom: 0; left: 0; height: 3px; background: ${color};
+                        width: 0%; transition: width 10s linear; border-radius: 0 0 6px 6px;
+                    `;
+                    el.style.position = 'relative';
+                    el.style.overflow = 'hidden';
+                    el.appendChild(bar);
+                    // Trigger animation
+                    setTimeout(() => bar.style.width = '90%', 100);
+                }
+            } else {
+                const bar = el.querySelector('.progress-bar');
+                if (bar) {
+                    bar.style.width = '100%';
+                    setTimeout(() => bar.remove(), 500);
+                }
             }
-
-            let bg = '#f1f5f9';
-            let color = '#334155';
-            let icon = '⏳';
-
-            if (status === 'success') {
-                bg = '#dcfce7'; color = '#166534'; icon = '✅';
-            } else if (status === 'error') {
-                bg = '#fee2e2'; color = '#991b1b'; icon = '❌';
-            } else if (status === 'uploading') {
-                bg = '#e0f2fe'; color = '#075985'; icon = '⬆️';
-            }
-
-            item.style.background = bg;
-            item.style.color = color;
-            item.innerHTML = `<strong>${icon} ${filename}</strong><br>${message}`;
         }
     </script>
 </body>
