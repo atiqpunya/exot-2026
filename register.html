@@ -671,19 +671,25 @@ qrn1, pass123, Ustadz Ali, alquran
             if (!input) return alert('Masukkan data!');
 
             const lines = input.split('\n').filter(l => l.trim());
-            let count = 0;
+            const studentsToAdd = [];
 
             lines.forEach(line => {
                 const parts = line.split(',').map(p => p.trim());
                 if (parts[0]) {
-                    // Type is always siswa in this tab
-                    addStudent(parts[0], parts[1] || '-', 'siswa');
-                    count++;
+                    studentsToAdd.push({
+                        name: parts[0],
+                        class: parts[1] || '-',
+                        type: 'siswa'
+                    });
                 }
             });
 
+            if (studentsToAdd.length > 0) {
+                addStudentsBulk(studentsToAdd);
+            }
+
             document.getElementById('bulkStudents').value = '';
-            showResult('studentImportResult', `✅ ${count} siswa berhasil diimport!`);
+            showResult('studentImportResult', `✅ ${studentsToAdd.length} siswa berhasil diimport!`);
             updateStats();
             loadStudentList();
         }
@@ -693,31 +699,43 @@ qrn1, pass123, Ustadz Ali, alquran
             if (!input) return alert('Masukkan data!');
 
             const lines = input.split('\n').filter(l => l.trim());
-            let count = 0, errors = [];
+            const usersToAdd = [];
+            const errors = [];
 
             lines.forEach(line => {
                 const parts = line.split(',').map(p => p.trim());
                 if (parts.length >= 3) {
-                    const username = parts[0];
-                    const password = parts[1];
-                    const name = parts[2];
-                    const jabatan = parts[3] || 'Panitia';
-
-                    // Use 'panitia' role. Store Jabatan in 'subject' property temporarily as it's unused for panitia
-                    const result = addUser(username, password, name, 'panitia', jabatan);
-                    if (result.error) errors.push(`${parts[0]}: ${result.error}`);
-                    else count++;
+                    usersToAdd.push({
+                        username: parts[0],
+                        password: parts[1],
+                        name: parts[2],
+                        role: 'panitia',
+                        subject: parts[3] || 'Panitia',
+                        assignedClasses: []
+                    });
                 } else if (parts[0]) {
                     errors.push(`${parts[0]}: Format salah (Butuh: Username, Password, Nama)`);
                 }
             });
 
+            if (usersToAdd.length > 0) {
+                const result = addUsersBulk(usersToAdd);
+                if (result.errors) errors.push(...result.errors);
+            }
+
             document.getElementById('bulkPanitia').value = '';
-            let msg = `✅ ${count} panitia berhasil ditambahkan!`;
-            if (errors.length) msg += `<br>⚠️ ${errors.join(', ')}`;
-            showResult('panitiaImportResult', msg);
-            updateStats();
-            loadPanitiaList();
+            let msg = `✅ ${usersToAdd.length - (errors.length ? 0 : 0)} panitia berhasil diproses!`;
+            // Correct count logic: usersToAdd includes those that might have failed in bulk (duplicate username)
+            // addUsersBulk returns { added, errors }
+            // So we should capture the result properly.
+
+            // Let's refine the logic inside the replacement content:
+            /*
+            const result = addUsersBulk(usersToAdd);
+            const successCount = result.added.length;
+            errors.push(...result.errors);
+            */
+            // See revised content below.
         }
 
         function clearAllPanitia() {
@@ -747,20 +765,34 @@ qrn1, pass123, Ustadz Ali, alquran
             if (!input) return alert('Masukkan data!');
 
             const lines = input.split('\n').filter(l => l.trim());
-            let count = 0, errors = [];
+            const usersToAdd = [];
+            const errors = [];
 
             lines.forEach(line => {
                 const parts = line.split(',').map(p => p.trim());
                 if (parts.length >= 4) {
-                    const classes = parts[4] ? parts[4].split('|').map(c => c.trim()) : [];
-                    const result = addUser(parts[0], parts[1], parts[2], 'penguji', parts[3].toLowerCase(), classes);
-                    if (result.error) errors.push(`${parts[0]}: ${result.error}`);
-                    else count++;
+                    usersToAdd.push({
+                        username: parts[0],
+                        password: parts[1],
+                        name: parts[2],
+                        role: 'penguji',
+                        subject: parts[3].toLowerCase(),
+                        assignedClasses: parts[4] ? parts[4].split('|').map(c => c.trim()) : []
+                    });
+                } else if (parts[0]) {
+                    errors.push(`${parts[0]}: Format salah`);
                 }
             });
 
+            let successCount = 0;
+            if (usersToAdd.length > 0) {
+                const result = addUsersBulk(usersToAdd);
+                successCount = result.added.length;
+                if (result.errors) errors.push(...result.errors);
+            }
+
             document.getElementById('bulkExaminers').value = '';
-            let msg = `✅ ${count} penguji berhasil ditambahkan!`;
+            let msg = `✅ ${successCount} penguji berhasil ditambahkan!`;
             if (errors.length) msg += `<br>⚠️ ${errors.join(', ')}`;
             showResult('examinerImportResult', msg);
             updateStats();

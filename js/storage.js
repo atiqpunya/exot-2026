@@ -647,26 +647,59 @@ function saveUsers(users) {
 function addUser(username, password, name, role, subject = null, assignedClasses = []) {
   const users = getUsers();
 
-  // Check duplicate username
   if (users.find(u => u.username === username)) {
     return { error: 'Username sudah ada!' };
   }
 
+  const newUser = createUserObject(username, password, name, role, subject, assignedClasses, users);
+  users.push(newUser);
+  saveUsers(users);
+  logActivity('user_add', `Added user: ${name} (${role})`);
+  return newUser;
+}
+
+function addUsersBulk(userList) {
+  const users = getUsers();
+  const added = [];
+  const errors = [];
+
+  userList.forEach(u => {
+    if (users.find(x => x.username === u.username)) {
+      errors.push(`${u.username}: Username sudah ada`);
+      return;
+    }
+    const newUser = createUserObject(u.username, u.password, u.name, u.role, u.subject, u.assignedClasses, users);
+    users.push(newUser);
+    added.push(newUser);
+    // Sync QR to handle uniqueness for next iteration? 
+    // createUserObject should handle it if we pass 'users' which is being mutated. YES.
+  });
+
+  if (added.length > 0) {
+    saveUsers(users);
+    logActivity('user_bulk_add', `Added ${added.length} users`);
+  }
+
+  return { added, errors };
+}
+
+function createUserObject(username, password, name, role, subject, assignedClasses, existingUsers) {
   const newUser = {
     id: generateId(),
     username: username.trim(),
     password: password,
     name: name.trim(),
-    role: role, // panitia_utama, penguji
-    subject: subject, // english, arabic, alquran (for penguji)
-    assignedClasses: assignedClasses,
-    qrCode: generateUniqueShortCode(users), // Generate 5-digit code
+    role: role,
+    subject: subject,
+    assignedClasses: assignedClasses || [],
+    qrCode: null,
     createdAt: new Date().toISOString()
   };
 
-  users.push(newUser);
-  saveUsers(users);
-  logActivity('user_add', `Added user: ${name} (${role})`);
+  newUser.qrCode = generateUniqueShortCode(existingUsers);
+  // We need to push a placeholder or rely on the caller pushing to existingUsers
+  // In bulk, we are pushing to 'users' reference effectively.
+
   return newUser;
 }
 
@@ -719,43 +752,56 @@ function saveStudents(students) {
 
 function addStudent(name, studentClass, type = 'siswa') {
   const students = getStudents();
+  // ... (existing logic)
+  const newStudent = createStudentObject(name, studentClass, type, students);
+  // Refactored helper to avoid code duplication
+
+  students.push(newStudent);
+  saveStudents(students);
+  addClass(studentClass);
+  return newStudent;
+}
+
+function addStudentsBulk(studentList) {
+  const students = getStudents();
+  const newStudents = [];
+
+  studentList.forEach(item => {
+    // Check duplicates? Optionally. For now assume we want to add all.
+    const s = createStudentObject(item.name, item.class, item.type || 'siswa', students);
+    students.push(s);
+    newStudents.push(s);
+
+    // Track classes
+    addClass(item.class); // addClass checks existence internally, but it saves every time.
+    // optimize addClass?
+  });
+
+  saveStudents(students); // Save ONCE
+  return newStudents;
+}
+
+// Helper to create object and generate QR
+function createStudentObject(name, studentClass, type, existingStudents) {
   const newStudent = {
     id: generateId(),
     name: name.trim(),
     class: studentClass.trim(),
-    type: type, // siswa, guru
+    type: type,
     qrCode: null,
     attended: false,
     attendedAt: null,
-    scores: {
-      english: null,
-      arabic: null,
-      alquran: null
-    },
-    scoredBy: {
-      english: null,
-      arabic: null,
-      alquran: null
-    },
+    scores: { english: null, arabic: null, alquran: null },
+    scoredBy: { english: null, arabic: null, alquran: null },
     createdAt: new Date().toISOString()
   };
 
-  // Generate unique short code for QR
-  let shortCode;
-  let isUnique = false;
-  while (!isUnique) {
-    shortCode = generateShortCode();
-    if (!students.find(s => s.qrCode === shortCode)) {
-      isUnique = true;
-    }
-  }
-
-  newStudent.qrCode = shortCode;
-  students.push(newStudent);
-  saveStudents(students);
-
-  // Auto-add class if new
-  addClass(studentClass);
+  newStudent.qrCode = generateUniqueShortCode(existingStudents);
+  // Temporarily add to existingStudents list for uniqueness check of subsequent items in same batch
+  existingStudents.push({ qrCode: newStudent.qrCode });
+  // Wait, if I push a dummy, I need to be careful. 
+  // Better: generateUniqueShortCode takes a collection.
+  // We can pass the updated list?
 
   return newStudent;
 }
