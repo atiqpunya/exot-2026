@@ -313,14 +313,29 @@ qrn1, pass123, Ustadz Ali, alquran
                         <h5 style="margin-bottom: 0.75rem;">📊 Export Data</h5>
 
                         <div class="export-option" onclick="exportToCSV()">
-                            <h5>📊 Export CSV</h5>
-                            <p>Download data peserta ke file CSV</p>
+                            <h5>📊 Export CSV (All Data)</h5>
+                            <p>Download full data backup</p>
                         </div>
 
-                        <div class="export-option" onclick="exportCanvaCSV()"
-                            style="margin-top: 10px; border-left: 4px solid #8b5cf6;">
-                            <h5 style="color: #8b5cf6;">🎨 Export Canva CSV</h5>
-                            <p>Format khusus untuk Bulk Create di Canva (Nama, Role, Kode)</p>
+                        <div style="margin-top: 15px; border-left: 4px solid #8b5cf6; padding-left: 10px;">
+                            <h5 style="color: #8b5cf6; margin-bottom: 8px;">🎨 Export for Canva (Bulk Create)</h5>
+                            <p style="font-size: 0.8rem; color: #666; margin-bottom: 8px;">Select categories to export:
+                            </p>
+
+                            <div style="display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px;">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" id="checkStudent" checked> Student
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" id="checkExaminer" checked> Examiner
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" id="checkCommittee" checked> Committee
+                                </label>
+                            </div>
+
+                            <button class="btn btn-sm" style="background: #8b5cf6; color: white; width: 100%;"
+                                onclick="exportCanvaCSV()">Download CSV</button>
                         </div>
 
                         <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">

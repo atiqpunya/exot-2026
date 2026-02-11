@@ -1064,42 +1064,58 @@ function exportCanvaCSV() {
   const panitia = getUsers().filter(u => u.role === 'panitia');
   const penguji = getUsers().filter(u => u.role === 'penguji');
 
+  // Check checkboxes
+  const incStudent = document.getElementById('checkStudent')?.checked ?? true;
+  const incExaminer = document.getElementById('checkExaminer')?.checked ?? true;
+  const incCommittee = document.getElementById('checkCommittee')?.checked ?? true;
+
+  if (!incStudent && !incExaminer && !incCommittee) {
+    alert('Please select at least one category!');
+    return;
+  }
+
   // Canva Bulk Create Header
-  // We need: Name, Role (or Class), Code (for QR)
+  // Request: Name, Role, Code (Role uses English: Student, Examiner, Committee)
   const headers = ['Name', 'Role', 'Code'];
 
   const rows = [];
 
   // Add Students
-  students.forEach(s => {
-    rows.push([
-      s.name,
-      s.class, // Role is Class for students
-      s.qrCode || s.id // The 5-digit code or ID
-    ]);
-  });
+  if (incStudent) {
+    students.forEach(s => {
+      rows.push([
+        s.name,
+        'Student',
+        s.qrCode || s.id
+      ]);
+    });
+  }
 
   // Add Panitia
-  panitia.forEach(p => {
-    rows.push([
-      p.name,
-      p.subject || 'Panitia',
-      p.qrCode || p.id
-    ]);
-  });
+  if (incCommittee) {
+    panitia.forEach(p => {
+      rows.push([
+        p.name,
+        'Committee',
+        p.qrCode || p.id
+      ]);
+    });
+  }
 
   // Add Penguji
-  penguji.forEach(e => {
-    rows.push([
-      e.name,
-      e.subject || 'Penguji',
-      e.qrCode || e.id
-    ]);
-  });
+  if (incExaminer) {
+    penguji.forEach(e => {
+      rows.push([
+        e.name,
+        'Examiner',
+        e.qrCode || e.id
+      ]);
+    });
+  }
 
   // CSV content
   const csvContent = [headers, ...rows]
-    .map(e => e.map(i => `"${i}"`).join(',')) // Quote fields to handle commas in names
+    .map(e => e.map(i => `"${i}"`).join(','))
     .join('\n');
 
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -1110,7 +1126,7 @@ function exportCanvaCSV() {
   link.click();
   document.body.removeChild(link);
 
-  logActivity('export', 'Exported Canva Bulk CSV');
+  logActivity('export', 'Exported Canva Bulk CSV (Filtered)');
 }
 
 // ========================================
