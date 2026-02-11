@@ -310,62 +310,87 @@ qrn1, pass123, Ustadz Ali, alquran
                     </div>
 
                     <div>
-                        <h5 style="margin-bottom: 0.75rem;">📊 Export Data</h5>
+                        <div
+                            style="background: var(--bg-surface); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+                            <h5 style="margin-bottom: 1rem; color: var(--text-primary);">🛠️ Data Center</h5>
 
-                        <div class="export-option" onclick="exportToCSV()">
-                            <h5>📊 Export CSV (All Data)</h5>
-                            <p>Download full data backup</p>
-                        </div>
-
-                        <div style="margin-top: 15px; border-left: 4px solid #8b5cf6; padding-left: 10px;">
-                            <h5 style="color: #8b5cf6; margin-bottom: 8px;">🎨 Export for Canva (Bulk Create)</h5>
-                            <p style="font-size: 0.8rem; color: #666; margin-bottom: 8px;">Select categories to export:
-                            </p>
-
-                            <div style="display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px;">
-                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                                    <input type="checkbox" id="checkStudent" checked> Student
-                                </label>
-                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                                    <input type="checkbox" id="checkExaminer" checked> Examiner
-                                </label>
-                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                                    <input type="checkbox" id="checkCommittee" checked> Committee
-                                </label>
+                            <!-- Row 1: Quick Actions -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem;">
+                                <div class="export-option" onclick="exportToCSV()"
+                                    style="margin: 0; padding: 10px; text-align: center;">
+                                    <h6 style="margin: 0; font-size: 0.9rem;">📊 Full CSV</h6>
+                                    <small style="font-size: 0.75rem;">All Backup</small>
+                                </div>
+                                <div class="export-option" onclick="createBackup()"
+                                    style="margin: 0; padding: 10px; text-align: center;">
+                                    <h6 style="margin: 0; font-size: 0.9rem;">💾 Backup JSON</h6>
+                                    <small style="font-size: 0.75rem;">Save Data</small>
+                                </div>
                             </div>
 
-                            <button class="btn btn-sm" style="background: #8b5cf6; color: white; width: 100%;"
-                                onclick="exportCanvaCSV()">Download CSV</button>
-                        </div>
-
-                        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
-                            <h5 style="margin-bottom: 0.75rem;">💾 Backup & Restore</h5>
-
-                            <div class="export-option" onclick="createBackup()">
-                                <h5>💾 Backup Data</h5>
-                                <p>Simpan semua data ke file JSON</p>
+                            <!-- Row 2: Canva Export -->
+                            <div
+                                style="background: #fdf4ff; border: 1px solid #e879f9; border-radius: 8px; padding: 10px; margin-bottom: 10px;">
+                                <h6 style="margin: 0 0 8px 0; color: #9333ea; font-size: 0.9rem;">🎨 Canva Export (Bulk)
+                                </h6>
+                                <div style="display: flex; gap: 15px; margin-bottom: 8px; flex-wrap: wrap;">
+                                    <label
+                                        style="cursor: pointer; font-size: 0.8rem; display: flex; align-items: center;"><input
+                                            type="checkbox" id="checkStudent" checked style="margin-right:4px;">
+                                        Student</label>
+                                    <label
+                                        style="cursor: pointer; font-size: 0.8rem; display: flex; align-items: center;"><input
+                                            type="checkbox" id="checkExaminer" checked style="margin-right:4px;">
+                                        Examiner</label>
+                                    <label
+                                        style="cursor: pointer; font-size: 0.8rem; display: flex; align-items: center;"><input
+                                            type="checkbox" id="checkCommittee" checked style="margin-right:4px;">
+                                        Committee</label>
+                                </div>
+                                <button class="btn btn-sm" style="width: 100%; background: #9333ea; color: white;"
+                                    onclick="exportCanvaCSV()">⬇️ Download CSV</button>
                             </div>
 
-                            <div class="export-option" onclick="document.getElementById('restoreFile').click()">
-                                <h5>📥 Restore Data</h5>
-                                <p>Pulihkan data dari file backup</p>
+                            <!-- Row 3: HTML QR Export -->
+                            <div style="margin-bottom: 10px;">
+                                <h6 style="margin-bottom: 5px; font-size: 0.9rem;">📄 Export QR (HTML)</h6>
+                                <div style="display: flex; gap: 5px;">
+                                    <select id="exportHtmlCategory" class="form-input"
+                                        style="padding: 6px; font-size: 0.85rem;">
+                                        <option value="all">Semua Data</option>
+                                        <option value="siswa">Hanya Siswa</option>
+                                        <option value="panitia">Hanya Panitia</option>
+                                        <option value="penguji">Hanya Penguji</option>
+                                    </select>
+                                    <button class="btn btn-primary btn-sm"
+                                        onclick="exportQR(document.getElementById('exportHtmlCategory').value)">Go</button>
+                                </div>
                             </div>
-                            <input type="file" id="restoreFile" accept=".json" style="display: none;"
-                                onchange="handleRestore(event)">
-                        </div>
 
-                        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
-                            <h5 style="margin-bottom: 0.75rem;">🔍 Download QR Individual</h5>
-                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                                <input type="text" id="searchQR" class="form-input" placeholder="Cari nama..."
-                                    style="flex: 1;">
-                                <button class="btn btn-secondary" onclick="searchAndShowQR()">Cari</button>
+                            <!-- Restore Link -->
+                            <div style="text-align: center; margin-top: 10px;">
+                                <small style="cursor: pointer; text-decoration: underline; color: var(--primary);"
+                                    onclick="document.getElementById('restoreFile').click()">📥 Restore from Backup
+                                    File</small>
                             </div>
-                            <div id="individualQRResult" style="margin-top: 1rem;"></div>
                         </div>
+                        <p>Pulihkan data dari file backup</p>
                     </div>
+                    <input type="file" id="restoreFile" accept=".json" style="display: none;"
+                        onchange="handleRestore(event)">
+                </div>
+
+                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                    <h5 style="margin-bottom: 0.75rem;">🔍 Download QR Individual</h5>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <input type="text" id="searchQR" class="form-input" placeholder="Cari nama..." style="flex: 1;">
+                        <button class="btn btn-secondary" onclick="searchAndShowQR()">Cari</button>
+                    </div>
+                    <div id="individualQRResult" style="margin-top: 1rem;"></div>
                 </div>
             </div>
+        </div>
+        </div>
         </div>
     </main>
 

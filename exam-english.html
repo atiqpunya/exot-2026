@@ -64,6 +64,52 @@
             <p style="margin: 0.5rem 0 0; opacity: 0.9;">Input nilai siswa untuk mata pelajaran English</p>
         </div>
 
+        <!-- Exam Material Panel -->
+        <div class="card fade-in" style="margin-bottom: 1.5rem; border-left: 4px solid var(--primary);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 1.2rem;">📄</span>
+                    <h3 style="margin: 0; font-size: 1.1rem;">Soal & Materi Ujian</h3>
+                </div>
+                <button id="toggleExamMaterialBtn" class="btn btn-sm btn-secondary" onclick="toggleExamMaterial()">▼
+                    Tampilkan</button>
+            </div>
+
+            <div id="examMaterialPanel"
+                style="display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                <!-- View Mode -->
+                <div id="materialView">
+                    <div id="materialContent"
+                        style="padding: 1rem; background: #f8fafc; border-radius: 6px; border: 1px dashed #cbd5e1; min-height: 50px; margin-bottom: 10px;">
+                        <p style="color: var(--text-muted); text-align: center; margin: 0;">Belum ada soal yang
+                            diupload.</p>
+                    </div>
+                    <button class="btn btn-sm btn-secondary" onclick="editMaterial()">✏️ Upload / Edit Soal</button>
+                </div>
+
+                <!-- Edit Mode -->
+                <div id="materialEdit" style="display: none;">
+                    <div style="margin-bottom: 10px;">
+                        <label style="font-size: 0.85rem; font-weight: 500; margin-bottom: 4px; display: block;">Link
+                            File Soal (Google Drive / PDF)</label>
+                        <input type="text" id="materialLink" class="form-input" placeholder="https://..."
+                            style="font-size: 0.9rem;">
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label style="font-size: 0.85rem; font-weight: 500; margin-bottom: 4px; display: block;">Teks
+                            Soal Langsung</label>
+                        <textarea id="materialText" class="form-input" rows="4"
+                            placeholder="Tulis atau tempel soal di sini..."
+                            style="font-size: 0.9rem; font-family: inherit;"></textarea>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-sm btn-primary" onclick="saveMaterial()">💾 Simpan Soal</button>
+                        <button class="btn btn-sm btn-secondary" onclick="cancelEditMaterial()">Batal</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Progress -->
         <div class="card fade-in" style="margin-bottom: 1.5rem;">
             <div
@@ -82,6 +128,7 @@
                 </div>
             </div>
         </div>
+
 
         <!-- Filters -->
         <div class="card fade-in" style="margin-bottom: 1.5rem;">
@@ -313,6 +360,69 @@
 
             updateScore(studentId, SUBJECT, value, currentSession.userId);
             loadStudents();
+        }
+
+        // ==========================================
+        // EXAM MATERIAL LOGIC
+        // ==========================================
+        const STORAGE_KEY_MATERIAL = 'EXAM_MATERIAL_' + SUBJECT;
+
+        function loadMaterial() {
+            const data = JSON.parse(localStorage.getItem(STORAGE_KEY_MATERIAL) || '{}');
+            const contentDiv = document.getElementById('materialContent');
+            const linkInput = document.getElementById('materialLink');
+            const textInput = document.getElementById('materialText');
+
+            let html = '';
+            if (data.link) {
+                html += `<div style="margin-bottom:8px;"><strong>📎 Link Soal:</strong> <a href="${data.link}" target="_blank" style="color: var(--primary); text-decoration: underline; word-break: break-all;">${data.link}</a></div>`;
+                linkInput.value = data.link;
+            }
+
+            if (data.text) {
+                html += `<div style="margin-top: 8px; white-space: pre-wrap; background: #fff; padding: 10px; border: 1px solid #e2e8f0; border-radius: 4px;">${data.text}</div>`;
+                textInput.value = data.text;
+            }
+
+            if (!data.link && !data.text) {
+                html = '<p style="color: var(--text-muted); text-align: center; margin: 0;">Belum ada soal yang diupload.</p>';
+                linkInput.value = '';
+                textInput.value = '';
+            }
+
+            contentDiv.innerHTML = html;
+        }
+
+        function toggleExamMaterial() {
+            const panel = document.getElementById('examMaterialPanel');
+            const btn = document.getElementById('toggleExamMaterialBtn');
+            if (panel.style.display === 'none') {
+                panel.style.display = 'block';
+                btn.textContent = '▲ Sembunyikan';
+                loadMaterial();
+            } else {
+                panel.style.display = 'none';
+                btn.textContent = '▼ Tampilkan';
+            }
+        }
+
+        function editMaterial() {
+            document.getElementById('materialView').style.display = 'none';
+            document.getElementById('materialEdit').style.display = 'block';
+        }
+
+        function cancelEditMaterial() {
+            document.getElementById('materialView').style.display = 'block';
+            document.getElementById('materialEdit').style.display = 'none';
+        }
+
+        function saveMaterial() {
+            const link = document.getElementById('materialLink').value;
+            const text = document.getElementById('materialText').value;
+            localStorage.setItem(STORAGE_KEY_MATERIAL, JSON.stringify({ link, text }));
+            cancelEditMaterial();
+            loadMaterial();
+            alert('Soal & Materi berhasil disimpan!');
         }
     </script>
     <!-- Footer Credit -->
