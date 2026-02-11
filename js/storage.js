@@ -6,6 +6,7 @@ const STORAGE_KEYS = {
   EXAMINER_REWARDS: 'exot_examiner_rewards',
   ACTIVITY_LOG: 'exot_activity_log',
   SETTINGS: 'exot_settings',
+  QUESTIONS: 'exot_questions',
   LAST_ACTIVITY: 'exot_last_activity'
 };
 
@@ -59,6 +60,9 @@ function initStorage() {
   }
   if (!localStorage.getItem(STORAGE_KEYS.SETTINGS)) {
     localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(DEFAULT_SETTINGS));
+  }
+  if (!localStorage.getItem(STORAGE_KEYS.QUESTIONS)) {
+    localStorage.setItem(STORAGE_KEYS.QUESTIONS, JSON.stringify([]));
   }
 
   // FIREBASE SYNC LISTENERS
@@ -798,10 +802,54 @@ function updateScore(studentId, subject, score, examinerId) {
   scores[subject] = score;
   scoredBy[subject] = examinerId;
 
+  // Call updateStudent to save changes
   logActivity('score_update', `Scored ${student.name}: ${subject}=${score}`);
 
+  // Call updateStudent to save changes
   return updateStudent(studentId, { scores, scoredBy });
 }
+
+// ========================================
+// Questions Management
+// ========================================
+
+function getQuestions() {
+  initStorage();
+  return JSON.parse(localStorage.getItem(STORAGE_KEYS.QUESTIONS)) || [];
+}
+
+function saveQuestions(questions) {
+  localStorage.setItem(STORAGE_KEYS.QUESTIONS, JSON.stringify(questions));
+  const ts = Date.now();
+  localStorage.setItem(STORAGE_KEYS.QUESTIONS + '_timestamp', ts);
+  saveToFirebase('questions', questions);
+}
+
+function addQuestion(room, subject, content, type = 'text') {
+  const questions = getQuestions();
+  const newQuestion = {
+    id: generateId(),
+    room: room,
+    subject: subject, // english, arabic, alquran
+    content: content,
+    type: type, // text, link, image
+    createdAt: new Date().toISOString()
+  };
+  questions.push(newQuestion);
+  saveQuestions(questions);
+  return newQuestion;
+}
+
+function deleteQuestion(id) {
+  const questions = getQuestions().filter(q => q.id !== id);
+  saveQuestions(questions);
+}
+
+function getQuestionsByRoomAndSubject(room, subject) {
+  return getQuestions().filter(q => q.room === room && q.subject === subject);
+}
+
+
 
 // ========================================
 // Examiner & Filtering

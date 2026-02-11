@@ -132,6 +132,7 @@
                 <button class="tab-btn active" onclick="switchTab('siswa')" id="btnTabSiswa">👨‍🎓 Siswa</button>
                 <button class="tab-btn" onclick="switchTab('panitia')" id="btnTabPanitia">👔 Panitia</button>
                 <button class="tab-btn" onclick="switchTab('penguji')" id="btnTabPenguji">👨‍🏫 Penguji</button>
+                <button class="tab-btn" onclick="switchTab('soal')" id="btnTabSoal">📝 Soal Ujian</button>
                 <button class="tab-btn" onclick="switchTab('ruangan')" id="btnTabRuangan">🏫 Ruangan</button>
                 <button class="tab-btn" onclick="switchTab('export')" id="btnTabExport">📦 Export</button>
             </div>
@@ -209,6 +210,56 @@ qrn1, pass123, Ustadz Ali, alquran
                 <div style="margin-top: 1.5rem;">
                     <h4>📋 Daftar Penguji (<span id="examinerCount">0</span>)</h4>
                     <div id="examinerList" style="max-height: 300px; overflow-y: auto;"></div>
+                </div>
+            </div>
+
+            <!-- Soal Tab -->
+            <div id="soalTab" class="tab-content">
+                <h4 style="margin-bottom: 1rem;">📝 Kelola Soal Ujian</h4>
+                <div class="card" style="background: var(--bg-surface); padding: 1.5rem; margin-bottom: 1.5rem;">
+                    <h5 style="margin-top: 0;">➕ Tambah Soal Baru</h5>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                        <div>
+                            <label style="font-size: 0.85rem; margin-bottom: 0.5rem; display: block;">Mata
+                                Pelajaran</label>
+                            <select id="questionSubject" class="form-input form-select">
+                                <option value="english">English</option>
+                                <option value="arabic">Arabic</option>
+                                <option value="alquran">Al-Quran</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size: 0.85rem; margin-bottom: 0.5rem; display: block;">Ruangan</label>
+                            <select id="questionRoom" class="form-input form-select">
+                                <!-- Populated by JS -->
+                            </select>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <label style="font-size: 0.85rem; margin-bottom: 0.5rem; display: block;">Isi Soal
+                            (Teks)</label>
+                        <textarea id="questionContent" class="form-input" rows="5"
+                            placeholder="Tuliskan soal ujian di sini..."></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="submitQuestion()">💾 Simpan Soal</button>
+                </div>
+
+                <div>
+                    <h4 style="margin-bottom: 1rem;">📋 Daftar Soal Tersimpan</h4>
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                        <select id="filterQuestionRoom" class="form-input form-select" style="width: auto;"
+                            onchange="loadQuestionList()">
+                            <option value="all">Semua Ruangan</option>
+                        </select>
+                        <select id="filterQuestionSubject" class="form-input form-select" style="width: auto;"
+                            onchange="loadQuestionList()">
+                            <option value="all">Semua Mapel</option>
+                            <option value="english">English</option>
+                            <option value="arabic">Arabic</option>
+                            <option value="alquran">Al-Quran</option>
+                        </select>
+                    </div>
+                    <div id="questionList"></div>
                 </div>
             </div>
 
@@ -432,13 +483,13 @@ qrn1, pass123, Ustadz Ali, alquran
                 console.log('🔄 Data synced, refreshing UI...');
                 updateStats();
                 loadStudentList();
-                if (session.role === 'panitia_utama') {
-                    loadPanitiaList();
-                    loadExaminerList();
-                }
+                loadExaminerList();
             });
 
             if (typeof loadClassList === 'function') loadClassList();
+
+            // Initialize room dropdowns for questions
+            loadQuestionRooms();
 
             document.getElementById('searchStudent').addEventListener('input', loadStudentList);
             document.getElementById('filterType').addEventListener('change', loadStudentList);
@@ -454,12 +505,18 @@ qrn1, pass123, Ustadz Ali, alquran
                     (tab === 'siswa' && i === 0) ||
                     (tab === 'panitia' && i === 1) ||
                     (tab === 'penguji' && i === 2) ||
-                    (tab === 'ruangan' && i === 3) ||
-                    (tab === 'export' && i === 4)
+                    (tab === 'soal' && i === 3) ||
+                    (tab === 'ruangan' && i === 4) ||
+                    (tab === 'export' && i === 5)
                 );
             });
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.getElementById(tab + 'Tab').classList.add('active');
+
+            if (tab === 'soal') {
+                loadQuestionRooms();
+                loadQuestionList();
+            }
         }
 
         function updateStats() {
