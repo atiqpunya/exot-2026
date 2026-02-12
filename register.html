@@ -256,42 +256,54 @@ qrn1, pass123, Ustadz Ali, alquran
                     <div class="grid grid-3" style="gap: 1rem;">
                         <!-- English Zone -->
                         <div class="card upload-card" data-subject="english"
-                            style="border: 2px dashed #3b82f6; background: #eff6ff; text-align: center; cursor: pointer; transition: all 0.2s;"
-                            ondragover="handleDragOver(event, this)" ondragleave="handleDragLeave(event, this)"
-                            ondrop="handleDrop(event, 'english')" onclick="triggerFileUpload('english')">
-                            <img src="https://flagcdn.com/w80/gb.png" alt="UK Flag"
-                                style="height: 48px; margin-bottom: 0.5rem; display: block; margin: 0 auto 0.5rem auto;">
-                            <h6 style="color: #1e40af; margin: 0;">ENGLISH</h6>
-                            <p style="font-size: 0.75rem; color: #1e3a8a;">Drop PDF or Click to Browse<br><span
-                                    style="font-size:0.7rem; opacity:0.8">(Local / Drive • Max 5MB)</span></p>
+                            style="border: 2px dashed #3b82f6; background: #eff6ff; text-align: center; cursor: pointer; transition: all 0.2s; position: relative;"
+                            ondragenter="handleDragOver(event, this)" ondragover="handleDragOver(event, this)"
+                            ondragleave="handleDragLeave(event, this)" ondrop="handleDrop(event, 'english')"
+                            onclick="triggerFileUpload('english')">
+                            <!-- Helper overlay to catch events -->
+                            <div style="pointer-events: none;">
+                                <img src="https://flagcdn.com/w80/gb.png" alt="UK Flag"
+                                    style="height: 48px; margin-bottom: 0.5rem; display: block; margin: 0 auto 0.5rem auto;">
+                                <h6 style="color: #1e40af; margin: 0;">ENGLISH</h6>
+                                <p style="font-size: 0.75rem; color: #1e3a8a;">Drop PDF or Click to Browse<br><span
+                                        style="font-size:0.7rem; opacity:0.8">(Local / Drive • Max 5MB)</span></p>
+                            </div>
                         </div>
 
                         <!-- Arabic Zone -->
                         <div class="card upload-card" data-subject="arabic"
-                            style="border: 2px dashed #10b981; background: #ecfdf5; text-align: center; cursor: pointer; transition: all 0.2s;"
-                            ondragover="handleDragOver(event, this)" ondragleave="handleDragLeave(event, this)"
-                            ondrop="handleDrop(event, 'arabic')" onclick="triggerFileUpload('arabic')">
-                            <img src="https://flagcdn.com/w80/sa.png" alt="Saudi Flag"
-                                style="height: 48px; margin-bottom: 0.5rem; display: block; margin: 0 auto 0.5rem auto;">
-                            <h6 style="color: #065f46; margin: 0;">ARABIC</h6>
-                            <p style="font-size: 0.75rem; color: #064e3b;">Drop PDF or Click to Browse<br><span
-                                    style="font-size:0.7rem; opacity:0.8">(Local / Drive • Max 5MB)</span></p>
+                            style="border: 2px dashed #10b981; background: #ecfdf5; text-align: center; cursor: pointer; transition: all 0.2s; position: relative;"
+                            ondragenter="handleDragOver(event, this)" ondragover="handleDragOver(event, this)"
+                            ondragleave="handleDragLeave(event, this)" ondrop="handleDrop(event, 'arabic')"
+                            onclick="triggerFileUpload('arabic')">
+                            <div style="pointer-events: none;">
+                                <img src="https://flagcdn.com/w80/sa.png" alt="Saudi Flag"
+                                    style="height: 48px; margin-bottom: 0.5rem; display: block; margin: 0 auto 0.5rem auto;">
+                                <h6 style="color: #065f46; margin: 0;">ARABIC</h6>
+                                <p style="font-size: 0.75rem; color: #064e3b;">Drop PDF or Click to Browse<br><span
+                                        style="font-size:0.7rem; opacity:0.8">(Local / Drive • Max 5MB)</span></p>
+                            </div>
                         </div>
 
                         <!-- Al-Quran Zone -->
                         <div class="card upload-card" data-subject="alquran"
-                            style="border: 2px dashed #f59e0b; background: #fffbeb; text-align: center; cursor: pointer; transition: all 0.2s;"
-                            ondragover="handleDragOver(event, this)" ondragleave="handleDragLeave(event, this)"
-                            ondrop="handleDrop(event, 'alquran')" onclick="triggerFileUpload('alquran')">
-                            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📖</div>
-                            <h6 style="color: #92400e; margin: 0;">AL-QURAN</h6>
-                            <p style="font-size: 0.75rem; color: #78350f;">Drop PDF or Click to Browse<br><span
-                                    style="font-size:0.7rem; opacity:0.8">(Local / Drive • Max 5MB)</span></p>
+                            style="border: 2px dashed #f59e0b; background: #fffbeb; text-align: center; cursor: pointer; transition: all 0.2s; position: relative;"
+                            ondragenter="handleDragOver(event, this)" ondragover="handleDragOver(event, this)"
+                            ondragleave="handleDragLeave(event, this)" ondrop="handleDrop(event, 'alquran')"
+                            onclick="triggerFileUpload('alquran')">
+                            <div style="pointer-events: none;">
+                                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📖</div>
+                                <h6 style="color: #92400e; margin: 0;">AL-QURAN</h6>
+                                <p style="font-size: 0.75rem; color: #78350f;">Drop PDF or Click to Browse<br><span
+                                        style="font-size:0.7rem; opacity:0.8">(Local / Drive • Max 5MB)</span></p>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Hidden Input for click-to-upload (Optional/Advanced, mostly relying on DragDrop for now) -->
-                    <input type="file" id="bulkFileInput" multiple accept="application/pdf" style="display: none;"
+                    <!-- Hidden Input for click-to-upload -->
+                    <!-- Changed display:none to opacity:0 to ensure it works on all browsers -->
+                    <input type="file" id="bulkFileInput" multiple accept="application/pdf"
+                        style="position: absolute; width: 0; height: 0; opacity: 0; overflow: hidden; z-index: -1;"
                         onchange="handleSelectedFiles(this.files)">
                 </div>
 
