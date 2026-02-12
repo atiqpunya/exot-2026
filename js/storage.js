@@ -230,49 +230,40 @@ function updateSyncStatus(status) {
   }
 }
 
-// Helper to save to Firebase (Throttled)
-let syncTimeout;
-function saveToFirebase(path, data) {
-  // path example: 'students' -> mapped to 'exot_students' internally or by service
-  // But wait, storage.js calls it with 'students', 'users', etc.
-  // firebaseService.save expects 'exot_students' or 'students'?
-  // Let's check firebase-service.js... it expects the full key like 'exot_students'?
-  // No, I implemented it to take 'exot_students' and strip 'exot_'.
-  // Actually, let's look at storage.js calls:
-  // saveToFirebase('students', students)
-  // saveToFirebase('users', users)
+// saveToFirebase('students', students)
+// saveToFirebase('users', users)
 
-  // My firebase-service.js: 
-  // async save(key, data) { ... const cleanKey = key.replace('exot_', ''); ... }
-  // So if I pass 'students', cleanKey is 'students'. content saved to doc 'students'.
-  // If I pass 'exot_students', cleanKey is 'students'. content saved to doc 'students'.
-  // Consistent.
+// My firebase-service.js: 
+// async save(key, data) { ... const cleanKey = key.replace('exot_', ''); ... }
+// So if I pass 'students', cleanKey is 'students'. content saved to doc 'students'.
+// If I pass 'exot_students', cleanKey is 'students'. content saved to doc 'students'.
+// Consistent.
 
-  clearTimeout(syncTimeout);
-  updateSyncStatus('syncing');
+clearTimeout(syncTimeout);
+updateSyncStatus('syncing');
 
-  syncTimeout = setTimeout(() => {
-    if (window.firebaseService) {
-      // We use the full storage key format for consistency with initSync
-      const fullKey = path.startsWith('exot_') ? path : `exot_${path}`;
+syncTimeout = setTimeout(() => {
+  if (window.firebaseService) {
+    // We use the full storage key format for consistency with initSync
+    const fullKey = path.startsWith('exot_') ? path : `exot_${path}`;
 
-      // Get local timestamp
-      const ts = parseInt(localStorage.getItem(fullKey + '_timestamp') || Date.now());
+    // Get local timestamp
+    const ts = parseInt(localStorage.getItem(fullKey + '_timestamp') || Date.now());
 
-      window.firebaseService.save(fullKey, data, ts)
-        .then(res => {
-          if (res && res.success) updateSyncStatus('online');
-          else updateSyncStatus('error');
-        })
-        .catch(err => {
-          console.error(err);
-          updateSyncStatus('offline');
-        });
-    } else {
-      console.warn('Firebase service not ready');
-      updateSyncStatus('offline');
-    }
-  }, 1000); // 1 second debounce
+    window.firebaseService.save(fullKey, data, ts)
+      .then(res => {
+        if (res && res.success) updateSyncStatus('online');
+        else updateSyncStatus('error');
+      })
+      .catch(err => {
+        console.error(err);
+        updateSyncStatus('offline');
+      });
+  } else {
+    console.warn('Firebase service not ready');
+    updateSyncStatus('offline');
+  }
+}, 1000); // 1 second debounce
 }
 
 // ========================================

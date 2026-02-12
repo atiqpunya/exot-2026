@@ -1852,16 +1852,12 @@ qrn1, pass123, Ustadz Ali, alquran
 
     <!-- App Scripts (Compat Mode) -->
     <script src="js/firebase-config.js?v=2.5"></script>
-    <script src="js/firebase-service.js?v=2.5"></script>
+    <script src="js/api-service.js"></script>
     <script>
-        // Auto Sign-in Anonymously for Storage Access
+        // Init Sync
         document.addEventListener('DOMContentLoaded', () => {
-            if (window.auth) {
-                window.auth.signInAnonymously()
-                    .then(() => console.log("✅ Signed in anonymously"))
-                    .catch(error => console.error("❌ Auth Error:", error));
-            } else {
-                console.warn("⚠️ Auth not loaded - Uploads may fail");
+            if (window.apiService) {
+                window.apiService.initSync();
             }
         });
     </script>
