@@ -79,6 +79,38 @@ CREATE TABLE IF NOT EXISTS `settings` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
+-- Table structure for table `activity_log`
+--
+
+CREATE TABLE IF NOT EXISTS `activity_log` (
+  `id` varchar(50) NOT NULL,
+  `action` varchar(50) NOT NULL,
+  `user_id` varchar(50) DEFAULT NULL,
+  `user_name` varchar(100) DEFAULT NULL,
+  `details` text DEFAULT NULL,
+  `timestamp` timestamp DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Table structure for table `examiner_rewards`
+--
+
+CREATE TABLE IF NOT EXISTS `examiner_rewards` (
+  `id` varchar(50) NOT NULL,
+  `examiner_id` varchar(50) NOT NULL,
+  `examiner_name` varchar(100) NOT NULL,
+  `subject` varchar(50) DEFAULT NULL,
+  `qr_code` varchar(50) NOT NULL,
+  `generated_at` timestamp DEFAULT current_timestamp(),
+  `claimed` tinyint(1) DEFAULT 0,
+  `claimed_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `qr_code` (`qr_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+--
 -- Default Data
 --
 

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -37,7 +37,7 @@
     <header class="header">
         <div class="container">
             <div class="header-content">
-                <a href="index.html" class="logo"><span class="logo-icon">📝</span> EXOT</a>
+                <a href="index.html" class="logo"><span class="logo-icon">??</span> EXOT</a>
                 <nav class="nav" id="navMenu"></nav>
                 <div style="margin-left: auto; display: flex; align-items: center; gap: 12px; text-align: right;">
                     <span style="font-size: 0.7rem; color: #64748b; line-height: 1.2;">
@@ -52,7 +52,7 @@
 
     <div id="authRequired" class="container" style="padding: 3rem; display: none;">
         <div class="card" style="max-width: 400px; margin: 0 auto; text-align: center;">
-            <h2>🔐 Login Diperlukan</h2>
+            <h2>?? Login Diperlukan</h2>
             <p>Halaman ini untuk Penguji Arabic atau Panitia Utama</p>
             <a href="index.html?redirect=exam-arabic.html" class="btn btn-primary" style="margin-top: 1rem;">Login</a>
         </div>
@@ -60,7 +60,7 @@
 
     <main id="mainContent" class="container" style="padding: 1.5rem; display: none;">
         <div class="subject-header fade-in">
-            <h1 style="margin: 0; font-size: 1.8rem;">📕 Penilaian Arabic</h1>
+            <h1 style="margin: 0; font-size: 1.8rem;">?? Penilaian Arabic</h1>
             <p style="margin: 0.5rem 0 0; opacity: 0.9;">Input nilai siswa untuk mata pelajaran Arabic</p>
         </div>
 
@@ -68,10 +68,10 @@
         <div class="card fade-in" style="margin-bottom: 1.5rem; border-left: 4px solid var(--primary);">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 1.2rem;">📄</span>
+                    <span style="font-size: 1.2rem;">??</span>
                     <h3 style="margin: 0; font-size: 1.1rem;">Soal & Materi Ujian</h3>
                 </div>
-                <button id="toggleExamMaterialBtn" class="btn btn-sm btn-secondary" onclick="toggleExamMaterial()">▼
+                <button id="toggleExamMaterialBtn" class="btn btn-sm btn-secondary" onclick="toggleExamMaterial()">?
                     Tampilkan</button>
             </div>
 
@@ -110,7 +110,7 @@
 
         <div class="card fade-in" style="margin-bottom: 1.5rem;">
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
-                <input type="text" id="searchInput" class="form-input" placeholder="🔍 Cari nama..."
+                <input type="text" id="searchInput" class="form-input" placeholder="?? Cari nama..."
                     style="width: 200px;">
                 <select id="filterClass" class="form-input form-select" style="width: auto;"></select>
                 <select id="filterStatus" class="form-input form-select" style="width: auto;">
@@ -131,7 +131,7 @@
     </main>
 
     <div class="floating-auth">
-        <button class="btn btn-secondary" onclick="toggleAuth()" id="floatingBtn">🔐 Login</button>
+        <button class="btn btn-secondary" onclick="toggleAuth()" id="floatingBtn">?? Login</button>
     </div>
 
     <script src="js/storage.js"></script>
@@ -155,7 +155,7 @@
             }
 
             document.getElementById('mainContent').style.display = 'block';
-            document.getElementById('floatingBtn').innerHTML = '🚪 Logout';
+            document.getElementById('floatingBtn').innerHTML = '?? Logout';
 
             const nav = document.getElementById('navMenu');
             if (currentSession.role === 'panitia_utama') {
@@ -170,7 +170,7 @@
             } else {
                 nav.innerHTML = `
           <a href="exam-arabic.html" class="nav-link active">Input Nilai</a>
-          <a href="examiner-reward.html" class="nav-link">🎁 Reward</a>
+          <a href="examiner-reward.html" class="nav-link">?? Reward</a>
         `;
             }
 
@@ -236,17 +236,17 @@
             // Debug info
             const allRegistered = getStudents();
             const allAttended = getAttendedStudents();
-            console.log('📊 DEBUG: Total registered:', allRegistered.length, 'Attended:', allAttended.length, 'Showing:', students.length);
+            console.log('?? DEBUG: Total registered:', allRegistered.length, 'Attended:', allAttended.length, 'Showing:', students.length);
 
             if (!students.length) {
                 const showAll = document.getElementById('showAllStudents')?.checked;
                 let message = '';
                 if (allRegistered.length === 0) {
-                    message = `<div class="empty-state"><div class="empty-state-icon">📝</div><p><strong>Belum ada siswa terdaftar</strong></p><p style="color: var(--text-muted); font-size: 0.9rem;">Registrasi siswa dulu di <a href="register.html">Data & Registrasi</a></p></div>`;
+                    message = `<div class="empty-state"><div class="empty-state-icon">??</div><p><strong>Belum ada siswa terdaftar</strong></p><p style="color: var(--text-muted); font-size: 0.9rem;">Registrasi siswa dulu di <a href="register.html">Data & Registrasi</a></p></div>`;
                 } else if (!showAll && allAttended.length === 0) {
-                    message = `<div class="empty-state"><div class="empty-state-icon">📭</div><p><strong>Belum ada siswa yang hadir</strong></p><p style="color: var(--text-muted); font-size: 0.9rem;">Centang ☑️ "Tampilkan Semua Siswa" untuk melihat ${allRegistered.length} siswa terdaftar</p></div>`;
+                    message = `<div class="empty-state"><div class="empty-state-icon">??</div><p><strong>Belum ada siswa yang hadir</strong></p><p style="color: var(--text-muted); font-size: 0.9rem;">Centang ?? "Tampilkan Semua Siswa" untuk melihat ${allRegistered.length} siswa terdaftar</p></div>`;
                 } else {
-                    message = `<div class="empty-state"><div class="empty-state-icon">📭</div><p>Tidak ada siswa yang sesuai filter</p></div>`;
+                    message = `<div class="empty-state"><div class="empty-state-icon">??</div><p>Tidak ada siswa yang sesuai filter</p></div>`;
                 }
                 container.innerHTML = message;
                 return;
@@ -270,16 +270,16 @@
                   <td>${i + 1}</td>
                   <td>
                     <strong>${s.name}</strong>
-                    <button class="btn btn-xs btn-secondary" style="margin-left:5px; padding:2px 6px; font-size:10px;" onclick="viewStudentQuestion('${s.name}', '${s.class}')">📄 Lihat Soal</button>
+                    <button class="btn btn-xs btn-secondary" style="margin-left:5px; padding:2px 6px; font-size:10px;" onclick="viewStudentQuestion('${s.name}', '${s.class}')">?? Lihat Soal</button>
                   </td>
                   <td>${s.class}</td>
                   <td>
                     <div class="score-cell">
                       <input type="number" id="score-${s.id}" class="form-input score-input" value="${s.scores[SUBJECT] ?? ''}" min="0" max="100" placeholder="0-100">
-                      ${s.scores[SUBJECT] !== null ? '<span class="badge badge-success">✓</span>' : ''}
+                      ${s.scores[SUBJECT] !== null ? '<span class="badge badge-success">?</span>' : ''}
                     </div>
                   </td>
-                  <td><button class="btn btn-sm btn-primary" onclick="saveScore('${s.id}')">💾 Simpan</button></td>
+                  <td><button class="btn btn-sm btn-primary" onclick="saveScore('${s.id}')">?? Simpan</button></td>
                 </tr>
               `).join('')}
             </tbody>
@@ -330,7 +330,7 @@
             if (!questions.length) {
                 container.innerHTML = `
                     <div style="text-align: center; padding: 2rem; border: 1px dashed var(--border-color); border-radius: 8px; color: var(--text-muted);">
-                        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">📭</div>
+                        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">??</div>
                         <p>Belum ada soal untuk <strong>${title}</strong></p>
                         ${studentName ? '<button class="btn btn-sm btn-secondary" onclick="loadExamQuestions()">Tampilkan Soal Umum</button>' : ''}
                     </div>
@@ -354,7 +354,7 @@
                     contentHtml = `
                         <iframe src="${url}" style="width: 100%; height: 600px; border: 1px solid var(--border-color); border-radius: 4px; background: #fff;"></iframe>
                         <div style="margin-top: 0.5rem; text-align: right;">
-                            <a href="${q.content}" target="_blank" class="btn btn-sm btn-secondary">🔗 Buka di Tab Baru</a>
+                            <a href="${q.content}" target="_blank" class="btn btn-sm btn-secondary">?? Buka di Tab Baru</a>
                         </div>
                    `;
                 } else {
@@ -379,7 +379,7 @@
             const btn = document.getElementById('toggleExamMaterialBtn');
             if (panel.style.display === 'none') {
                 panel.style.display = 'block';
-                btn.textContent = '▲ Sembunyikan';
+                btn.textContent = '? Sembunyikan';
             }
 
             // 2. Set the room select to student's class
@@ -400,11 +400,11 @@
             const btn = document.getElementById('toggleExamMaterialBtn');
             if (panel.style.display === 'none') {
                 panel.style.display = 'block';
-                btn.textContent = '▲ Sembunyikan';
+                btn.textContent = '? Sembunyikan';
                 loadExamRooms();
             } else {
                 panel.style.display = 'none';
-                btn.textContent = '▼ Tampilkan';
+                btn.textContent = '? Tampilkan';
             }
         }
     </script>
@@ -416,7 +416,7 @@
     <script src="js/firebase-firestore-compat.js"></script>
     <script src="js/firebase-storage-compat.js"></script>
     <script src="js/firebase-config.js?v=2.5"></script>
-    <script src="js/firebase-service.js?v=2.5"></script>
+    <script src="js/api-service.js?v=2.5"></script>
     <!-- <script type="module" src="js/firebase-config.js"></script> -->
 </body>
 

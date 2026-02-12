@@ -21,19 +21,20 @@ try {
         case 'getAll':
             handleGetAll($pdo);
             break;
-            
+
         case 'save':
             handleSave($pdo);
             break;
-            
+
         case 'uploadFile':
             handleUploadFile($pdo);
             break;
-            
+
         default:
             throw new Exception("Invalid Action: $action");
     }
-} catch (Exception $e) {
+}
+catch (Exception $e) {
     http_response_code(400);
     echo json_encode(['error' => $e->getMessage()]);
 }
@@ -42,9 +43,10 @@ try {
 // Handlers
 // ==========================================
 
-function handleGetAll($pdo) {
+function handleGetAll($pdo)
+{
     $data = [];
-    
+
     // Fetch Students
     $stmt = $pdo->query("SELECT * FROM students");
     $students = $stmt->fetchAll();
@@ -63,31 +65,58 @@ function handleGetAll($pdo) {
         $u['assigned_classes'] = json_decode($u['assigned_classes'], true);
     }
     $data['users'] = $users;
-    
+
     // Fetch Questions
     $stmt = $pdo->query("SELECT * FROM questions");
     $data['questions'] = $stmt->fetchAll();
-    
+
     // Fetch Classes
     $stmt = $pdo->query("SELECT name FROM classes");
     $data['classes'] = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
+    // Fetch Activity Log
+    $stmt = $pdo->query("SELECT * FROM activity_log ORDER BY timestamp DESC LIMIT 100");
+    $data['activity_log'] = $stmt->fetchAll();
+
+    // Fetch Examiner Rewards
+    $stmt = $pdo->query("SELECT * FROM examiner_rewards");
+    $data['examiner_rewards'] = $stmt->fetchAll();
+    foreach ($data['examiner_rewards'] as &$r) {
+        $r['claimed'] = (bool)$r['claimed'];
+    }
+
+    // Fetch Settings
+    $stmt = $pdo->query("SELECT * FROM settings");
+    $settings = $stmt->fetchAll();
+    $mappedSettings = [];
+    foreach ($settings as $s) {
+        $val = $s['value'];
+        // Try to decode if looks like JSON
+        if (!empty($val) && ($val[0] === '{' || $val[0] === '[') && ($decoded = json_decode($val, true)) !== null) {
+            $val = $decoded;
+        }
+        $mappedSettings[$s['key_name']] = $val;
+    }
+    $data['settings'] = $mappedSettings;
+
     echo json_encode($data);
 }
 
-function handleSave($pdo) {
+function handleSave($pdo)
+{
     // Get JSON Input
     $input = json_decode(file_get_contents('php://input'), true);
-    
+
     if (!$input) {
-         // Fallback to POST fields if form-data
-         $input = $_POST;
+        // Fallback to POST fields if form-data
+        $input = $_POST;
     }
 
     $type = $input['type'] ?? '';
     $data = $input['data'] ?? null;
-    
-    if (!$data) throw new Exception("No data provided");
+
+    if (!$data)
+        throw new Exception("No data provided");
 
     $pdo->beginTransaction();
 
@@ -100,7 +129,7 @@ function handleSave($pdo) {
             // The existing Frontend sends the WHOLE array for 'students'.
             // Efficient: DELETE ALL and INSERT ALL? No, risky.
             // Better: Upsert (INSERT INTO ... ON DUPLICATE KEY UPDATE)
-            
+
             // To be safe with the current frontend sending FULL ARRAY, 
             // we first check if it IS an array
             if (is_array($data)) {
@@ -108,16 +137,16 @@ function handleSave($pdo) {
                     $jsonScores = json_encode($row['scores'] ?? []);
                     $jsonScoredBy = json_decode(json_encode($row['scored_by'] ?? []), true); // Ensure format
                     // Map frontend keys to DB columns
-                     // Frontend: scoredBy -> DB: scored_by
-                     $jsonScoredBy = json_encode($row['scoredBy'] ?? []);
-                    
+                    // Frontend: scoredBy -> DB: scored_by
+                    $jsonScoredBy = json_encode($row['scoredBy'] ?? []);
+
                     $sql = "INSERT INTO students (id, name, class, type, qr_code, attended, attended_at, scores, scored_by)
                             VALUES (:id, :name, :class, :type, :qr, :att, :att_at, :scores, :scored_by)
                             ON DUPLICATE KEY UPDATE
                             name=VALUES(name), class=VALUES(class), type=VALUES(type), 
                             attended=VALUES(attended), attended_at=VALUES(attended_at),
                             scores=VALUES(scores), scored_by=VALUES(scored_by)";
-                    
+
                     $stmt = $pdo->prepare($sql);
                     $stmt->execute([
                         ':id' => $row['id'],
@@ -130,7 +159,7 @@ function handleSave($pdo) {
                         ':scores' => json_encode($row['scores'] ?? []),
                         ':scored_by' => json_encode($row['scoredBy'] ?? [])
                     ]);
-                    
+
                     // Also track Class
                     if (!empty($row['class'])) {
                         $pdo->query("INSERT IGNORE INTO classes (name) VALUES ('" . $row['class'] . "')");
@@ -138,7 +167,7 @@ function handleSave($pdo) {
                 }
             }
         }
-        
+
         elseif ($type === 'users') {
             if (is_array($data)) {
                 foreach ($data as $row) {
@@ -147,7 +176,7 @@ function handleSave($pdo) {
                             ON DUPLICATE KEY UPDATE
                             password=VALUES(password), name=VALUES(name), role=VALUES(role),
                             subject=VALUES(subject), assigned_classes=VALUES(assigned_classes)";
-                            
+
                     $stmt = $pdo->prepare($sql);
                     $stmt->execute([
                         ':id' => $row['id'],
@@ -162,17 +191,17 @@ function handleSave($pdo) {
                 }
             }
         }
-        
+
         elseif ($type === 'questions') {
-             if (is_array($data)) {
-                 // First, maybe clear existing? Or just upsert.
-                 // Let's upsert.
-                 foreach ($data as $row) {
+            if (is_array($data)) {
+                // First, maybe clear existing? Or just upsert.
+                // Let's upsert.
+                foreach ($data as $row) {
                     $sql = "INSERT INTO questions (id, room, subject, content, type, target_student, storage_path)
                             VALUES (:id, :room, :subj, :cont, :type, :tgt, :path)
                             ON DUPLICATE KEY UPDATE
                             room=VALUES(room), subject=VALUES(subject), content=VALUES(content), storage_path=VALUES(storage_path)";
-                            
+
                     $stmt = $pdo->prepare($sql);
                     $stmt->execute([
                         ':id' => $row['id'],
@@ -183,56 +212,114 @@ function handleSave($pdo) {
                         ':tgt' => $row['targetStudent'] ?? null,
                         ':path' => $row['storagePath'] ?? null
                     ]);
-                 }
-             }
+                }
+            }
         }
-        
+
+        elseif ($type === 'activity_log') {
+            if (is_array($data)) {
+                foreach ($data as $row) {
+                    $sql = "INSERT INTO activity_log (id, action, user_id, user_name, details, timestamp)
+                            VALUES (:id, :act, :uid, :uname, :det, :ts)
+                            ON DUPLICATE KEY UPDATE action=VALUES(action), details=VALUES(details)";
+
+                    $stmt = $pdo->prepare($sql);
+                    $stmt->execute([
+                        ':id' => $row['id'],
+                        ':act' => $row['action'],
+                        ':uid' => $row['userId'] ?? 'system',
+                        ':uname' => $row['userName'] ?? 'System',
+                        ':det' => $row['details'] ?? '',
+                        ':ts' => date('Y-m-d H:i:s', strtotime($row['timestamp']))
+                    ]);
+                }
+            }
+        }
+
+        elseif ($type === 'examiner_rewards') {
+            if (is_array($data)) {
+                foreach ($data as $row) {
+                    $sql = "INSERT INTO examiner_rewards (id, examiner_id, examiner_name, subject, qr_code, generated_at, claimed, claimed_at)
+                            VALUES (:id, :eid, :ename, :subj, :qr, :gen, :cld, :cld_at)
+                            ON DUPLICATE KEY UPDATE claimed=VALUES(claimed), claimed_at=VALUES(claimed_at)";
+
+                    $stmt = $pdo->prepare($sql);
+                    $stmt->execute([
+                        ':id' => $row['id'],
+                        ':eid' => $row['examinerId'],
+                        ':ename' => $row['examinerName'],
+                        ':subj' => $row['subject'] ?? null,
+                        ':qr' => $row['qrCode'],
+                        ':gen' => date('Y-m-d H:i:s', strtotime($row['generatedAt'])),
+                        ':cld' => !empty($row['claimed']) ? 1 : 0,
+                        ':cld_at' => !empty($row['claimedAt']) ? date('Y-m-d H:i:s', strtotime($row['claimedAt'])) : null
+                    ]);
+                }
+            }
+        }
+
+        elseif ($type === 'settings') {
+            // Settings is a special case, it's a KV store
+            foreach ($data as $key => $val) {
+                $sql = "INSERT INTO settings (key_name, value) VALUES (:k, :v)
+                         ON DUPLICATE KEY UPDATE value=VALUES(value)";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([
+                    ':k' => $key,
+                    ':v' => is_array($val) ? json_encode($val) : $val
+                ]);
+            }
+        }
+
         elseif ($type === 'exot_connection_test') {
-            // Do nothing, just verify connection which is implicit
+        // Do nothing, just verify connection which is implicit
         }
 
         $pdo->commit();
         echo json_encode(['success' => true]);
 
-    } catch (Exception $e) {
+    }
+    catch (Exception $e) {
         $pdo->rollBack();
         throw $e;
     }
 }
 
-function handleUploadFile($pdo) {
+function handleUploadFile($pdo)
+{
     if (!isset($_FILES['file'])) {
         throw new Exception("No file uploaded");
     }
 
     $file = $_FILES['file'];
     $subject = $_POST['subject'] ?? 'unknown';
-    
+
     // Directory: uploads/english/
     $uploadDir = __DIR__ . '/uploads/' . $subject . '/';
     if (!is_dir($uploadDir)) {
         mkdir($uploadDir, 0755, true);
     }
-    
+
     $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
     $filename = time() . '_' . preg_replace('/[^a-zA-Z0-9]/', '_', pathinfo($file['name'], PATHINFO_FILENAME)) . '.' . $ext;
     $targetPath = $uploadDir . $filename;
-    
+
     if (move_uploaded_file($file['tmp_name'], $targetPath)) {
         // Return public URL
         // Assuming API is at domain.com/api/, file is at domain.com/api/uploads/...
         $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
         $domain = $_SERVER['HTTP_HOST'];
         $path = dirname($_SERVER['PHP_SELF']); // /api
-        
+
         $publicUrl = "$protocol://$domain$path/uploads/$subject/$filename";
-        
+
         echo json_encode([
             'success' => true,
             'url' => $publicUrl,
             'originalName' => $file['name']
         ]);
-    } else {
+    }
+    else {
         throw new Exception("Failed to move uploaded file");
     }
 }

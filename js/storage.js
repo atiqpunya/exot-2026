@@ -65,22 +65,22 @@ function initStorage() {
     localStorage.setItem(STORAGE_KEYS.QUESTIONS, JSON.stringify([]));
   }
 
-  // FIREBASE SYNC LISTENERS
-  const setupFirebaseSync = () => {
-    // Wait for firebaseService to be available (it's a module, might load later)
+  // API SYNC LISTENERS
+  const setupApiSync = () => {
+    // Wait for apiService to be available
     const checkService = setInterval(() => {
-      if (window.firebaseService) {
+      if (window.apiService) {
         clearInterval(checkService);
-        console.log('🔥 Firebase Service initialized');
+        console.log('🔄 API Service initialized');
         updateSyncStatus('online'); // Assume online if loaded
 
-        // Listen for real-time updates
-        window.firebaseService.initSync();
+        // Start polling for updates
+        window.apiService.initSync();
       }
     }, 500);
   };
 
-  setupFirebaseSync();
+  setupApiSync();
   // Auto-heal: Ensure all students have a qrCode
   let modified = false;
   const students = JSON.parse(localStorage.getItem(STORAGE_KEYS.STUDENTS)) || [];
@@ -230,40 +230,41 @@ function updateSyncStatus(status) {
   }
 }
 
-// saveToFirebase('students', students)
-// saveToFirebase('users', users)
+let syncTimeout = null;
 
-// My firebase-service.js: 
-// async save(key, data) { ... const cleanKey = key.replace('exot_', ''); ... }
-// So if I pass 'students', cleanKey is 'students'. content saved to doc 'students'.
-// If I pass 'exot_students', cleanKey is 'students'. content saved to doc 'students'.
-// Consistent.
+function saveToFirebase(path, data) {
+  if (!path || !data) return;
 
-clearTimeout(syncTimeout);
-updateSyncStatus('syncing');
+  // Use debounced sync to server
+  clearTimeout(syncTimeout);
+  updateSyncStatus('syncing');
 
-syncTimeout = setTimeout(() => {
-  if (window.firebaseService) {
-    // We use the full storage key format for consistency with initSync
-    const fullKey = path.startsWith('exot_') ? path : `exot_${path}`;
+  syncTimeout = setTimeout(() => {
+    if (window.apiService) {
+      // Map legacy path to API expected key
+      // The apiService already does some mapping, but we handle it here too for clarity
+      const fullKey = path.startsWith('exot_') ? path : `exot_${path}`;
 
-    // Get local timestamp
-    const ts = parseInt(localStorage.getItem(fullKey + '_timestamp') || Date.now());
-
-    window.firebaseService.save(fullKey, data, ts)
-      .then(res => {
-        if (res && res.success) updateSyncStatus('online');
-        else updateSyncStatus('error');
-      })
-      .catch(err => {
-        console.error(err);
-        updateSyncStatus('offline');
-      });
-  } else {
-    console.warn('Firebase service not ready');
-    updateSyncStatus('offline');
-  }
-}, 1000); // 1 second debounce
+      window.apiService.save(fullKey, data)
+        .then(res => {
+          if (res && !res.error) {
+            updateSyncStatus('online');
+            // Update local timestamp to avoid immediate re-sync from server
+            localStorage.setItem(fullKey + '_timestamp', Date.now());
+          } else {
+            console.error("API Save Error:", res.error);
+            updateSyncStatus('error');
+          }
+        })
+        .catch(err => {
+          console.error("Sync Error:", err);
+          updateSyncStatus('offline');
+        });
+    } else {
+      console.warn('API service not ready');
+      updateSyncStatus('offline');
+    }
+  }, 1000); // 1 second debounce
 }
 
 // ========================================

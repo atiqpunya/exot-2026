@@ -14,7 +14,7 @@ const STATIC_ASSETS = [
     '/css/styles.css',
     '/js/storage.js',
     '/js/firebase-config.js',
-    '/js/firebase-service.js',
+    '/js/api-service.js',
     '/js/firebase-app-compat.js',
     '/js/firebase-firestore-compat.js',
     '/img/logo-alwildan.png',
