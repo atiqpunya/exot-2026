@@ -1263,10 +1263,11 @@ qrn1, pass123, Ustadz Ali, alquran
                 }
 
                 // Create a timeout to prevent hanging forever
+                const timeoutDuration = 90000; // 90 seconds
                 const timeout = setTimeout(() => {
                     if (task) task.cancel();
-                    reject(new Error("Upload timed out (30s). Cek koneksi internet."));
-                }, 30000);
+                    reject(new Error(`Upload timed out (${timeoutDuration / 1000}s). Cek koneksi internet.`));
+                }, timeoutDuration);
 
                 const task = window.firebaseService.uploadFile(path, file);
 
@@ -1313,96 +1314,103 @@ qrn1, pass123, Ustadz Ali, alquran
             progressContainer.style.display = 'block';
             progressList.innerHTML = ''; // Clear previous
 
-            for (const file of files) {
-                if (file.type !== 'application/pdf') {
-                    addProgressItem(file.name, '❌ Bukan file PDF', 'error');
-                    continue;
-                }
-
-                // Create Progress Item
-                const progressItem = addProgressItem(file.name, '⏳ Memulai upload...', 'pending');
-
-                // Parse Filename: ROOM-NAME.pdf (Subject is passed implicitly)
-                const filename = file.name.replace('.pdf', '');
-                const parts = filename.split('-');
-
-                let room, name;
-
-                // Heuristic: If 3 parts, assume SUBJECT-ROOM-NAME. If 2, ROOM-NAME.
-                if (parts.length >= 3) {
-                    // Legacy: ENGLISH-7A-AHMAD -> Ignore index 0
-                    room = parts[1].trim();
-                    name = parts.slice(2).join('-').trim(); // Join rest as name
-                } else if (parts.length === 2) {
-                    // New: 7A-AHMAD
-                    room = parts[0].trim();
-                    name = parts[1].trim();
-                } else {
-                    updateProgressItem(progressItem, '❌ Format nama file salah. Gunakan: RUANGAN-NAMA.pdf', 'error');
-                    continue;
-                }
-
-                // Find Student ID
-                const students = getStudents();
-                const student = students.find(s =>
-                    s.name.toLowerCase() === name.toLowerCase() &&
-                    s.class.toLowerCase() === room.toLowerCase()
-                );
-
-                if (!student) {
-                    updateProgressItem(progressItem, `❌ Siswa tidak ditemukan: ${name} di ${room}`, 'error');
-                    continue;
-                }
-
-                // Upload to Firebase
-                try {
-                    const authText = window.currentUser ? `(User: ${window.currentUser.uid.substring(0, 4)}..)` : '(No Auth!)';
-                    updateProgressItem(progressItem, `🚀 Mengupload... ${authText}`, 'loading');
-
-                    // Allow retry if auth is missing, but don't block if it fails (e.g. auth not configured)
-                    if (!window.currentUser && window.auth) {
-                        try {
-                            await window.auth.signInAnonymously();
-                            console.log("✅ Auto-signin success");
-                        } catch (authErr) {
-                            console.warn("⚠️ Auto-signin failed, trying upload anyway:", authErr);
-                            // We proceed to uploadPDFToFirebase. If storage requires auth, it will fail there.
-                            // If storage is public, it will succeed.
-                        }
-                    }
-
-                    // Path: questions/SUBJECT/ROOM/FILENAME
-                    const path = `questions/${subject}/${room}/${file.name}`;
-
-                    const downloadURL = await uploadPDFToFirebase(file, path, (progress) => {
-                        updateProgressItem(progressItem, `🚀 Uploading... ${Math.round(progress)}%`, 'loading');
-                        // Update bar width manually if needed or via helper
-                        const el = document.getElementById(progressItem);
-                        const bar = el?.querySelector('.progress-bar');
-                        if (bar) {
-                            bar.style.width = `${progress}%`;
-                            bar.style.transition = 'width 0.1s linear';
-                        }
-                    });
-
-                    // Add to Database (Storage.js)
-                    // Signature: addQuestion(room, subject, content, type, targetStudent, storagePath)
-                    addQuestion(room, subject, downloadURL, 'pdf', student.name, path);
-
-                    updateProgressItem(progressItem, `✅ Berhasil! Disimpan untuk ${name}`, 'success');
-
-                } catch (err) {
-                    console.error(err);
-                    let msg = `❌ Gagal upload: ${err.message}`;
-                    if (err.message.includes('timed out')) {
-                        msg = '❌ Koneksi lambat/terputus. Coba lagi.';
-                    }
-                    updateProgressItem(progressItem, msg, 'error');
-                    alert(msg + "\n\nPastikan internet lancar dan file tidak corrupt.");
-                }
+            if (file.type !== 'application/pdf') {
+                addProgressItem(file.name, '❌ Bukan file PDF', 'error');
+                continue;
             }
 
-            loadQuestionList(); // Refresh list
+            // Limit File Size to 5MB
+            const MAX_SIZE_MB = 5;
+            if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+                addProgressItem(file.name, `❌ File terlalu besar (> ${MAX_SIZE_MB}MB)`, 'error');
+                alert(`File ${file.name} terlalu besar! Maksimal ${MAX_SIZE_MB}MB.`);
+                continue;
+            }
+
+            // Create Progress Item
+            const progressItem = addProgressItem(file.name, '⏳ Memulai upload...', 'pending');
+
+            // Parse Filename: ROOM-NAME.pdf (Subject is passed implicitly)
+            const filename = file.name.replace('.pdf', '');
+            const parts = filename.split('-');
+
+            let room, name;
+
+            // Heuristic: If 3 parts, assume SUBJECT-ROOM-NAME. If 2, ROOM-NAME.
+            if (parts.length >= 3) {
+                // Legacy: ENGLISH-7A-AHMAD -> Ignore index 0
+                room = parts[1].trim();
+                name = parts.slice(2).join('-').trim(); // Join rest as name
+            } else if (parts.length === 2) {
+                // New: 7A-AHMAD
+                room = parts[0].trim();
+                name = parts[1].trim();
+            } else {
+                updateProgressItem(progressItem, '❌ Format nama file salah. Gunakan: RUANGAN-NAMA.pdf', 'error');
+                continue;
+            }
+
+            // Find Student ID
+            const students = getStudents();
+            const student = students.find(s =>
+                s.name.toLowerCase() === name.toLowerCase() &&
+                s.class.toLowerCase() === room.toLowerCase()
+            );
+
+            if (!student) {
+                updateProgressItem(progressItem, `❌ Siswa tidak ditemukan: ${name} di ${room}`, 'error');
+                continue;
+            }
+
+            // Upload to Firebase
+            try {
+                const authText = window.currentUser ? `(User: ${window.currentUser.uid.substring(0, 4)}..)` : '(No Auth!)';
+                updateProgressItem(progressItem, `🚀 Mengupload... ${authText}`, 'loading');
+
+                // Allow retry if auth is missing, but don't block if it fails (e.g. auth not configured)
+                if (!window.currentUser && window.auth) {
+                    try {
+                        await window.auth.signInAnonymously();
+                        console.log("✅ Auto-signin success");
+                    } catch (authErr) {
+                        console.warn("⚠️ Auto-signin failed, trying upload anyway:", authErr);
+                        // We proceed to uploadPDFToFirebase. If storage requires auth, it will fail there.
+                        // If storage is public, it will succeed.
+                    }
+                }
+
+                // Path: questions/SUBJECT/ROOM/FILENAME
+                const path = `questions/${subject}/${room}/${file.name}`;
+
+                const downloadURL = await uploadPDFToFirebase(file, path, (progress) => {
+                    updateProgressItem(progressItem, `🚀 Uploading... ${Math.round(progress)}%`, 'loading');
+                    // Update bar width manually if needed or via helper
+                    const el = document.getElementById(progressItem);
+                    const bar = el?.querySelector('.progress-bar');
+                    if (bar) {
+                        bar.style.width = `${progress}%`;
+                        bar.style.transition = 'width 0.1s linear';
+                    }
+                });
+
+                // Add to Database (Storage.js)
+                // Signature: addQuestion(room, subject, content, type, targetStudent, storagePath)
+                addQuestion(room, subject, downloadURL, 'pdf', student.name, path);
+
+                updateProgressItem(progressItem, `✅ Berhasil! Disimpan untuk ${name}`, 'success');
+
+            } catch (err) {
+                console.error(err);
+                let msg = `❌ Gagal upload: ${err.message}`;
+                if (err.message.includes('timed out')) {
+                    msg = '❌ Koneksi lambat/terputus. Coba lagi.';
+                }
+                updateProgressItem(progressItem, msg, 'error');
+                alert(msg + "\n\nPastikan internet lancar dan file tidak corrupt.");
+            }
+        }
+
+        loadQuestionList(); // Refresh list
         }
 
         function addProgressItem(filename, status, type) {
