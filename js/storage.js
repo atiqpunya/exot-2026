@@ -1045,7 +1045,8 @@ function getRewardByQR(qrCode) {
 
 function login(username, password) {
   const users = getUsers();
-  const user = users.find(u => u.username === username && u.password === password);
+  // Case-insensitive username, exact password
+  const user = users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
 
   if (user) {
     const session = {

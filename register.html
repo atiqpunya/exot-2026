@@ -1039,11 +1039,12 @@ qrn1, pass123, Ustadz Ali, alquran
             container.innerHTML = `
         <div class="table-container">
           <table class="table">
-            <thead><tr><th>Username</th><th>Nama</th><th>Jabatan</th><th>Aksi</th></tr></thead>
+            <thead><tr><th>Username</th><th>Password</th><th>Nama</th><th>Jabatan</th><th>Aksi</th></tr></thead>
             <tbody>
               ${displayList.map(p => `
                 <tr>
                   <td>${p.username}</td>
+                  <td style="font-family:monospace; color:var(--primary);">${p.password}</td>
                   <td>${p.name}</td>
                   <td>${p.subject || '-'}</td>
                   <td>
@@ -1071,11 +1072,12 @@ qrn1, pass123, Ustadz Ali, alquran
             container.innerHTML = `
         <div class="table-container">
           <table class="table">
-            <thead><tr><th>Username</th><th>Nama</th><th>Mapel</th><th>Ruangan</th><th>Aksi</th></tr></thead>
+            <thead><tr><th>Username</th><th>Password</th><th>Nama</th><th>Mapel</th><th>Ruangan</th><th>Aksi</th></tr></thead>
             <tbody>
               ${examiners.map(e => `
                 <tr>
                   <td>${e.username}</td>
+                  <td style="font-family:monospace; color:var(--primary);">${e.password}</td>
                   <td>${e.name}</td>
                   <td>${e.subject}</td>
                   <td>${e.assignedClasses ? e.assignedClasses.map(c => `<span class="badge badge-info">${c}</span>`).join('') : '-'}</td>
@@ -1269,10 +1271,181 @@ qrn1, pass123, Ustadz Ali, alquran
                 setTimeout(() => progressEl.style.display = 'none', 3000);
             }
         }
+
+        // ==========================================
+        // MISSING QR FUNCTIONS IMPLEMENTATION
+        // ==========================================
+
+        async function downloadSingleQR(id, type) {
+            let entity;
+            if (type === 'student' || type === 'siswa') entity = getStudentById(id);
+            else entity = getUserById(id);
+
+            if (!entity) return alert('Data tidak ditemukan!');
+
+            const qrCode = new QRCodeStyling({
+                width: 1000, height: 1000,
+                data: entity.qrCode || entity.id,
+                image: "img/logo-alwildan.png",
+                dotsOptions: { color: "#000", type: "rounded" },
+                backgroundOptions: { color: "#fff" },
+                imageOptions: { crossOrigin: "anonymous", margin: 20 }
+            });
+
+            try {
+                const blob = await qrCode.getRawData("png");
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `QR-${entity.name.replace(/\s+/g, '-')}.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } catch (e) {
+                console.error(e);
+                alert('Gagal download QR');
+            }
+        }
+
+        function searchAndShowQR() {
+            const query = document.getElementById('searchQR').value.toLowerCase().trim();
+            if (!query) return alert('Masukkan nama untuk dicari!');
+
+            const container = document.getElementById('individualQRResult');
+            container.innerHTML = 'Mencari...';
+
+            const students = getStudents(); // all
+            // storage.js getStudents returns all entities in student list (including legacy panitia/guru)
+            // storage.js getUsers returns all users
+
+            // Let's search in both to be sure
+            const allStudents = getStudents();
+            const allUsers = getUsers();
+
+            const results = [];
+
+            allStudents.forEach(s => {
+                if (s.name.toLowerCase().includes(query)) results.push({ ...s, sourceType: 'student' });
+            });
+            allUsers.forEach(u => {
+                if (u.name.toLowerCase().includes(query)) results.push({ ...u, sourceType: 'user' });
+            });
+
+            // unique by ID
+            const unique = [];
+            const ids = new Set();
+            results.forEach(r => {
+                if (!ids.has(r.id)) {
+                    ids.add(r.id);
+                    unique.push(r);
+                }
+            });
+
+            if (unique.length === 0) {
+                container.innerHTML = '<p class="text-muted">Tidak ditemukan.</p>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
+                    ${unique.map(u => `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid var(--border-color);">
+                            <div>
+                                <strong>${u.name}</strong>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">
+                                    ${u.class || u.role || '-'} • ${u.id}
+                                </div>
+                            </div>
+                            <button class="btn btn-sm btn-primary" onclick="downloadSingleQR('${u.id}', '${u.sourceType}')">⬇️ QR</button>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        async function exportQR(category) {
+            let data = [];
+            if (category === 'all') {
+                data = [...getStudents(), ...getUsers()];
+            } else if (category === 'siswa') {
+                data = getStudents().filter(s => s.type === 'siswa');
+            } else if (category === 'panitia') {
+                data = getUsers().filter(u => u.role === 'panitia');
+            } else if (category === 'penguji') {
+                data = getUsers().filter(u => u.role === 'penguji');
+            }
+
+            // deduplicate
+            const unique = [];
+            const ids = new Set();
+            data.forEach(r => {
+                if (!ids.has(r.id)) {
+                    ids.add(r.id);
+                    unique.push(r);
+                }
+            });
+            data = unique;
+
+            if (data.length === 0) return alert('Data kosong!');
+
+            if (!confirm(`Generate HTML QR untuk ${data.length} data?`)) return;
+
+            // Generate HTML content
+            let htmlContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Export QR - ${category.toUpperCase()}</title>
+                <style>
+                    body { font-family: sans-serif; padding: 20px; }
+                    .card { border: 1px solid #ccc; padding: 10px; text-align: center; display: inline-block; margin: 10px; width: 200px; }
+                    img { width: 150px; height: 150px; }
+                    h3 { margin: 5px 0; font-size: 14px; }
+                    p { margin: 0; font-size: 12px; color: #666; }
+                </style>
+                <script src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"><\/script>
+            </head>
+            <body>
+                <h1>Export QR: ${category.toUpperCase()} (${data.length})</h1>
+                <div id="container"></div>
+                <script>
+                    const data = ${JSON.stringify(data)};
+                    const container = document.getElementById('container');
+                    
+                    data.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'card';
+                        
+                        const qr = new QRCodeStyling({
+                            width: 300, height: 300,
+                            data: item.qrCode || item.id,
+                            image: "",
+                            dotsOptions: { color: "#000", type: "mixed" },
+                            backgroundOptions: { color: "#fff" }
+                        });
+                        
+                        div.innerHTML = \`<h3>\${item.name}</h3><p>\${item.class || item.role || ''}</p>\`;
+                        const imgDiv = document.createElement('div');
+                        qr.append(imgDiv);
+                        div.appendChild(imgDiv);
+                        container.appendChild(div);
+                    });
+                <\/script>
+            </body>
+            </html>`;
+
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `QR_Export_${category}_${new Date().toISOString().slice(0, 10)}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+
     </script>
-    <!-- Footer Credit -->
-
-
     <footer style="text-align: center; margin-top: 2rem; color: var(--text-muted); font-size: 0.8rem;">
         <p>&copy; 2026 EXOT System. Created by Muhammad Atiq Qoidul Islam</p>
         <p>Version 2.4 (Local SDK)</p>
