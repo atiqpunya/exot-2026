@@ -2,12 +2,19 @@
 // api/config.php
 
 // Database Credentials
-// ATTENTION: Change these values based on your Hosting Provider (cPanel -> MySQL Databases)
-// If using XAMPP/Localhost: Host is 'localhost', User is 'root', Pass is '', DB is your DB name.
+// ====
+// ASUMSI: environment pengujian lokal menggunakan MySQL/XAMPP standar
+// - Host   : localhost
+// - DB Name: exot_2026
+// - User   : root
+// - Pass   : (kosong)
+//
+// Untuk server hosting (cPanel, dll), cukup ubah 4 variabel di bawah
+// sesuai kredensial database yang Anda buat di hosting.
 $host = 'localhost';
-$dbname = 'u1234567_exot_db'; // Change this!
-$user = 'u1234567_admin'; // Change this!
-$pass = 'password_db_anda'; // Change this!
+$dbname = 'exot_2026';   // Ganti jika nama DB Anda berbeda
+$user = 'root';          // Untuk XAMPP/WAMP lokal
+$pass = '';              // Password default XAMPP biasanya kosong
 
 try {
     $dsn = "mysql:host=$host;dbname=$dbname;charset=utf8mb4";

@@ -19,7 +19,7 @@
     <header class="header">
         <div class="container">
             <div class="header-content">
-                <a href="index.html" class="logo"><span class="logo-icon">??</span> EXOT</a>
+                <a href="index.html" class="logo"><span class="logo-icon">📊</span> EXOT</a>
                 <nav class="nav">
                     <a href="register.html" class="nav-link">Data</a>
                     <a href="attendance.html" class="nav-link">Absensi</a>
@@ -41,7 +41,7 @@
 
     <div id="authRequired" class="container" style="padding: 3rem; display: none;">
         <div class="card" style="max-width: 400px; margin: 0 auto; text-align: center;">
-            <h2>?? Login Diperlukan</h2>
+            <h2>🔐 Login Diperlukan</h2>
             <p>Halaman ini hanya untuk Panitia Utama</p>
             <a href="index.html?redirect=dashboard.html" class="btn btn-primary" style="margin-top: 1rem;">Login</a>
         </div>
@@ -53,25 +53,25 @@
             <div
                 style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                 <div>
-                    <h1 style="margin: 0;">?? Dashboard EXOT</h1>
+                    <h1 style="margin: 0;">📉 Dashboard EXOT</h1>
                     <p style="margin: 0.5rem 0 0; color: var(--text-muted);">Rekap hasil ujian lengkap</p>
                 </div>
                 <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                    <button class="btn btn-primary" onclick="generateCertificates()">?? Sertifikat PDF</button>
-                    <button class="btn btn-success" onclick="exportToCSV()">?? Export CSV</button>
-                    <button class="btn btn-secondary" onclick="createBackup()">?? Backup</button>
-                    <button class="btn btn-secondary" onclick="window.print()">??? Print</button>
+                    <button class="btn btn-primary" onclick="generateCertificates()">📜 Sertifikat PDF</button>
+                    <button class="btn btn-success" onclick="exportToCSV()">📊 Export CSV</button>
+                    <button class="btn btn-secondary" onclick="createBackup()">💾 Backup</button>
+                    <button class="btn btn-secondary" onclick="window.print()">🖨️ Print</button>
                 </div>
             </div>
         </div>
 
         <!-- Tabs -->
         <div class="tabs">
-            <button class="tab-btn active" onclick="showTab('overview')">?? Ringkasan</button>
-            <button class="tab-btn" onclick="showTab('ranking')">?? Ranking</button>
-            <button class="tab-btn" onclick="showTab('rooms')">?? Per Ruangan</button>
-            <button class="tab-btn" onclick="showTab('charts')">?? Grafik</button>
-            <button class="tab-btn" onclick="showTab('activity')">?? Activity Log</button>
+            <button class="tab-btn active" onclick="showTab('overview')">📋 Ringkasan</button>
+            <button class="tab-btn" onclick="showTab('ranking')">🏆 Ranking</button>
+            <button class="tab-btn" onclick="showTab('rooms')">🏠 Per Ruangan</button>
+            <button class="tab-btn" onclick="showTab('charts')">📈 Grafik</button>
+            <button class="tab-btn" onclick="showTab('activity')">🕰️ Activity Log</button>
         </div>
 
         <!-- Tab: Overview -->
@@ -99,21 +99,21 @@
             <!-- Per Subject Stats -->
             <div class="grid grid-3 fade-in" style="margin-bottom: 1.5rem;">
                 <div class="card" style="border-left: 4px solid #3b82f6;">
-                    <h4 style="margin: 0 0 0.5rem;">?? English</h4>
+                    <h4 style="margin: 0 0 0.5rem;">🇬🇧 English</h4>
                     <div style="display: flex; justify-content: space-between;"><span>Dinilai:</span><strong
                             id="engScored">0</strong></div>
                     <div style="display: flex; justify-content: space-between;"><span>Rata-rata:</span><strong
                             id="engAvg">0</strong></div>
                 </div>
                 <div class="card" style="border-left: 4px solid #10b981;">
-                    <h4 style="margin: 0 0 0.5rem;">?? Arabic</h4>
+                    <h4 style="margin: 0 0 0.5rem;">🇸🇦 Arabic</h4>
                     <div style="display: flex; justify-content: space-between;"><span>Dinilai:</span><strong
                             id="arbScored">0</strong></div>
                     <div style="display: flex; justify-content: space-between;"><span>Rata-rata:</span><strong
                             id="arbAvg">0</strong></div>
                 </div>
                 <div class="card" style="border-left: 4px solid #f59e0b;">
-                    <h4 style="margin: 0 0 0.5rem;">?? Al-Quran</h4>
+                    <h4 style="margin: 0 0 0.5rem;">📖 Al-Quran</h4>
                     <div style="display: flex; justify-content: space-between;"><span>Dinilai:</span><strong
                             id="qrnScored">0</strong></div>
                     <div style="display: flex; justify-content: space-between;"><span>Rata-rata:</span><strong
@@ -124,7 +124,7 @@
             <!-- Filters & Table -->
             <div class="card fade-in">
                 <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
-                    <input type="text" id="searchInput" class="form-input" placeholder="?? Cari nama..."
+                    <input type="text" id="searchInput" class="form-input" placeholder="🔍 Cari nama..."
                         style="width: 200px;">
                     <select id="filterClass" class="form-input form-select" style="width: auto;"></select>
                     <select id="filterStatus" class="form-input form-select" style="width: auto;">
@@ -142,7 +142,7 @@
         <div id="tab-ranking" class="tab-content">
             <div class="card fade-in">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3 style="margin: 0;">?? Peringkat Nilai</h3>
+                    <h3 style="margin: 0;">🏆 Peringkat Nilai</h3>
                     <select id="rankingFilter" class="form-input form-select" style="width: auto;"
                         onchange="loadRanking()">
                         <option value="all">Semua Ruangan</option>
@@ -155,7 +155,7 @@
         <!-- Tab: Per Room -->
         <div id="tab-rooms" class="tab-content">
             <div class="card fade-in">
-                <h3 style="margin: 0 0 1rem;">?? Statistik Per Ruangan</h3>
+                <h3 style="margin: 0 0 1rem;">🏫 Statistik Per Ruangan</h3>
                 <div id="roomStats"></div>
             </div>
         </div>
@@ -164,13 +164,13 @@
         <div id="tab-charts" class="tab-content">
             <div class="grid grid-2" style="margin-bottom: 1.5rem;">
                 <div class="card fade-in">
-                    <h4 style="margin: 0 0 1rem;">?? Rata-rata Per Mata Pelajaran</h4>
+                    <h4 style="margin: 0 0 1rem;">📊 Rata-rata Per Mata Pelajaran</h4>
                     <div class="chart-container">
                         <canvas id="subjectChart"></canvas>
                     </div>
                 </div>
                 <div class="card fade-in">
-                    <h4 style="margin: 0 0 1rem;">?? Rata-rata Per Ruangan</h4>
+                    <h4 style="margin: 0 0 1rem;">🏫 Rata-rata Per Ruangan</h4>
                     <div class="chart-container">
                         <canvas id="roomChart"></canvas>
                     </div>
@@ -182,9 +182,9 @@
         <div id="tab-activity" class="tab-content">
             <div class="card fade-in">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3 style="margin: 0;">?? Activity Log</h3>
+                    <h3 style="margin: 0;">🕰️ Activity Log</h3>
                     <button class="btn btn-sm btn-danger"
-                        onclick="if(confirm('Hapus semua log?')){clearActivityLog();loadActivity();}">??? Clear</button>
+                        onclick="if(confirm('Hapus semua log?')){clearActivityLog();loadActivity();}">🗑️ Clear</button>
                 </div>
                 <div id="activityLog" class="activity-log"></div>
             </div>
@@ -193,14 +193,13 @@
 
     <!-- Settings Toggle -->
     <div class="settings-toggle no-print">
-        <button class="btn btn-secondary" onclick="toggleDarkMode()" title="Dark Mode">??</button>
-        <button class="btn btn-secondary" onclick="toggleSound()" id="soundBtn" title="Sound">??</button>
+        <button class="btn btn-secondary" onclick="toggleDarkMode()" title="Dark Mode">🌓</button>
+        <button class="btn btn-secondary" onclick="toggleSound()" id="soundBtn" title="Sound">🔊</button>
     </div>
 
     <div class="floating-auth no-print">
-        <button class="btn btn-secondary" onclick="toggleAuth()" id="floatingBtn">?? Login</button>
+        <button class="btn btn-secondary" onclick="toggleAuth()" id="floatingBtn">🔐 Login</button>
     </div>
-
 
     <script>
         let subjectChart = null;
@@ -219,7 +218,7 @@
             }
 
             document.getElementById('mainContent').style.display = 'block';
-            document.getElementById('floatingBtn').innerHTML = '?? Logout';
+            document.getElementById('floatingBtn').innerHTML = '🚪 Logout';
 
             // Update sound button
             updateSoundBtn();
@@ -258,7 +257,7 @@
 
         function updateSoundBtn() {
             const settings = getSettings();
-            document.getElementById('soundBtn').textContent = settings.soundEnabled ? '??' : '??';
+            document.getElementById('soundBtn').textContent = settings.soundEnabled ? '🔊' : '🔇';
         }
 
         function showTab(tabId) {
@@ -331,7 +330,7 @@
 
             const container = document.getElementById('resultTable');
             if (!students.length) {
-                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">??</div><p>Tidak ada data</p></div>';
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔍</div><p>Tidak ada data</p></div>';
                 return;
             }
 
@@ -367,7 +366,7 @@
                                         <td>${i + 1}</td>
                                         <td><strong>${s.name}</strong></td>
                                         <td>${s.class}</td>
-                                        <td>${s.attended ? '<span class="badge badge-success">?</span>' : '<span class="badge badge-warning">-</span>'}</td>
+                                        <td>${s.attended ? '<span class="badge badge-success">✅</span>' : '<span class="badge badge-warning">-</span>'}</td>
                                         <td>${s.scores.english ?? '-'}</td>
                                         <td>${s.scores.arabic ?? '-'}</td>
                                         <td>${s.scores.alquran ?? '-'}</td>
@@ -387,7 +386,7 @@
             const container = document.getElementById('rankingTable');
 
             if (!ranked.length) {
-                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">??</div><p>Belum ada data ranking</p></div>';
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔍</div><p>Belum ada data ranking</p></div>';
                 return;
             }
 
@@ -468,7 +467,7 @@
             const container = document.getElementById('activityLog');
 
             if (!log.length) {
-                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">??</div><p>Belum ada aktivitas</p></div>';
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔍</div><p>Belum ada aktivitas</p></div>';
                 return;
             }
 
@@ -595,11 +594,6 @@
     </script>
     <!-- Footer Credit -->
 
-
-    <!-- Firebase Compat SDK (Local) -->
-    <script src="js/firebase-app-compat.js"></script>
-    <script src="js/firebase-firestore-compat.js"></script>
-    <script src="js/firebase-config.js?v=2.5"></script>
     <script src="js/api-service.js?v=2.5"></script>
     <script src="js/storage.js"></script>
 </body>

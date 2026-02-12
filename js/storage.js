@@ -980,7 +980,7 @@ function saveExaminerRewards(rewards) {
   // Track local update time
   const ts = Date.now();
   localStorage.setItem(STORAGE_KEYS.EXAMINER_REWARDS + '_timestamp', ts);
-  saveToFirebase('rewards', rewards);
+  saveToFirebase('examiner_rewards', rewards);
 }
 
 function generateExaminerReward(examinerId) {

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -150,7 +150,7 @@
     <header class="header">
         <div class="container">
             <div class="header-content">
-                <a href="index.html" class="logo"><span class="logo-icon">📝</span> EXOT</a>
+                <a href="index.html" class="logo"><span class="logo-icon">📋</span> EXOT</a>
                 <nav class="nav">
                     <a href="register.html" class="nav-link active">Data</a>
                     <a href="attendance.html" class="nav-link">Absensi</a>
@@ -164,7 +164,7 @@
                     <div id="globalConnectionStatus"
                         style="display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.5); padding: 4px 8px; border-radius: 20px; border: 1px solid var(--border-color); cursor: pointer;"
                         onclick="testCloudConnection()">
-                        <span id="connIcon">📡</span>
+                        <span id="connIcon">🌐</span>
                         <span id="connText" style="font-size: 0.75rem; font-weight: 600;">Check Connection</span>
                     </div>
 
@@ -193,7 +193,7 @@
                 <h2 style="margin: 0; color: var(--text-primary);">Data Registrasi</h2>
             </div>
             <div style="display: flex; gap: 0.5rem;">
-                <button class="btn btn-secondary" onclick="forceLoadCloud()" title="Ambil data dari Cloud">☁️
+                <button class="btn btn-secondary" onclick="forceLoadCloud()" title="Ambil data dari Cloud">🔄
                     Load</button>
                 <button class="btn btn-primary" onclick="forceSaveCloud()" title="Simpan data ke Firebase">💾
                     Save</button>
@@ -223,16 +223,16 @@
         <div class="card fade-in">
             <div class="tabs">
                 <button class="tab-btn active" onclick="switchTab('siswa')" id="btnTabSiswa">👨‍🎓 Siswa</button>
-                <button class="tab-btn" onclick="switchTab('panitia')" id="btnTabPanitia">👔 Panitia</button>
+                <button class="tab-btn" onclick="switchTab('panitia')" id="btnTabPanitia">👥 Panitia</button>
                 <button class="tab-btn" onclick="switchTab('penguji')" id="btnTabPenguji">👨‍🏫 Penguji</button>
                 <button class="tab-btn" onclick="switchTab('soal')" id="btnTabSoal">📝 Soal Ujian</button>
                 <button class="tab-btn" onclick="switchTab('ruangan')" id="btnTabRuangan">🏫 Ruangan</button>
-                <button class="tab-btn" onclick="switchTab('export')" id="btnTabExport">📦 Export</button>
+                <button class="tab-btn" onclick="switchTab('export')" id="btnTabExport">📤 Export</button>
             </div>
 
             <!-- Siswa Tab -->
             <div id="siswaTab" class="tab-content active">
-                <h4 style="margin-bottom: 1rem;">📄 Bulk Input Siswa</h4>
+                <h4 style="margin-bottom: 1rem;">📥 Bulk Input Siswa</h4>
                 <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.9rem;">
                     Format: <code>Nama, Ruangan</code>
                 </p>
@@ -242,7 +242,7 @@ Siti Aminah, 7B
                 <div style="display: flex; gap: 1rem; margin-top: 1rem;">
                     <button class="btn btn-primary" onclick="importStudents()">📥 Import Siswa</button>
                     <button class="btn btn-warning" onclick="deleteSelectedStudents()">🗑️ Hapus Terpilih</button>
-                    <button class="btn btn-danger" onclick="clearAllStudents()">🗑️ Hapus Semua</button>
+                    <button class="btn btn-danger" onclick="clearAllStudents()">🔥 Hapus Semua</button>
                 </div>
                 <div id="studentImportResult" class="alert alert-success" style="display: none; margin-top: 1rem;">
                 </div>
@@ -259,7 +259,7 @@ Siti Aminah, 7B
 
             <!-- Panitia Tab -->
             <div id="panitiaTab" class="tab-content">
-                <h4 style="margin-bottom: 1rem;">👔 Bulk Input Panitia</h4>
+                <h4 style="margin-bottom: 1rem;">📥 Bulk Input Panitia</h4>
                 <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.9rem;">
                     Format: <code>Username, Password, Nama, Jabatan/Unit</code>
                 </p>
@@ -267,15 +267,15 @@ Siti Aminah, 7B
 sekretaris, securepass, Siti Rahma, Sekretaris
 ..."></textarea>
                 <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-                    <button class="btn btn-secondary" onclick="loadFromStorage()">☁️ Load</button>
-                    <button class="btn btn-warning" onclick="manualSync()" id="btnSync">🔄 Sync Cloud</button>
+                    <button class="btn btn-secondary" onclick="loadFromStorage()">🔄 Load</button>
+                    <button class="btn btn-warning" onclick="manualSync()" id="btnSync">☁️ Sync Cloud</button>
                     <button class="btn btn-primary" onclick="saveDataManual()">💾 Save</button>
                 </div>
 
                 <div
                     style="display: flex; gap: 1rem; margin-top: 1rem; border-top: 1px dashed var(--border-color); padding-top: 1rem;">
                     <button class="btn btn-warning" onclick="deleteSelectedPanitia()">🗑️ Hapus Terpilih</button>
-                    <button class="btn btn-danger" onclick="clearAllPanitia()">🗑️ Hapus Semua</button>
+                    <button class="btn btn-danger" onclick="clearAllPanitia()">🔥 Hapus Semua</button>
                 </div>
 
                 <div id="panitiaImportResult" class="alert alert-success" style="display: none; margin-top: 1rem;">
@@ -293,7 +293,7 @@ sekretaris, securepass, Siti Rahma, Sekretaris
 
             <!-- Penguji Tab -->
             <div id="pengujiTab" class="tab-content">
-                <h4 style="margin-bottom: 1rem;">👨‍🏫 Bulk Input Penguji</h4>
+                <h4 style="margin-bottom: 1rem;">📥 Bulk Input Penguji</h4>
                 <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.9rem;">
                     Format: <code>Username, Password, Nama, Mapel, Ruangan (opsional)</code><br>
                     Mapel: english / arabic / alquran<br>
@@ -306,7 +306,7 @@ qrn1, pass123, Ustadz Ali, alquran
                 <div style="margin-top: 1rem; display: flex; gap: 1rem;">
                     <button class="btn btn-primary" onclick="importExaminers()">📥 Import Penguji</button>
                     <button class="btn btn-warning" onclick="deleteSelectedExaminers()">🗑️ Hapus Terpilih</button>
-                    <button class="btn btn-danger" onclick="clearAllExaminers()">🗑️ Hapus Semua</button>
+                    <button class="btn btn-danger" onclick="clearAllExaminers()">🔥 Hapus Semua</button>
                 </div>
                 <div id="examinerImportResult" class="alert alert-success" style="display: none; margin-top: 1rem;">
                 </div>
@@ -415,7 +415,7 @@ qrn1, pass123, Ustadz Ali, alquran
                 </div>
 
                 <!-- Hidden manual input removed per request, but keeping Submit button container structured if needed -->
-                <!-- button class="btn btn-primary" onclick="submitQuestion()">💾 Simpan Soal</button> (Use for manual only if re-added) -->
+                <!-- button class="btn btn-primary" onclick="submitQuestion()">?? Simpan Soal</button> (Use for manual only if re-added) -->
 
                 <div style="margin-top: 2rem; border-top: 1px dashed var(--border-color); padding-top: 1rem;">
                     <h4 style="margin-bottom: 1rem;">📋 Daftar Soal Tersimpan</h4>
@@ -451,7 +451,7 @@ qrn1, pass123, Ustadz Ali, alquran
                     <h4>✏️ Edit Nama Ruangan</h4>
                     <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap;">
                         <select id="editClassOld" class="form-input form-select" style="width: auto;"></select>
-                        <span style="align-self: center;">→</span>
+                        <span style="align-self: center;">➡️</span>
                         <input type="text" id="editClassNew" class="form-input" placeholder="Nama baru"
                             style="width: 150px;">
                         <button class="btn btn-secondary" onclick="editClass()">Simpan</button>
@@ -461,29 +461,29 @@ qrn1, pass123, Ustadz Ali, alquran
 
             <!-- Export Tab -->
             <div id="exportTab" class="tab-content">
-                <h4 style="margin-bottom: 1rem;">📦 Export & Backup</h4>
+                <h4 style="margin-bottom: 1rem;">📤 Export & Backup</h4>
 
                 <div class="grid grid-2" style="gap: 1.5rem;">
                     <div>
-                        <h5 style="margin-bottom: 0.75rem;">📄 Download QR sebagai HTML</h5>
+                        <h5 style="margin-bottom: 0.75rem;">📥 Download QR sebagai HTML</h5>
 
                         <div class="export-option" onclick="exportQR('all')">
-                            <h5>📦 Semua Data</h5>
+                            <h5>?? Semua Data</h5>
                             <p>Download QR semua siswa, guru, dan penguji</p>
                         </div>
 
                         <div class="export-option" onclick="exportQR('siswa')">
-                            <h5>👨‍🎓 Hanya Siswa</h5>
+                            <h5>????? Hanya Siswa</h5>
                             <p>Download QR code semua siswa saja</p>
                         </div>
 
                         <div class="export-option" onclick="exportQR('panitia')">
-                            <h5>👔 Hanya Panitia</h5>
+                            <h5>?? Hanya Panitia</h5>
                             <p>Download QR code semua panitia saja</p>
                         </div>
 
                         <div class="export-option" onclick="exportQR('penguji')">
-                            <h5>📋 Hanya Penguji</h5>
+                            <h5>?? Hanya Penguji</h5>
                             <p>Download QR code semua penguji saja</p>
                         </div>
 
@@ -537,7 +537,7 @@ qrn1, pass123, Ustadz Ali, alquran
                     <div>
                         <div
                             style="background: var(--bg-surface); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
-                            <h5 style="margin-bottom: 1rem; color: var(--text-primary);">🛠️ Data Center</h5>
+                            <h5 style="margin-bottom: 1rem; color: var(--text-primary);">🗄️ Data Center</h5>
 
                             <!-- Row 1: Quick Actions -->
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem;">
@@ -573,12 +573,12 @@ qrn1, pass123, Ustadz Ali, alquran
                                         Committee</label>
                                 </div>
                                 <button class="btn btn-sm" style="width: 100%; background: #9333ea; color: white;"
-                                    onclick="exportCanvaCSV()">⬇️ Download CSV</button>
+                                    onclick="exportCanvaCSV()">📥 Download CSV</button>
                             </div>
 
                             <!-- Row 3: HTML QR Export -->
                             <div style="margin-bottom: 10px;">
-                                <h6 style="margin-bottom: 5px; font-size: 0.9rem;">📄 Export QR (HTML)</h6>
+                                <h6 style="margin-bottom: 5px; font-size: 0.9rem;">📤 Export QR (HTML)</h6>
                                 <div style="display: flex; gap: 5px;">
                                     <select id="exportHtmlCategory" class="form-input"
                                         style="padding: 6px; font-size: 0.85rem;">
@@ -595,18 +595,16 @@ qrn1, pass123, Ustadz Ali, alquran
                             <!-- Restore Link -->
                             <div style="text-align: center; margin-top: 10px;">
                                 <small style="cursor: pointer; text-decoration: underline; color: var(--primary);"
-                                    onclick="document.getElementById('restoreFile').click()">📥 Restore from Backup
+                                    onclick="document.getElementById('restoreFile').click()">⏪ Restore from Backup
                                     File</small>
                             </div>
                         </div>
                     </div>
 
-
                     <div id="cloudTestResult" style="display:none;"></div>
 
-
                     <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
-                        <h5 style="margin-bottom: 0.75rem;">🔍 Download QR Individual</h5>
+                        <h5 style="margin-bottom: 0.75rem;">📥 Download QR Individual</h5>
                         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                             <input type="text" id="searchQR" class="form-input" placeholder="Cari nama..."
                                 style="flex: 1;">
@@ -769,7 +767,7 @@ qrn1, pass123, Ustadz Ali, alquran
                             ${items.map(q => `
                                 <div style="margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px dashed var(--border-color);">
                                     <div style="font-size: 0.9rem; margin-bottom: 0.25rem;">
-                                        <a href="${q.content}" target="_blank" style="color: var(--primary); text-decoration: underline;">📄 Buka Link</a>
+                                        <a href="${q.content}" target="_blank" style="color: var(--primary); text-decoration: underline;">🔗 Buka Link</a>
                                         ${q.targetStudent ? `<span class="badge badge-warning" style="margin-left:5px; font-size: 0.7rem;">Khusus: ${q.targetStudent}</span>` : ''}
                                         <div style="font-size: 0.8rem; color: var(--text-muted); margin-top:2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${q.content}</div>
                                     </div>
@@ -842,7 +840,7 @@ qrn1, pass123, Ustadz Ali, alquran
             }
 
             document.getElementById('bulkStudents').value = '';
-            showResult('studentImportResult', `✅ ${studentsToAdd.length} siswa berhasil diimport!`);
+            showResult('studentImportResult', `? ${studentsToAdd.length} siswa berhasil diimport!`);
             updateStats();
             loadStudentList();
         }
@@ -870,7 +868,7 @@ qrn1, pass123, Ustadz Ali, alquran
 
                 if (students.length !== initialCount) {
                     saveStudents(students);
-                    showResult('studentImportResult', `✅ ${ids.length} siswa dihapus.`);
+                    showResult('studentImportResult', `? ${ids.length} siswa dihapus.`);
                     loadStudentList();
                     updateStats();
                 }
@@ -879,7 +877,7 @@ qrn1, pass123, Ustadz Ali, alquran
 
         function clearAllStudents() {
             // ... (keep existing)
-            if (confirm('⚠️ PERINGATAN: Hapus SEMUA siswa?')) {
+            if (confirm('?? PERINGATAN: Hapus SEMUA siswa?')) {
                 saveStudents([]);
                 updateStats();
                 loadStudentList();
@@ -916,7 +914,7 @@ qrn1, pass123, Ustadz Ali, alquran
             }
 
             document.getElementById('bulkPanitia').value = '';
-            let msg = `✅ ${usersToAdd.length - (errors.length ? 0 : 0)} panitia berhasil diproses!`;
+            let msg = `? ${usersToAdd.length - (errors.length ? 0 : 0)} panitia berhasil diproses!`;
             // Correct count logic: usersToAdd includes those that might have failed in bulk (duplicate username)
             // addUsersBulk returns { added, errors }
             // So we should capture the result properly.
@@ -931,7 +929,7 @@ qrn1, pass123, Ustadz Ali, alquran
         }
 
         function clearAllPanitia() {
-            if (confirm('⚠️ PERINGATAN: Apakah Anda yakin ingin menghapus SEMUA panitia?\n\nIni akan menghapus:\n1. Panitia dengan login (Baru)\n2. Panitia tanpa login (Lama)\n\nData tidak dapat dikembalikan!')) {
+            if (confirm('?? PERINGATAN: Apakah Anda yakin ingin menghapus SEMUA panitia?\n\nIni akan menghapus:\n1. Panitia dengan login (Baru)\n2. Panitia tanpa login (Lama)\n\nData tidak dapat dikembalikan!')) {
                 // 1. Delete from Users (New System)
                 const allUsers = getUsers();
                 const panitiaUsers = allUsers.filter(u => u.role === 'panitia' && u.id !== 'admin-001');
@@ -948,7 +946,7 @@ qrn1, pass123, Ustadz Ali, alquran
 
                 updateStats();
                 loadPanitiaList();
-                alert('✅ Data panitia berhasil dibersihkan.');
+                alert('? Data panitia berhasil dibersihkan.');
             }
         }
 
@@ -984,8 +982,8 @@ qrn1, pass123, Ustadz Ali, alquran
             }
 
             document.getElementById('bulkExaminers').value = '';
-            let msg = `✅ ${successCount} penguji berhasil ditambahkan!`;
-            if (errors.length) msg += `<br>⚠️ ${errors.join(', ')}`;
+            let msg = `? ${successCount} penguji berhasil ditambahkan!`;
+            if (errors.length) msg += `<br>?? ${errors.join(', ')}`;
             showResult('examinerImportResult', msg);
             updateStats();
             loadExaminerList();
@@ -1025,8 +1023,8 @@ qrn1, pass123, Ustadz Ali, alquran
                   <td>${s.class}</td>
                   <td><span class="badge badge-success">Siswa</span></td>
                   <td>
-                    <button class="btn btn-sm btn-secondary" onclick="downloadSingleQR('${s.id}', 'student')">📱</button>
-                    <button class="btn btn-sm btn-danger" onclick="delStudent('${s.id}')">🗑️</button>
+                    <button class="btn btn-sm btn-secondary" onclick="downloadSingleQR('${s.id}', 'student')">??</button>
+                    <button class="btn btn-sm btn-danger" onclick="delStudent('${s.id}')">???</button>
                   </td>
                 </tr>
               `).join('')}
@@ -1067,8 +1065,8 @@ qrn1, pass123, Ustadz Ali, alquran
                   <td>${p.name}</td>
                   <td>${p.subject || '-'}</td>
                   <td>
-                    <button class="btn btn-sm btn-secondary" onclick="downloadSingleQR('${p.id}', 'panitia')">📱</button>
-                    <button class="btn btn-sm btn-danger" onclick="deleteUser('${p.id}'); loadPanitiaList(); updateStats();">🗑️</button>
+                    <button class="btn btn-sm btn-secondary" onclick="downloadSingleQR('${p.id}', 'panitia')">??</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteUser('${p.id}'); loadPanitiaList(); updateStats();">???</button>
                   </td>
                 </tr>
               `).join('')}
@@ -1122,8 +1120,8 @@ qrn1, pass123, Ustadz Ali, alquran
                   <td>${e.subject}</td>
                   <td>${e.assignedClasses ? e.assignedClasses.map(c => `<span class="badge badge-info">${c}</span>`).join('') : '-'}</td>
                   <td>
-                    <button class="btn btn-sm btn-secondary" onclick="downloadSingleQR('${e.id}', 'penguji')">📱</button>
-                    <button class="btn btn-sm btn-danger" onclick="deleteUser('${e.id}'); loadExaminerList(); updateStats();">🗑️</button>
+                    <button class="btn btn-sm btn-secondary" onclick="downloadSingleQR('${e.id}', 'penguji')">??</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteUser('${e.id}'); loadExaminerList(); updateStats();">???</button>
                   </td>
                 </tr>
               `).join('')}
@@ -1139,18 +1137,24 @@ qrn1, pass123, Ustadz Ali, alquran
             });
         }
 
-        checkboxes.forEach(cb => {
-            deleteUser(cb.value, false);
-        });
+        function deleteSelectedExaminers() {
+            const checkboxes = document.querySelectorAll('.examiner-checkbox:checked');
+            if (checkboxes.length === 0) {
+                alert('Pilih penguji yang akan dihapus!');
+                return;
+            }
 
-        loadExaminerList();
-        updateStats();
-        showToast(`${checkboxes.length} penguji dihapus`, "success");
+            if (confirm(`Hapus ${checkboxes.length} penguji terpilih?`)) {
+                const ids = Array.from(checkboxes).map(cb => cb.value);
+                deleteUsersBulk(ids);
+                loadExaminerList();
+                updateStats();
+                showToast(`${checkboxes.length} penguji dihapus`, "success");
             }
         }
 
         function clearAllExaminers() {
-            if (confirm('⚠️ PERINGATAN: Hapus SEMUA data penguji?')) {
+            if (confirm('?? PERINGATAN: Hapus SEMUA data penguji?')) {
                 const examiners = getExaminers();
                 const ids = examiners.map(e => e.id);
 
@@ -1426,7 +1430,7 @@ qrn1, pass123, Ustadz Ali, alquran
                                     ${u.class || u.role || '-'} • ${u.id}
                                 </div>
                             </div>
-                            <button class="btn btn-sm btn-primary" onclick="downloadSingleQR('${u.id}', '${u.sourceType}')">⬇️ QR</button>
+                            <button class="btn btn-sm btn-primary" onclick="downloadSingleQR('${u.id}', '${u.sourceType}')">?? QR</button>
                         </div>
                     `).join('')}
                 </div>
@@ -1514,7 +1518,6 @@ qrn1, pass123, Ustadz Ali, alquran
             document.body.removeChild(a);
         }
 
-
         async function testCloudConnection() {
             const el = document.getElementById('cloudTestResult'); // Legacy element in export tab (optional)
             const headerIcon = document.getElementById('connIcon');
@@ -1523,11 +1526,11 @@ qrn1, pass123, Ustadz Ali, alquran
 
             if (el) {
                 el.style.display = 'block';
-                el.innerHTML = '⏳ Testing...';
+                el.innerHTML = '? Testing...';
             }
 
             // Header Loading State
-            if (headerIcon) headerIcon.innerText = '⏳';
+            if (headerIcon) headerIcon.innerText = '?';
             if (headerText) headerText.innerText = 'Connecting...';
 
             try {
@@ -1539,11 +1542,11 @@ qrn1, pass123, Ustadz Ali, alquran
                 if (result.success || result.key) {
                     // Success
                     if (el) {
-                        el.innerHTML = `✅ <strong>Connected!</strong>`;
+                        el.innerHTML = `? <strong>Connected!</strong>`;
                         el.style.color = 'green';
                     }
                     if (headerIcon) {
-                        headerIcon.innerText = '✅';
+                        headerIcon.innerText = '?';
                         headerText.innerText = 'Online';
                         headerText.style.color = 'green';
                         headerBadge.style.borderColor = 'green';
@@ -1556,11 +1559,11 @@ qrn1, pass123, Ustadz Ali, alquran
 
             } catch (e) {
                 if (el) {
-                    el.innerHTML = `❌ <strong>Failed</strong>`;
+                    el.innerHTML = `? <strong>Failed</strong>`;
                     el.style.color = 'red';
                 }
                 if (headerIcon) {
-                    headerIcon.innerText = '❌';
+                    headerIcon.innerText = '?';
                     headerText.innerText = 'Offline';
                     headerText.style.color = 'red';
                     headerBadge.style.borderColor = 'red';
@@ -1574,7 +1577,7 @@ qrn1, pass123, Ustadz Ali, alquran
         // AUTO-SYNC UI LISTENERS
         // ==========================================
         window.addEventListener('storage-update', () => {
-            console.log("♻️ Data update detected from Cloud/Local, refreshing UI...");
+            console.log("?? Data update detected from Cloud/Local, refreshing UI...");
             refreshAllData();
             showToast("Data disinkronkan", "info");
         });
@@ -1598,6 +1601,91 @@ qrn1, pass123, Ustadz Ali, alquran
             // Just safely ensure we render once on load
             setTimeout(refreshAllData, 500);
         });
+
+        // ==========================================
+        // Manual Cloud Sync Controls (Load / Save)
+        // ==========================================
+
+        async function forceLoadCloud() {
+            if (!window.apiService) {
+                alert('API Service belum siap. Coba lagi beberapa detik lagi.');
+                return;
+            }
+
+            updateSyncStatus('syncing');
+
+            try {
+                const response = await fetch('./api/index.php?action=getAll');
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `HTTP ${response.status}`);
+                }
+
+                const allData = await response.json();
+                let changed = false;
+
+                if (Array.isArray(allData.students)) {
+                    localStorage.setItem('exot_students', JSON.stringify(allData.students));
+                    changed = true;
+                }
+                if (Array.isArray(allData.users)) {
+                    localStorage.setItem('exot_users', JSON.stringify(allData.users));
+                    changed = true;
+                }
+                if (Array.isArray(allData.questions)) {
+                    localStorage.setItem('exot_questions', JSON.stringify(allData.questions));
+                    changed = true;
+                }
+                if (Array.isArray(allData.activity_log)) {
+                    localStorage.setItem('exot_activity_log', JSON.stringify(allData.activity_log));
+                    changed = true;
+                }
+                if (Array.isArray(allData.examiner_rewards)) {
+                    localStorage.setItem('exot_examiner_rewards', JSON.stringify(allData.examiner_rewards));
+                    changed = true;
+                }
+                if (allData.settings && typeof allData.settings === 'object') {
+                    localStorage.setItem('exot_settings', JSON.stringify(allData.settings));
+                    changed = true;
+                }
+                if (Array.isArray(allData.classes)) {
+                    localStorage.setItem('exot_classes', JSON.stringify(allData.classes));
+                    changed = true;
+                }
+
+                if (changed) {
+                    refreshAllData();
+                    window.dispatchEvent(new Event('students-updated'));
+                }
+
+                updateSyncStatus('online');
+                showToast('Data berhasil di-load dari server', 'success');
+            } catch (e) {
+                console.error(e);
+                updateSyncStatus('error');
+                alert('Gagal load data dari server: ' + e.message);
+            }
+        }
+
+        function forceSaveCloud() {
+            const students = getStudents();
+            const users = getUsers();
+            const questions = getQuestions();
+            const activity = getActivityLog();
+            const rewards = getExaminerRewards();
+            const settings = getSettings();
+            const classes = getClasses();
+
+            saveToFirebase('students', students);
+            saveToFirebase('users', users);
+            saveToFirebase('questions', questions);
+            saveToFirebase('activity_log', activity);
+            saveToFirebase('examiner_rewards', rewards);
+            saveToFirebase('classes', classes);
+            saveToFirebase('settings', settings);
+
+            showToast('Perintah simpan dikirim ke server', 'info');
+        }
 
     </script>
     <footer style="text-align: center; margin-top: 2rem; color: var(--text-muted); font-size: 0.8rem;">
@@ -1631,7 +1719,7 @@ qrn1, pass123, Ustadz Ali, alquran
                                 progEl.id = 'stat-prog';
                                 statusDiv.appendChild(progEl);
                             }
-                            progEl.innerText = `📦 ${Math.round(snapshot.bytesTransferred / 1024)}KB / ${Math.round(snapshot.totalBytes / 1024)}KB`;
+                            progEl.innerText = `?? ${Math.round(snapshot.bytesTransferred / 1024)}KB / ${Math.round(snapshot.totalBytes / 1024)}KB`;
                             progEl.style.color = '#4caf50';
                         }
 
@@ -1671,20 +1759,20 @@ qrn1, pass123, Ustadz Ali, alquran
 
             for (const file of files) {
                 if (file.type !== 'application/pdf') {
-                    addProgressItem(file.name, '❌ Bukan file PDF', 'error');
+                    addProgressItem(file.name, '? Bukan file PDF', 'error');
                     continue;
                 }
 
                 // Limit File Size to 5MB
                 const MAX_SIZE_MB = 5;
                 if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-                    addProgressItem(file.name, `❌ File terlalu besar (> ${MAX_SIZE_MB}MB)`, 'error');
+                    addProgressItem(file.name, `? File terlalu besar (> ${MAX_SIZE_MB}MB)`, 'error');
                     alert(`File ${file.name} terlalu besar! Maksimal ${MAX_SIZE_MB}MB.`);
                     continue;
                 }
 
                 // Create Progress Item
-                const progressItem = addProgressItem(file.name, '⏳ Memulai upload...', 'pending');
+                const progressItem = addProgressItem(file.name, '? Memulai upload...', 'pending');
 
                 // Parse Filename: ROOM-NAME.pdf (Subject is passed implicitly)
                 const filename = file.name.replace('.pdf', '');
@@ -1702,7 +1790,7 @@ qrn1, pass123, Ustadz Ali, alquran
                     room = parts[0].trim();
                     name = parts[1].trim();
                 } else {
-                    updateProgressItem(progressItem, '❌ Format nama file salah. Gunakan: RUANGAN-NAMA.pdf', 'error');
+                    updateProgressItem(progressItem, '? Format nama file salah. Gunakan: RUANGAN-NAMA.pdf', 'error');
                     continue;
                 }
 
@@ -1714,14 +1802,14 @@ qrn1, pass123, Ustadz Ali, alquran
                 );
 
                 if (!student) {
-                    updateProgressItem(progressItem, `❌ Siswa tidak ditemukan: ${name} di ${room}`, 'error');
+                    updateProgressItem(progressItem, `? Siswa tidak ditemukan: ${name} di ${room}`, 'error');
                     continue;
                 }
 
                 // Upload to Firebase
                 try {
                     const authText = window.currentUser ? `(User: ${window.currentUser.uid.substring(0, 4)}..)` : '(No Auth!)';
-                    updateProgressItem(progressItem, `🚀 Mengupload... ${authText}`, 'loading');
+                    updateProgressItem(progressItem, `?? Mengupload... ${authText}`, 'loading');
 
                     // Allow retry if auth is missing, but don't block more than 5 seconds
                     if (!window.currentUser && window.auth) {
@@ -1733,9 +1821,9 @@ qrn1, pass123, Ustadz Ali, alquran
                             );
 
                             await Promise.race([authPromise, timeoutPromise]);
-                            console.log("✅ Auto-signin success");
+                            console.log("? Auto-signin success");
                         } catch (authErr) {
-                            console.warn("⚠️ Auto-signin failed/timed-out, trying upload anyway:", authErr);
+                            console.warn("?? Auto-signin failed/timed-out, trying upload anyway:", authErr);
                         }
                     }
 
@@ -1743,7 +1831,7 @@ qrn1, pass123, Ustadz Ali, alquran
                     const path = `questions/${subject}/${room}/${file.name}`;
 
                     const downloadURL = await uploadPDFToFirebase(file, path, (progress) => {
-                        updateProgressItem(progressItem, `🚀 Uploading... ${Math.round(progress)}%`, 'loading');
+                        updateProgressItem(progressItem, `?? Uploading... ${Math.round(progress)}%`, 'loading');
                         // Update bar width manually if needed or via helper
                         const el = document.getElementById(progressItem);
                         const bar = el?.querySelector('.progress-bar');
@@ -1757,13 +1845,13 @@ qrn1, pass123, Ustadz Ali, alquran
                     // Signature: addQuestion(room, subject, content, type, targetStudent, storagePath)
                     addQuestion(room, subject, downloadURL, 'pdf', student.name, path);
 
-                    updateProgressItem(progressItem, `✅ Berhasil! Disimpan untuk ${name}`, 'success');
+                    updateProgressItem(progressItem, `? Berhasil! Disimpan untuk ${name}`, 'success');
 
                 } catch (err) {
                     console.error(err);
-                    let msg = `❌ Gagal upload: ${err.message}`;
+                    let msg = `? Gagal upload: ${err.message}`;
                     if (err.message.includes('timed out')) {
-                        msg = '❌ Koneksi lambat/terputus. Coba lagi.';
+                        msg = '? Koneksi lambat/terputus. Coba lagi.';
                     }
                     updateProgressItem(progressItem, msg, 'error');
                     alert(msg + "\n\nPastikan internet lancar dan file tidak corrupt.");
@@ -1777,13 +1865,13 @@ qrn1, pass123, Ustadz Ali, alquran
             const list = document.getElementById('progressList');
             const id = 'prog-' + Math.random().toString(36).substr(2, 9);
 
-            let icon = '📄';
+            let icon = '??';
             let color = 'var(--text-primary)';
             let bg = 'var(--bg-surface)';
 
-            if (type === 'error') { color = 'var(--danger)'; bg = '#fee2e2'; icon = '❌'; }
-            if (type === 'success') { color = 'var(--success)'; bg = '#dcfce7'; icon = '✅'; }
-            if (type === 'loading') { color = 'var(--info)'; bg = '#e0f2fe'; icon = '⏳'; }
+            if (type === 'error') { color = 'var(--danger)'; bg = '#fee2e2'; icon = '?'; }
+            if (type === 'success') { color = 'var(--success)'; bg = '#dcfce7'; icon = '?'; }
+            if (type === 'loading') { color = 'var(--info)'; bg = '#e0f2fe'; icon = '?'; }
 
             const html = `
                 <div id="${id}" style="
@@ -1842,16 +1930,6 @@ qrn1, pass123, Ustadz Ali, alquran
         }
     </script>
 
-    <!-- Firebase Compat SDK (Local) -->
-    <script src="js/firebase-app-compat.js"></script>
-    <script src="js/firebase-firestore-compat.js"></script>
-    <script src="js/firebase-storage-compat.js"></script>
-
-    <!-- Firebase Auth (CDN - Required for Storage Rules) -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-
-    <!-- App Scripts (Compat Mode) -->
-    <script src="js/firebase-config.js?v=2.5"></script>
     <script src="js/api-service.js"></script>
     <script>
         // Init Sync

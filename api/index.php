@@ -50,11 +50,16 @@ function handleGetAll($pdo)
     // Fetch Students
     $stmt = $pdo->query("SELECT * FROM students");
     $students = $stmt->fetchAll();
-    // Decode JSON columns
+    // Decode JSON columns and map to camelCase
     foreach ($students as &$s) {
-        $s['scores'] = json_decode($s['scores'], true);
-        $s['scored_by'] = json_decode($s['scored_by'], true); // Fix key name mismatch from schema? No, schema is scored_by
+        $s['scores'] = json_decode($s['scores'] ?? '{"english":null,"arabic":null,"alquran":null}', true);
+        $s['scoredBy'] = json_decode($s['scored_by'] ?? '{"english":null,"arabic":null,"alquran":null}', true);
+        $s['qrCode'] = $s['qr_code'];
+        $s['attendedAt'] = $s['attended_at'];
         $s['attended'] = (bool)$s['attended'];
+
+        // Remove snake_case versions
+        unset($s['qr_code'], $s['attended_at'], $s['scored_by']);
     }
     $data['students'] = $students;
 
@@ -62,13 +67,21 @@ function handleGetAll($pdo)
     $stmt = $pdo->query("SELECT * FROM users");
     $users = $stmt->fetchAll();
     foreach ($users as &$u) {
-        $u['assigned_classes'] = json_decode($u['assigned_classes'], true);
+        $u['assignedClasses'] = json_decode($u['assigned_classes'] ?? '[]', true);
+        $u['qrCode'] = $u['qr_code'];
+        unset($u['assigned_classes'], $u['qr_code']);
     }
     $data['users'] = $users;
 
     // Fetch Questions
     $stmt = $pdo->query("SELECT * FROM questions");
-    $data['questions'] = $stmt->fetchAll();
+    $questions = $stmt->fetchAll();
+    foreach ($questions as &$q) {
+        $q['targetStudent'] = $q['target_student'];
+        $q['storagePath'] = $q['storage_path'];
+        unset($q['target_student'], $q['storage_path']);
+    }
+    $data['questions'] = $questions;
 
     // Fetch Classes
     $stmt = $pdo->query("SELECT name FROM classes");
@@ -76,14 +89,27 @@ function handleGetAll($pdo)
 
     // Fetch Activity Log
     $stmt = $pdo->query("SELECT * FROM activity_log ORDER BY timestamp DESC LIMIT 100");
-    $data['activity_log'] = $stmt->fetchAll();
+    $activityLog = $stmt->fetchAll();
+    foreach ($activityLog as &$log) {
+        $log['userId'] = $log['user_id'];
+        $log['userName'] = $log['user_name'];
+        unset($log['user_id'], $log['user_name']);
+    }
+    $data['activity_log'] = $activityLog;
 
     // Fetch Examiner Rewards
     $stmt = $pdo->query("SELECT * FROM examiner_rewards");
-    $data['examiner_rewards'] = $stmt->fetchAll();
-    foreach ($data['examiner_rewards'] as &$r) {
+    $rewards = $stmt->fetchAll();
+    foreach ($rewards as &$r) {
         $r['claimed'] = (bool)$r['claimed'];
+        $r['examinerId'] = $r['examiner_id'];
+        $r['examinerName'] = $r['examiner_name'];
+        $r['qrCode'] = $r['qr_code'];
+        $r['generatedAt'] = $r['generated_at'];
+        $r['claimedAt'] = $r['claimed_at'];
+        unset($r['examiner_id'], $r['examiner_name'], $r['qr_code'], $r['generated_at'], $r['claimed_at']);
     }
+    $data['examiner_rewards'] = $rewards;
 
     // Fetch Settings
     $stmt = $pdo->query("SELECT * FROM settings");
