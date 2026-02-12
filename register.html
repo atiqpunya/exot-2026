@@ -1489,6 +1489,35 @@ qrn1, pass123, Ustadz Ali, alquran
             }
         }
 
+        // ==========================================
+        // AUTO-SYNC UI LISTENERS
+        // ==========================================
+        window.addEventListener('storage-update', () => {
+            console.log("♻️ Data update detected from Cloud/Local, refreshing UI...");
+            refreshAllData();
+            showToast("Data disinkronkan", "info");
+        });
+
+        window.addEventListener('students-updated', () => {
+            loadStudentList();
+            updateStats();
+        });
+
+        function refreshAllData() {
+            loadStudentList();
+            loadPanitiaList();
+            loadExaminerList();
+            loadQuestionList();
+            updateStats();
+        }
+
+        // Trigger initial load
+        document.addEventListener('DOMContentLoaded', () => {
+            // ... existing init logic if any, currently handled by body onload or individual scripts
+            // Just safely ensure we render once on load
+            setTimeout(refreshAllData, 500);
+        });
+
     </script>
     <footer style="text-align: center; margin-top: 2rem; color: var(--text-muted); font-size: 0.8rem;">
         <p>&copy; 2026 EXOT System. Created by Muhammad Atiq Qoidul Islam</p>

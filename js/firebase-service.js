@@ -4,7 +4,7 @@
  */
 
 // PASTE YOUR WEB APP URL HERE
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwLt-nhwmHMEW5EP9gw9UqJ-Nn2BTYWKZj8id-8N74jGnPnZvb67wYaeA9NKTu37AQFQQ/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxFSO_O0gb8uRA35qMI6TfZBCvMyTBVo3HTF0T6AV2Qdrj-KQLtNZ3aL8CH76r_1XgWRA/exec";
 
 const firebaseService = {
     async save(key, data, timestamp = null) {
