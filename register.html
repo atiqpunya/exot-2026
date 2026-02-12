@@ -59,6 +59,91 @@
             color: var(--text-muted);
         }
     </style>
+    <script>
+        // Global variable to track which subject is being uploaded to via button
+        console.log('Bulk Upload Script Loading from HEAD...');
+        var currentUploadSubject = '';
+
+        window.triggerFileUpload = function (subject) {
+            console.log('Triggering upload for subject:', subject);
+            currentUploadSubject = subject;
+
+            const fileInput = document.getElementById('bulkFileInput');
+            if (fileInput) {
+                console.log('File input found, executing click()...');
+                try {
+                    fileInput.value = ''; // Reset value to allow selecting the same file again
+                    fileInput.click();
+                } catch (e) {
+                    console.error('Error triggering click:', e);
+                    alert('Gagal membuka file picker: ' + e.message);
+                }
+            } else {
+                console.error('FATAL: Input element #bulkFileInput not found in DOM!');
+                alert('Error sistem: Komponen upload tidak ditemukan. Mohon refresh halaman.');
+            }
+        };
+
+        window.handleDragOver = function (e, el) {
+            e.preventDefault();
+            e.stopPropagation();
+            el.style.transform = 'scale(1.02)';
+            el.style.borderColor = getComputedStyle(el).color;
+            el.style.backgroundColor = '#fff';
+        };
+
+        window.handleDragLeave = function (e, el) {
+            e.preventDefault();
+            e.stopPropagation();
+            el.style.transform = 'scale(1)';
+            // Reset to original colors based on data-subject
+            const subject = el.getAttribute('data-subject');
+            if (subject === 'english') {
+                el.style.borderColor = '#3b82f6';
+                el.style.backgroundColor = '#eff6ff';
+            } else if (subject === 'arabic') {
+                el.style.borderColor = '#10b981';
+                el.style.backgroundColor = '#ecfdf5';
+            } else if (subject === 'alquran') {
+                el.style.borderColor = '#f59e0b';
+                el.style.backgroundColor = '#fffbeb';
+            }
+        };
+
+        window.handleDrop = function (e, subject) {
+            e.preventDefault();
+            e.stopPropagation();
+            const el = e.currentTarget;
+            handleDragLeave(e, el); // Reset style
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                console.log('Files dropped:', files.length);
+                if (typeof processFiles === 'function') {
+                    processFiles(files, subject);
+                } else {
+                    alert('Sistem belum siap sepenuhnya. Mohon tunggu sebentar...');
+                }
+            }
+        };
+
+        // For hidden file input
+        window.handleSelectedFiles = function (files) {
+            console.log('File selection detected:', files.length, 'files');
+            if (files.length > 0 && currentUploadSubject) {
+                if (typeof processFiles === 'function') {
+                    processFiles(files, currentUploadSubject);
+                } else {
+                    alert('Sistem belum siap sepenuhnya. Mohon tunggu sebentar...');
+                }
+                // Reset for next use
+                document.getElementById('bulkFileInput').value = '';
+            } else if (files.length > 0) {
+                console.error('Subject is missing for upload!');
+                alert('Error: Subject not selected. Please try again.');
+            }
+        };
+    </script>
 </head>
 
 <body>
@@ -1193,92 +1278,11 @@ qrn1, pass123, Ustadz Ali, alquran
         <p>Version 2.4 (Local SDK)</p>
     </footer>
 
-    <!-- Firebase Compat SDK (Local) -->
-    <script src="js/firebase-app-compat.js"></script>
-    <script src="js/firebase-firestore-compat.js"></script>
-    <script src="js/firebase-storage-compat.js"></script>
-
-    <!-- Firebase Auth (CDN - Required for Storage Rules) -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-
-    <!-- App Scripts (Compat Mode) -->
-    <script src="js/firebase-config.js?v=2.5"></script>
-    <script src="js/firebase-service.js?v=2.5"></script>
+    <!-- Bulk Upload Logic (Firebase Dependent) -->
     <script>
-        // Auto Sign-in Anonymously for Storage Access
-        document.addEventListener('DOMContentLoaded', () => {
-            if (window.auth) {
-                window.auth.signInAnonymously()
-                    .then(() => console.log("✅ Signed in anonymously"))
-                    .catch(error => console.error("❌ Auth Error:", error));
-            } else {
-                console.warn("⚠️ Auth not loaded - Uploads may fail");
-            }
-        });
-    </script>
-    <!-- Bulk Upload Logic -->
-    <script>
-        // Global variable to track which subject is being uploaded to via button
-        let currentUploadSubject = '';
-
-        function triggerFileUpload(subject) {
-            currentUploadSubject = subject;
-            document.getElementById('bulkFileInput').click();
-        }
-
-        function handleDragOver(e, el) {
-            e.preventDefault();
-            e.stopPropagation();
-            el.style.transform = 'scale(1.02)';
-            el.style.borderColor = getComputedStyle(el).color;
-            el.style.backgroundColor = '#fff';
-        }
-
-        function handleDragLeave(e, el) {
-            e.preventDefault();
-            e.stopPropagation();
-            el.style.transform = 'scale(1)';
-            // Reset to original colors based on data-subject
-            const subject = el.getAttribute('data-subject');
-            if (subject === 'english') {
-                el.style.borderColor = '#3b82f6';
-                el.style.backgroundColor = '#eff6ff';
-            } else if (subject === 'arabic') {
-                el.style.borderColor = '#10b981';
-                el.style.backgroundColor = '#ecfdf5';
-            } else if (subject === 'alquran') {
-                el.style.borderColor = '#f59e0b';
-                el.style.backgroundColor = '#fffbeb';
-            }
-        }
-
-        function handleDrop(e, subject) {
-            e.preventDefault();
-            e.stopPropagation();
-            const el = e.currentTarget;
-            handleDragLeave(e, el); // Reset style
-
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                processFiles(files, subject);
-            }
-        }
-
-        // For hidden file input
-        function handleSelectedFiles(files) {
-            if (files.length > 0 && currentUploadSubject) {
-                processFiles(files, currentUploadSubject);
-                // Reset for next use
-                document.getElementById('bulkFileInput').value = '';
-            } else if (files.length > 0) {
-                alert('Error: Subject not selected.');
-            }
-        }
-
         async function uploadPDFToFirebase(file, path, onProgress) {
             return new Promise((resolve, reject) => {
                 if (!window.firebaseService) {
-                    reject(new Error("Firebase Service not loaded"));
                     return;
                 }
 
@@ -1334,58 +1338,54 @@ qrn1, pass123, Ustadz Ali, alquran
             progressContainer.style.display = 'block';
             progressList.innerHTML = ''; // Clear previous
 
-            if (file.type !== 'application/pdf') {
-                addProgressItem(file.name, '❌ Bukan file PDF', 'error');
-                continue;
-            }
+            for (const file of files) {
+                if (file.type !== 'application/pdf') {
+                    addProgressItem(file.name, '❌ Bukan file PDF', 'error');
+                    continue;
+                }
 
-            // Limit File Size to 5MB
-            const MAX_SIZE_MB = 5;
-            if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-                addProgressItem(file.name, `❌ File terlalu besar (> ${MAX_SIZE_MB}MB)`, 'error');
-                alert(`File ${file.name} terlalu besar! Maksimal ${MAX_SIZE_MB}MB.`);
-                continue;
-            }
+                // Limit File Size to 5MB
+                const MAX_SIZE_MB = 5;
+                if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+                    addProgressItem(file.name, `❌ File terlalu besar (> ${MAX_SIZE_MB}MB)`, 'error');
+                    alert(`File ${file.name} terlalu besar! Maksimal ${MAX_SIZE_MB}MB.`);
+                    continue;
+                }
 
-            // Create Progress Item
-            const progressItem = addProgressItem(file.name, '⏳ Memulai upload...', 'pending');
+                // Create Progress Item
+                const progressItem = addProgressItem(file.name, '⏳ Memulai upload...', 'pending');
 
-            // Parse Filename: ROOM-NAME.pdf (Subject is passed implicitly)
-            const filename = file.name.replace('.pdf', '');
-            const parts = filename.split('-');
+                // Parse Filename: ROOM-NAME.pdf (Subject is passed implicitly)
+                const filename = file.name.replace('.pdf', '');
+                const parts = filename.split('-');
 
-            let room, name;
+                let room, name;
 
-            // Heuristic: If 3 parts, assume SUBJECT-ROOM-NAME. If 2, ROOM-NAME.
-            if (parts.length >= 3) {
-                // Legacy: ENGLISH-7A-AHMAD -> Ignore index 0
-                room = parts[1].trim();
-                name = parts.slice(2).join('-').trim(); // Join rest as name
-            } else if (parts.length === 2) {
-                // New: 7A-AHMAD
-                room = parts[0].trim();
-                name = parts[1].trim();
-            } else {
-                updateProgressItem(progressItem, '❌ Format nama file salah. Gunakan: RUANGAN-NAMA.pdf', 'error');
-                continue;
-            }
+                // Heuristic: If 3 parts, assume SUBJECT-ROOM-NAME. If 2, ROOM-NAME.
+                if (parts.length >= 3) {
+                    // Legacy: ENGLISH-7A-AHMAD -> Ignore index 0
+                    room = parts[1].trim();
+                    name = parts.slice(2).join('-').trim(); // Join rest as name
+                } else if (parts.length === 2) {
+                    // New: 7A-AHMAD
+                    room = parts[0].trim();
+                    name = parts[1].trim();
+                } else {
+                    updateProgressItem(progressItem, '❌ Format nama file salah. Gunakan: RUANGAN-NAMA.pdf', 'error');
+                    continue;
+                }
 
-            // Find Student ID
-            const students = getStudents();
-            const student = students.find(s =>
-                s.name.toLowerCase() === name.toLowerCase() &&
-                s.class.toLowerCase() === room.toLowerCase()
-            );
+                // Find Student ID
+                const students = getStudents();
+                const student = students.find(s =>
+                    s.name.toLowerCase() === name.toLowerCase() &&
+                    s.class.toLowerCase() === room.toLowerCase()
+                );
 
-            if (!student) {
-                updateProgressItem(progressItem, `❌ Siswa tidak ditemukan: ${name} di ${room}`, 'error');
-                continue;
-            }
-
-            // Upload to Firebase
-            try {
-                const authText = window.currentUser ? `(User: ${window.currentUser.uid.substring(0, 4)}..)` : '(No Auth!)';
-                updateProgressItem(progressItem, `🚀 Mengupload... ${authText}`, 'loading');
+                if (!student) {
+                    updateProgressItem(progressItem, `❌ Siswa tidak ditemukan: ${name} di ${room}`, 'error');
+                    continue;
+                }
 
                 // Upload to Firebase
                 try {
@@ -1439,7 +1439,7 @@ qrn1, pass123, Ustadz Ali, alquran
                 }
             }
 
-        loadQuestionList(); // Refresh list
+            loadQuestionList(); // Refresh list
         }
 
         function addProgressItem(filename, status, type) {
@@ -1509,6 +1509,30 @@ qrn1, pass123, Ustadz Ali, alquran
                 }
             }
         }
+    </script>
+
+    <!-- Firebase Compat SDK (Local) -->
+    <script src="js/firebase-app-compat.js"></script>
+    <script src="js/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-storage-compat.js"></script>
+
+    <!-- Firebase Auth (CDN - Required for Storage Rules) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
+    <!-- App Scripts (Compat Mode) -->
+    <script src="js/firebase-config.js?v=2.5"></script>
+    <script src="js/firebase-service.js?v=2.5"></script>
+    <script>
+        // Auto Sign-in Anonymously for Storage Access
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.auth) {
+                window.auth.signInAnonymously()
+                    .then(() => console.log("✅ Signed in anonymously"))
+                    .catch(error => console.error("❌ Auth Error:", error));
+            } else {
+                console.warn("⚠️ Auth not loaded - Uploads may fail");
+            }
+        });
     </script>
 </body>
 
