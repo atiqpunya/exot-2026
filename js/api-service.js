@@ -4,6 +4,7 @@
  */
 
 const API_URL = './api/index.php';
+const SYNC_CHANNEL = new BroadcastChannel('exot_sync_channel');
 
 const apiService = {
     async save(key, data) {
@@ -33,6 +34,10 @@ const apiService = {
 
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const result = await response.json();
+
+            // Notify other tabs immediately
+            SYNC_CHANNEL.postMessage({ type: 'data-updated', key: key });
+
             return result;
         } catch (error) {
             console.error("API Save Error:", error);
@@ -53,7 +58,12 @@ const apiService = {
             });
 
             if (!response.ok) throw new Error(`Upload failed: ${response.statusText}`);
-            return await response.json();
+            const result = await response.json();
+
+            // Notify other tabs about file upload if needed
+            SYNC_CHANNEL.postMessage({ type: 'files-updated' });
+
+            return result;
         } catch (error) {
             console.error("API Upload Error:", error);
             throw error;
@@ -61,95 +71,68 @@ const apiService = {
     },
 
     initSync() {
-        console.log("🔄 API Sync Service Started (Polling Mode)");
-        // Poll every 10 seconds for updates (reducing frequent polling)
-        setInterval(async () => {
-            try {
-                const response = await fetch(`${API_URL}?action=getAll`);
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.error || `HTTP ${response.status}`);
-                }
+        console.log("🔄 API Sync Service Started (Hybrid Mode)");
 
-                const allData = await response.json();
-                let updated = false;
-
-                // Sync Students
-                if (allData.students && Array.isArray(allData.students)) {
-                    const local = localStorage.getItem('exot_students');
-                    const remote = JSON.stringify(allData.students);
-                    if (local !== remote) {
-                        // Only update if there's actual data or we explicitly want to clear
-                        // To prevent "data loss" on connection glitched empty responses
-                        localStorage.setItem('exot_students', remote);
-                        updated = true;
-                    }
-                }
-
-                // Sync Users
-                if (allData.users && Array.isArray(allData.users)) {
-                    const local = localStorage.getItem('exot_users');
-                    const remote = JSON.stringify(allData.users);
-                    if (local !== remote) {
-                        localStorage.setItem('exot_users', remote);
-                        updated = true;
-                    }
-                }
-
-                // Sync Questions
-                if (allData.questions && Array.isArray(allData.questions)) {
-                    const local = localStorage.getItem('exot_questions');
-                    const remote = JSON.stringify(allData.questions);
-                    if (local !== remote) {
-                        localStorage.setItem('exot_questions', remote);
-                        updated = true;
-                    }
-                }
-
-                // Sync Activity Log
-                if (allData.activity_log && Array.isArray(allData.activity_log)) {
-                    const local = localStorage.getItem('exot_activity_log');
-                    const remote = JSON.stringify(allData.activity_log);
-                    if (local !== remote) {
-                        localStorage.setItem('exot_activity_log', remote);
-                        updated = true;
-                    }
-                }
-
-                // Sync Examiner Rewards
-                if (allData.examiner_rewards && Array.isArray(allData.examiner_rewards)) {
-                    const local = localStorage.getItem('exot_examiner_rewards');
-                    const remote = JSON.stringify(allData.examiner_rewards);
-                    if (local !== remote) {
-                        localStorage.setItem('exot_examiner_rewards', remote);
-                        updated = true;
-                    }
-                }
-
-                // Sync Settings
-                if (allData.settings && typeof allData.settings === 'object') {
-                    const local = localStorage.getItem('exot_settings');
-                    const remote = JSON.stringify(allData.settings);
-                    if (local !== remote) {
-                        localStorage.setItem('exot_settings', remote);
-                        updated = true;
-                    }
-                }
-
-                if (updated) {
-                    console.log("🔄 Data synced from server.");
-                    window.dispatchEvent(new Event('storage-update'));
-                    window.dispatchEvent(new Event('students-updated'));
-                }
-
-            } catch (e) {
-                console.warn("Sync Poll Failed:", e.message);
-                // Dispatch event for UI indicator if needed
-                window.dispatchEvent(new CustomEvent('sync-error', { detail: e.message }));
+        // 1. Listen for instant updates from other tabs
+        SYNC_CHANNEL.onmessage = (event) => {
+            if (event.data.type === 'data-updated' || event.data.type === 'files-updated') {
+                console.log("🚀 Instant sync received from another tab");
+                this.pollNow();
             }
-        }, 10000);
+        };
+
+        // 2. Poll every 5 seconds for updates from other browsers/devices
+        setInterval(() => this.pollNow(), 5000);
+
+        // Initial poll
+        this.pollNow();
+    },
+
+    async pollNow() {
+        try {
+            const response = await fetch(`${API_URL}?action=getAll`);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `HTTP ${response.status}`);
+            }
+
+            const allData = await response.json();
+            let updated = false;
+
+            const syncKeys = [
+                { remote: 'students', local: 'exot_students' },
+                { remote: 'users', local: 'exot_users' },
+                { remote: 'questions', local: 'exot_questions' },
+                { remote: 'activity_log', local: 'exot_activity_log' },
+                { remote: 'examiner_rewards', local: 'exot_examiner_rewards' },
+                { remote: 'settings', local: 'exot_settings' }
+            ];
+
+            syncKeys.forEach(mapping => {
+                const remoteData = allData[mapping.remote];
+                if (remoteData) {
+                    const localStr = localStorage.getItem(mapping.local);
+                    const remoteStr = JSON.stringify(remoteData);
+                    if (localStr !== remoteStr) {
+                        localStorage.setItem(mapping.local, remoteStr);
+                        updated = true;
+                    }
+                }
+            });
+
+            if (updated) {
+                console.log("🔄 Data synced from server/tab.");
+                window.dispatchEvent(new Event('storage-update'));
+                window.dispatchEvent(new Event('students-updated'));
+            }
+
+        } catch (e) {
+            console.warn("Sync Poll Failed:", e.message);
+            window.dispatchEvent(new CustomEvent('sync-error', { detail: e.message }));
+        }
     }
 };
+
 
 // Expose globally
 window.apiService = apiService;

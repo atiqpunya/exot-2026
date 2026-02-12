@@ -168,7 +168,7 @@
                 document.getElementById('floatingBtn').innerHTML = '🚪 Logout';
             }
 
-            if (window.firebaseService) window.firebaseService.initSync();
+            if (window.apiService) window.apiService.initSync();
 
             // Listen for sync updates
             window.addEventListener('storage-update', () => {

@@ -161,7 +161,7 @@
             document.getElementById('floatingBtn').innerHTML = '🚪 Logout';
 
             loadExaminers();
-            if (window.firebaseService) window.firebaseService.initSync();
+            if (window.apiService) window.apiService.initSync();
         });
 
         function toggleAuth() {

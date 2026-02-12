@@ -1,5 +1,5 @@
-// EXOT Service Worker v2.0
-const CACHE_NAME = 'exot-v2.4';
+// EXOT Service Worker v2.7
+const CACHE_NAME = 'exot-v2.7';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -13,10 +13,7 @@ const STATIC_ASSETS = [
     '/examiner-reward.html',
     '/css/styles.css',
     '/js/storage.js',
-    '/js/firebase-config.js',
     '/js/api-service.js',
-    '/js/firebase-app-compat.js',
-    '/js/firebase-firestore-compat.js',
     '/img/logo-alwildan.png',
     '/manifest.json'
 ];

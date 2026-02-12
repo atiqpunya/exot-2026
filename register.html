@@ -195,7 +195,7 @@
             <div style="display: flex; gap: 0.5rem;">
                 <button class="btn btn-secondary" onclick="forceLoadCloud()" title="Ambil data dari Cloud">🔄
                     Load</button>
-                <button class="btn btn-primary" onclick="forceSaveCloud()" title="Simpan data ke Firebase">💾
+                <button class="btn btn-primary" onclick="forceSaveCloud()" title="Simpan data ke Cloud">💾
                     Save</button>
             </div>
         </div>
@@ -468,22 +468,22 @@ qrn1, pass123, Ustadz Ali, alquran
                         <h5 style="margin-bottom: 0.75rem;">📥 Download QR sebagai HTML</h5>
 
                         <div class="export-option" onclick="exportQR('all')">
-                            <h5>?? Semua Data</h5>
+                            <h5>📦 Semua Data</h5>
                             <p>Download QR semua siswa, guru, dan penguji</p>
                         </div>
 
                         <div class="export-option" onclick="exportQR('siswa')">
-                            <h5>????? Hanya Siswa</h5>
+                            <h5>🎓 Hanya Siswa</h5>
                             <p>Download QR code semua siswa saja</p>
                         </div>
 
                         <div class="export-option" onclick="exportQR('panitia')">
-                            <h5>?? Hanya Panitia</h5>
+                            <h5>👥 Hanya Panitia</h5>
                             <p>Download QR code semua panitia saja</p>
                         </div>
 
                         <div class="export-option" onclick="exportQR('penguji')">
-                            <h5>?? Hanya Penguji</h5>
+                            <h5>👨‍🏫 Hanya Penguji</h5>
                             <p>Download QR code semua penguji saja</p>
                         </div>
 
@@ -652,9 +652,7 @@ qrn1, pass123, Ustadz Ali, alquran
             }
 
             // Initialize Sync
-            if (window.firebaseService) {
-                window.firebaseService.initSync();
-            }
+            if (window.apiService) window.apiService.initSync();
 
             // Listen for sync updates
             window.addEventListener('storage-update', () => {
@@ -715,11 +713,11 @@ qrn1, pass123, Ustadz Ali, alquran
             const question = getQuestions().find(q => q.id === id);
 
             // Delete file if exists
-            if (question && question.storagePath && window.firebaseService) {
+            if (question && question.storagePath && window.apiService) {
                 try {
                     // Show some loading indicator or just wait
-                    await window.firebaseService.deleteFile(question.storagePath);
-                    console.log('File deleted from storage:', question.storagePath);
+                    await window.apiService.deleteFile(question.storagePath);
+                    console.log('File deleted from server:', question.storagePath);
                 } catch (e) {
                     console.warn("File deletion failed or file not found:", e);
                     // Continue to delete record anyway
@@ -877,7 +875,7 @@ qrn1, pass123, Ustadz Ali, alquran
 
         function clearAllStudents() {
             // ... (keep existing)
-            if (confirm('?? PERINGATAN: Hapus SEMUA siswa?')) {
+            if (confirm('⚠️ PERINGATAN: Hapus SEMUA siswa?')) {
                 saveStudents([]);
                 updateStats();
                 loadStudentList();
@@ -929,7 +927,7 @@ qrn1, pass123, Ustadz Ali, alquran
         }
 
         function clearAllPanitia() {
-            if (confirm('?? PERINGATAN: Apakah Anda yakin ingin menghapus SEMUA panitia?\n\nIni akan menghapus:\n1. Panitia dengan login (Baru)\n2. Panitia tanpa login (Lama)\n\nData tidak dapat dikembalikan!')) {
+            if (confirm('⚠️ PERINGATAN: Apakah Anda yakin ingin menghapus SEMUA panitia?\n\nIni akan menghapus:\n1. Panitia dengan login (Baru)\n2. Panitia tanpa login (Lama)\n\nData tidak dapat dikembalikan!')) {
                 // 1. Delete from Users (New System)
                 const allUsers = getUsers();
                 const panitiaUsers = allUsers.filter(u => u.role === 'panitia' && u.id !== 'admin-001');
@@ -983,7 +981,7 @@ qrn1, pass123, Ustadz Ali, alquran
 
             document.getElementById('bulkExaminers').value = '';
             let msg = `? ${successCount} penguji berhasil ditambahkan!`;
-            if (errors.length) msg += `<br>?? ${errors.join(', ')}`;
+            if (errors.length) msg += `<br>❌ ${errors.join(', ')}`;
             showResult('examinerImportResult', msg);
             updateStats();
             loadExaminerList();
@@ -1023,8 +1021,8 @@ qrn1, pass123, Ustadz Ali, alquran
                   <td>${s.class}</td>
                   <td><span class="badge badge-success">Siswa</span></td>
                   <td>
-                    <button class="btn btn-sm btn-secondary" onclick="downloadSingleQR('${s.id}', 'student')">??</button>
-                    <button class="btn btn-sm btn-danger" onclick="delStudent('${s.id}')">???</button>
+                    <button class="btn btn-sm btn-secondary" onclick="downloadSingleQR('${s.id}', 'student')" title="Cetak QR">🖨️</button>
+                    <button class="btn btn-sm btn-danger" onclick="delStudent('${s.id}')" title="Hapus">🗑️</button>
                   </td>
                 </tr>
               `).join('')}
@@ -1065,8 +1063,8 @@ qrn1, pass123, Ustadz Ali, alquran
                   <td>${p.name}</td>
                   <td>${p.subject || '-'}</td>
                   <td>
-                    <button class="btn btn-sm btn-secondary" onclick="downloadSingleQR('${p.id}', 'panitia')">??</button>
-                    <button class="btn btn-sm btn-danger" onclick="deleteUser('${p.id}'); loadPanitiaList(); updateStats();">???</button>
+                    <button class="btn btn-sm btn-secondary" onclick="downloadSingleQR('${p.id}', 'panitia')" title="Cetak QR">🖨️</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteUser('${p.id}'); loadPanitiaList(); updateStats();" title="Hapus">🗑️</button>
                   </td>
                 </tr>
               `).join('')}
@@ -1120,8 +1118,8 @@ qrn1, pass123, Ustadz Ali, alquran
                   <td>${e.subject}</td>
                   <td>${e.assignedClasses ? e.assignedClasses.map(c => `<span class="badge badge-info">${c}</span>`).join('') : '-'}</td>
                   <td>
-                    <button class="btn btn-sm btn-secondary" onclick="downloadSingleQR('${e.id}', 'penguji')">??</button>
-                    <button class="btn btn-sm btn-danger" onclick="deleteUser('${e.id}'); loadExaminerList(); updateStats();">???</button>
+                    <button class="btn btn-sm btn-secondary" onclick="downloadSingleQR('${e.id}', 'penguji')" title="Cetak QR">🖨️</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteUser('${e.id}'); loadExaminerList(); updateStats();" title="Hapus">🗑️</button>
                   </td>
                 </tr>
               `).join('')}
@@ -1154,7 +1152,7 @@ qrn1, pass123, Ustadz Ali, alquran
         }
 
         function clearAllExaminers() {
-            if (confirm('?? PERINGATAN: Hapus SEMUA data penguji?')) {
+            if (confirm('⚠️ PERINGATAN: Hapus SEMUA data penguji?')) {
                 const examiners = getExaminers();
                 const ids = examiners.map(e => e.id);
 
@@ -1430,7 +1428,7 @@ qrn1, pass123, Ustadz Ali, alquran
                                     ${u.class || u.role || '-'} • ${u.id}
                                 </div>
                             </div>
-                            <button class="btn btn-sm btn-primary" onclick="downloadSingleQR('${u.id}', '${u.sourceType}')">?? QR</button>
+                            <button class="btn btn-sm btn-primary" onclick="downloadSingleQR('${u.id}', '${u.sourceType}')">🖨️ Cetak QR</button>
                         </div>
                     `).join('')}
                 </div>
@@ -1534,19 +1532,19 @@ qrn1, pass123, Ustadz Ali, alquran
             if (headerText) headerText.innerText = 'Connecting...';
 
             try {
-                if (!window.firebaseService) throw new Error("Service missing");
+                if (!window.apiService) throw new Error("Service missing");
 
                 const start = Date.now();
-                const result = await window.firebaseService.save('exot_connection_test', { check: "ok", time: start });
+                const result = await window.apiService.save('exot_connection_test', { check: "ok", time: start });
 
-                if (result.success || result.key) {
+                if (result.success || !result.error) {
                     // Success
                     if (el) {
-                        el.innerHTML = `? <strong>Connected!</strong>`;
+                        el.innerHTML = `✅ <strong>Connected!</strong>`;
                         el.style.color = 'green';
                     }
                     if (headerIcon) {
-                        headerIcon.innerText = '?';
+                        headerIcon.innerText = '✅';
                         headerText.innerText = 'Online';
                         headerText.style.color = 'green';
                         headerBadge.style.borderColor = 'green';
@@ -1577,7 +1575,7 @@ qrn1, pass123, Ustadz Ali, alquran
         // AUTO-SYNC UI LISTENERS
         // ==========================================
         window.addEventListener('storage-update', () => {
-            console.log("?? Data update detected from Cloud/Local, refreshing UI...");
+            console.log("🔄 Data update detected from Cloud/Local, refreshing UI...");
             refreshAllData();
             showToast("Data disinkronkan", "info");
         });
@@ -1676,13 +1674,13 @@ qrn1, pass123, Ustadz Ali, alquran
             const settings = getSettings();
             const classes = getClasses();
 
-            saveToFirebase('students', students);
-            saveToFirebase('users', users);
-            saveToFirebase('questions', questions);
-            saveToFirebase('activity_log', activity);
-            saveToFirebase('examiner_rewards', rewards);
-            saveToFirebase('classes', classes);
-            saveToFirebase('settings', settings);
+            syncData('students', students);
+            syncData('users', users);
+            syncData('questions', questions);
+            syncData('activity_log', activity);
+            syncData('examiner_rewards', rewards);
+            syncData('classes', classes);
+            syncData('settings', settings);
 
             showToast('Perintah simpan dikirim ke server', 'info');
         }
@@ -1690,65 +1688,32 @@ qrn1, pass123, Ustadz Ali, alquran
     </script>
     <footer style="text-align: center; margin-top: 2rem; color: var(--text-muted); font-size: 0.8rem;">
         <p>&copy; 2026 EXOT System. Created by Muhammad Atiq Qoidul Islam</p>
-        <p>Version 2.4 (Local SDK)</p>
+        <p>Version 2.7 (PHP API Sync)</p>
     </footer>
 
-    <!-- Bulk Upload Logic (Firebase Dependent) -->
+    <!-- Bulk Upload Logic (Cloud API) -->
     <script>
-        async function uploadPDFToFirebase(file, path, onProgress) {
-            return new Promise((resolve, reject) => {
-                if (!window.firebaseService) {
-                    reject(new Error("Firebase Service not loaded"));
-                    return;
+        async function uploadPDFToCloud(file, path, onProgress) {
+            console.log(`Starting upload to PHP: ${path}`);
+            // Infer subject from path: questions/SUBJECT/ROOM/FILENAME
+            const pathParts = path.split('/');
+            const subject = pathParts[1] || 'general';
+
+            if (onProgress) onProgress(10); // Initial progress
+
+            try {
+                const result = await window.apiService.uploadFile(file, subject);
+                if (result.success) {
+                    if (onProgress) onProgress(100);
+                    // result.url is the relative path from the server
+                    return result.url;
+                } else {
+                    throw new Error(result.error || "Upload gagal");
                 }
-
-                console.log(`Starting upload: ${path}`);
-                const task = window.firebaseService.uploadFile(path, file);
-
-                task.on('state_changed',
-                    (snapshot) => {
-                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                        console.log(`Upload: ${Math.round(progress)}% (${snapshot.bytesTransferred}/${snapshot.totalBytes})`);
-
-                        // Update diagnostic status if available
-                        const statusDiv = document.getElementById('sys-status');
-                        if (statusDiv) {
-                            let progEl = document.getElementById('stat-prog');
-                            if (!progEl) {
-                                progEl = document.createElement('span');
-                                progEl.id = 'stat-prog';
-                                statusDiv.appendChild(progEl);
-                            }
-                            progEl.innerText = `?? ${Math.round(snapshot.bytesTransferred / 1024)}KB / ${Math.round(snapshot.totalBytes / 1024)}KB`;
-                            progEl.style.color = '#4caf50';
-                        }
-
-                        if (onProgress) onProgress(progress);
-                    },
-                    (error) => {
-                        console.error("Firebase Upload Error:", error);
-                        // Visualize specific error codes
-                        let msg = error.message;
-                        if (error.code === 'storage/unauthorized') {
-                            msg = 'Izin Ditolak (CORS/Auth). Cek Console & CORS Config.';
-                        } else if (error.code === 'storage/canceled') {
-                            msg = 'Upload dibatalkan.';
-                        } else if (error.code === 'storage/unknown') {
-                            msg = 'Error tidak diketahui, cek koneksi.';
-                        }
-                        reject(new Error(msg));
-                    },
-                    async () => {
-                        try {
-                            const downloadURL = await task.snapshot.ref.getDownloadURL();
-                            resolve(downloadURL);
-                        } catch (e) {
-                            console.error("Get Download URL Error:", e);
-                            reject(e);
-                        }
-                    }
-                );
-            });
+            } catch (error) {
+                console.error("PHP Upload Error:", error);
+                throw error;
+            }
         }
 
         async function processFiles(files, subject) {
@@ -1759,42 +1724,35 @@ qrn1, pass123, Ustadz Ali, alquran
 
             for (const file of files) {
                 if (file.type !== 'application/pdf') {
-                    addProgressItem(file.name, '? Bukan file PDF', 'error');
+                    addProgressItem(file.name, '❌ Bukan file PDF', 'error');
                     continue;
                 }
 
                 // Limit File Size to 5MB
-                const MAX_SIZE_MB = 5;
+                const MAX_SIZE_MB = 10; // Increased to 10MB just in case
                 if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-                    addProgressItem(file.name, `? File terlalu besar (> ${MAX_SIZE_MB}MB)`, 'error');
+                    addProgressItem(file.name, `❌ File terlalu besar (> ${MAX_SIZE_MB}MB)`, 'error');
                     alert(`File ${file.name} terlalu besar! Maksimal ${MAX_SIZE_MB}MB.`);
                     continue;
                 }
 
                 // Create Progress Item
-                const progressItem = addProgressItem(file.name, '? Memulai upload...', 'pending');
+                const progressItem = addProgressItem(file.name, '⏳ Memulai upload...', 'pending');
 
-                // Parse Filename: ROOM-NAME.pdf (Subject is passed implicitly)
+                // Parse Filename: ROOM-NAME.pdf
                 const filename = file.name.replace('.pdf', '');
                 const parts = filename.split('-');
 
                 let room, name;
-
-                // Heuristic: If 3 parts, assume SUBJECT-ROOM-NAME. If 2, ROOM-NAME.
-                if (parts.length >= 3) {
-                    // Legacy: ENGLISH-7A-AHMAD -> Ignore index 0
-                    room = parts[1].trim();
-                    name = parts.slice(2).join('-').trim(); // Join rest as name
-                } else if (parts.length === 2) {
-                    // New: 7A-AHMAD
+                if (parts.length >= 2) {
                     room = parts[0].trim();
-                    name = parts[1].trim();
+                    name = parts.slice(1).join('-').trim();
                 } else {
-                    updateProgressItem(progressItem, '? Format nama file salah. Gunakan: RUANGAN-NAMA.pdf', 'error');
+                    updateProgressItem(progressItem, '❌ Format nama file salah. Gunakan: RUANGAN-NAMA.pdf', 'error');
                     continue;
                 }
 
-                // Find Student ID
+                // Find Student
                 const students = getStudents();
                 const student = students.find(s =>
                     s.name.toLowerCase() === name.toLowerCase() &&
@@ -1802,59 +1760,33 @@ qrn1, pass123, Ustadz Ali, alquran
                 );
 
                 if (!student) {
-                    updateProgressItem(progressItem, `? Siswa tidak ditemukan: ${name} di ${room}`, 'error');
+                    updateProgressItem(progressItem, `❌ Siswa tidak ditemukan: ${name} di ${room}`, 'error');
                     continue;
                 }
 
-                // Upload to Firebase
+                // Upload to PHP
                 try {
-                    const authText = window.currentUser ? `(User: ${window.currentUser.uid.substring(0, 4)}..)` : '(No Auth!)';
-                    updateProgressItem(progressItem, `?? Mengupload... ${authText}`, 'loading');
-
-                    // Allow retry if auth is missing, but don't block more than 5 seconds
-                    if (!window.currentUser && window.auth) {
-                        try {
-                            // Race condition: Auth vs 5s Timeout
-                            const authPromise = window.auth.signInAnonymously();
-                            const timeoutPromise = new Promise((_, reject) =>
-                                setTimeout(() => reject(new Error("Auth Timeout")), 5000)
-                            );
-
-                            await Promise.race([authPromise, timeoutPromise]);
-                            console.log("? Auto-signin success");
-                        } catch (authErr) {
-                            console.warn("?? Auto-signin failed/timed-out, trying upload anyway:", authErr);
-                        }
-                    }
+                    updateProgressItem(progressItem, `🚀 Mengupload...`, 'loading');
 
                     // Path: questions/SUBJECT/ROOM/FILENAME
                     const path = `questions/${subject}/${room}/${file.name}`;
 
-                    const downloadURL = await uploadPDFToFirebase(file, path, (progress) => {
-                        updateProgressItem(progressItem, `?? Uploading... ${Math.round(progress)}%`, 'loading');
-                        // Update bar width manually if needed or via helper
+                    const fileUrl = await uploadPDFToCloud(file, path, (progress) => {
+                        updateProgressItem(progressItem, `🚀 Uploading... ${Math.round(progress)}%`, 'loading');
                         const el = document.getElementById(progressItem);
                         const bar = el?.querySelector('.progress-bar');
-                        if (bar) {
-                            bar.style.width = `${progress}%`;
-                            bar.style.transition = 'width 0.1s linear';
-                        }
+                        if (bar) bar.style.width = `${progress}%`;
                     });
 
-                    // Add to Database (Storage.js)
-                    // Signature: addQuestion(room, subject, content, type, targetStudent, storagePath)
-                    addQuestion(room, subject, downloadURL, 'pdf', student.name, path);
-
-                    updateProgressItem(progressItem, `? Berhasil! Disimpan untuk ${name}`, 'success');
+                    // Add to Database
+                    addQuestion(room, subject, fileUrl, 'pdf', student.name, path);
+                    updateProgressItem(progressItem, `✅ Berhasil! Disimpan untuk ${name}`, 'success');
 
                 } catch (err) {
                     console.error(err);
-                    let msg = `? Gagal upload: ${err.message}`;
-                    if (err.message.includes('timed out')) {
-                        msg = '? Koneksi lambat/terputus. Coba lagi.';
-                    }
+                    let msg = `❌ Gagal upload: ${err.message}`;
                     updateProgressItem(progressItem, msg, 'error');
-                    alert(msg + "\n\nPastikan internet lancar dan file tidak corrupt.");
+                    alert(msg);
                 }
             }
 
@@ -1865,7 +1797,7 @@ qrn1, pass123, Ustadz Ali, alquran
             const list = document.getElementById('progressList');
             const id = 'prog-' + Math.random().toString(36).substr(2, 9);
 
-            let icon = '??';
+            let icon = '📄';
             let color = 'var(--text-primary)';
             let bg = 'var(--bg-surface)';
 

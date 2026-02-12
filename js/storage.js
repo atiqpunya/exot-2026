@@ -94,7 +94,7 @@ function initStorage() {
 
   if (modified) {
     localStorage.setItem(STORAGE_KEYS.STUDENTS, JSON.stringify(students));
-    saveToFirebase('students', students);
+    syncData('students', students);
   }
 
   // Data Cleanup: Remove corrupted entries (missing ID or Name)
@@ -102,7 +102,7 @@ function initStorage() {
   if (cleanStudents.length !== students.length) {
     console.warn(`Cleaning up ${students.length - cleanStudents.length} corrupted student entries.`);
     localStorage.setItem(STORAGE_KEYS.STUDENTS, JSON.stringify(cleanStudents));
-    saveToFirebase('students', cleanStudents);
+    syncData('students', cleanStudents);
   }
 
   // Auto-heal: Ensure all USERS have a qrCode
@@ -118,7 +118,7 @@ function initStorage() {
 
   if (modifiedUsers) {
     localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
-    saveToFirebase('users', users);
+    syncData('users', users);
   }
 }
 
@@ -232,7 +232,7 @@ function updateSyncStatus(status) {
 
 let syncTimeout = null;
 
-function saveToFirebase(path, data) {
+function syncData(path, data) {
   if (!path || !data) return;
 
   // Use debounced sync to server
@@ -242,18 +242,19 @@ function saveToFirebase(path, data) {
   syncTimeout = setTimeout(() => {
     if (window.apiService) {
       // Map legacy path to API expected key
-      // The apiService already does some mapping, but we handle it here too for clarity
       const fullKey = path.startsWith('exot_') ? path : `exot_${path}`;
 
       window.apiService.save(fullKey, data)
         .then(res => {
-          if (res && !res.error) {
+          if (res && !res.success === false) { // Handle res.success specifically if returned
             updateSyncStatus('online');
-            // Update local timestamp to avoid immediate re-sync from server
             localStorage.setItem(fullKey + '_timestamp', Date.now());
-          } else {
+          } else if (res && res.error) {
             console.error("API Save Error:", res.error);
             updateSyncStatus('error');
+          } else {
+            updateSyncStatus('online');
+            localStorage.setItem(fullKey + '_timestamp', Date.now());
           }
         })
         .catch(err => {
@@ -283,7 +284,7 @@ function saveSettings(settings) {
   // Track local update time
   const ts = Date.now();
   localStorage.setItem(STORAGE_KEYS.SETTINGS + '_timestamp', ts);
-  saveToFirebase('settings', settings);
+  syncData('settings', settings);
 }
 
 function toggleDarkMode() {
@@ -321,7 +322,7 @@ function saveActivityLog(log) {
   localStorage.setItem(STORAGE_KEYS.ACTIVITY_LOG, JSON.stringify(log));
   // We opt NOT to sync activity log globally to save bandwidth/noise, 
   // or we can sync it if needed. Let's sync it.
-  saveToFirebase('activity_log', log);
+  syncData('activity_log', log);
 }
 
 function logActivity(action, details = '') {
@@ -589,7 +590,7 @@ function saveClasses(classes) {
   // Track local update time
   const ts = Date.now();
   localStorage.setItem(STORAGE_KEYS.CLASSES + '_timestamp', ts);
-  saveToFirebase('classes', classes);
+  syncData('classes', classes);
 }
 
 function addClass(className) {
@@ -641,7 +642,7 @@ function saveUsers(users) {
   // Track local update time
   const ts = Date.now();
   localStorage.setItem(STORAGE_KEYS.USERS + '_timestamp', ts);
-  saveToFirebase('users', users);
+  syncData('users', users);
 }
 
 function addUser(username, password, name, role, subject = null, assignedClasses = []) {
@@ -762,7 +763,7 @@ function saveStudents(students) {
   // Track local update time
   const ts = Date.now();
   localStorage.setItem(STORAGE_KEYS.STUDENTS + '_timestamp', ts);
-  saveToFirebase('students', students);
+  syncData('students', students);
 }
 
 function addStudent(name, studentClass, type = 'siswa') {
@@ -885,7 +886,7 @@ function saveQuestions(questions) {
   localStorage.setItem(STORAGE_KEYS.QUESTIONS, JSON.stringify(questions));
   const ts = Date.now();
   localStorage.setItem(STORAGE_KEYS.QUESTIONS + '_timestamp', ts);
-  saveToFirebase('questions', questions);
+  syncData('questions', questions);
 }
 
 function addQuestion(room, subject, content, type = 'text', targetStudent = null, storagePath = null) {
@@ -897,7 +898,7 @@ function addQuestion(room, subject, content, type = 'text', targetStudent = null
     content: content,
     type: type, // text, link, image
     targetStudent: targetStudent, // null or student name
-    storagePath: storagePath, // Path in Firebase Storage
+    storagePath: storagePath, // Path in Cloud Storage
     createdAt: new Date().toISOString()
   };
   questions.push(newQuestion);
@@ -980,7 +981,7 @@ function saveExaminerRewards(rewards) {
   // Track local update time
   const ts = Date.now();
   localStorage.setItem(STORAGE_KEYS.EXAMINER_REWARDS + '_timestamp', ts);
-  saveToFirebase('examiner_rewards', rewards);
+  syncData('examiner_rewards', rewards);
 }
 
 function generateExaminerReward(examinerId) {

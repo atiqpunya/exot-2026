@@ -185,7 +185,7 @@
             window.addEventListener('storage', loadStudents);
             window.addEventListener('storage-update', loadStudents);
 
-            if (window.firebaseService) window.firebaseService.initSync();
+            if (window.apiService) window.apiService.initSync();
         });
 
         function toggleAuth() {
@@ -411,7 +411,7 @@
     <!-- Footer Credit -->
 
     <script src="js/api-service.js?v=2.5"></script>
-    <!-- <script type="module" src="js/firebase-config.js"></script> -->
+    <!-- Cloud API Services -->
 </body>
 
 </html>

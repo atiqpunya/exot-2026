@@ -229,7 +229,7 @@
             loadRanking();
             loadRoomStats();
             loadActivity();
-            if (window.firebaseService) window.firebaseService.initSync();
+            if (window.apiService) window.apiService.initSync();
             initCharts();
 
             document.getElementById('searchInput').addEventListener('input', loadResults);
