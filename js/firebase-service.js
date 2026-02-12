@@ -48,7 +48,7 @@ const firebaseService = {
     /**
      * Listen for real-time updates from Firestore
      */
-    initSync(callback) {
+    initSync() {
         if (!window.db) {
             console.error("DB not ready for initSync");
             return;
@@ -62,32 +62,41 @@ const firebaseService = {
             const docRef = window.db.collection(COLLECTION_NAME).doc(key);
 
             docRef.onSnapshot((doc) => {
-                if (doc.exists) { // Compat: doc.exists is a property, not a function (in v8) but behaves like boolean? Actually in compat it's a property.
-                    // Wait, in v9 compat, doc.exists() might still be a function or property depending on exact version.
-                    // Standard v8 SDK: doc.exists (boolean). v9 Modular: doc.exists() (function).
-                    // v9 Compat: mirrors v8. So it's a boolean property.
+                // In compat mode, doc is an object. usage: doc.exists, doc.data()
+                if (doc.exists) {
                     const docData = doc.data();
-                    const remoteData = docData.data;
+                    const remoteData = docData.data || []; // Handle case where 'data' field might be missing
                     const remoteTs = docData.updatedAt || 0;
 
                     const storageKey = `exot_${key}`;
                     const localTs = parseInt(localStorage.getItem(storageKey + '_timestamp') || '0');
 
-                    if (localTs > remoteTs + 2000) {
+                    // Conflict Resolution:
+                    // If local is significantly newer, push local to cloud.
+                    // But be careful of loops. The 2000ms buffer helps.
+                    if (localTs > remoteTs + 5000) {
                         console.log(`⚠️ Local ${key} is newer (${localTs} > ${remoteTs}). Pushing to cloud...`);
                         this.save(storageKey, JSON.parse(localStorage.getItem(storageKey)), localTs);
                         return;
                     }
 
                     const localStr = localStorage.getItem(storageKey);
+                    // Compare content, not just timestamp, to avoid unnecessary writes/events
+                    // Note: JSON.stringify order might vary, but for simple arrays it's usually stable enough for this check
                     const remoteStr = JSON.stringify(remoteData);
 
                     if (localStr !== remoteStr) {
+                        // If remote is newer or equal (and content different), accept remote
                         if (remoteTs >= localTs) {
-                            console.log(`🔄 Syncing ${key} from Cloud`);
+                            console.log(`🔄 Syncing ${key} from Cloud (Remote: ${remoteTs}, Local: ${localTs})`);
                             localStorage.setItem(storageKey, remoteStr);
                             localStorage.setItem(storageKey + '_timestamp', remoteTs);
+
+                            // Important: Dispatch event so UI updates
                             window.dispatchEvent(new Event('storage-update'));
+
+                            // Specific event for students to refresh list
+                            if (key === 'students') window.dispatchEvent(new Event('students-updated'));
                         }
                     }
                     updateStatus('online');
@@ -133,7 +142,7 @@ const firebaseService = {
                 const docSnap = await docRef.get();
 
                 if (docSnap.exists) {
-                    const remoteData = docSnap.data().data;
+                    const remoteData = docSnap.data().data || [];
                     localStorage.setItem(`exot_${key}`, JSON.stringify(remoteData));
                 }
             }

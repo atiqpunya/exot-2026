@@ -167,6 +167,15 @@
             if (isLoggedIn()) {
                 document.getElementById('floatingBtn').innerHTML = '🚪 Logout';
             }
+
+            if (window.firebaseService) window.firebaseService.initSync();
+
+            // Listen for sync updates
+            window.addEventListener('storage-update', () => {
+                console.log('🔄 Data synced, refreshing UI...');
+                loadAttendedList();
+                updateStats();
+            });
         });
 
         function toggleAuth() {

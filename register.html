@@ -174,8 +174,9 @@ Siti Aminah, 7B
 sekretaris, securepass, Siti Rahma, Sekretaris
 ..."></textarea>
                 <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-                    <button class="btn btn-primary" onclick="importPanitia()">📥 Import Panitia</button>
-                    <button class="btn btn-danger" onclick="clearAllPanitia()">🗑️ Hapus Semua</button>
+                    <button class="btn btn-secondary" onclick="loadFromStorage()">☁️ Load</button>
+                    <button class="btn btn-warning" onclick="manualSync()" id="btnSync">🔄 Sync Cloud</button>
+                    <button class="btn btn-primary" onclick="saveDataManual()">💾 Save</button>
                 </div>
                 <div id="panitiaImportResult" class="alert alert-success" style="display: none; margin-top: 1rem;">
                 </div>
@@ -527,12 +528,24 @@ qrn1, pass123, Ustadz Ali, alquran
                 loadExaminerList();
             }
 
+            // Initialize Sync
+            if (window.firebaseService) {
+                window.firebaseService.initSync();
+            }
+
             // Listen for sync updates
             window.addEventListener('storage-update', () => {
                 console.log('🔄 Data synced, refreshing UI...');
                 updateStats();
                 loadStudentList();
                 loadExaminerList();
+            });
+
+            // Listen for student-specific updates
+            window.addEventListener('students-updated', () => {
+                console.log('UI: Student list updated from sync');
+                loadStudentList();
+                updateStats();
             });
 
             if (typeof loadClassList === 'function') loadClassList();
@@ -674,7 +687,7 @@ qrn1, pass123, Ustadz Ali, alquran
         function updateStats() {
             const students = getStudents();
             const examiners = getExaminers();
-            const panitia = getUsers().filter(u => u.role === 'panitia'); // Fix: getPanitia not defined
+            const panitia = getPanitia();
             document.getElementById('statTotal').textContent = students.length;
             document.getElementById('statSiswa').textContent = students.filter(s => s.type === 'siswa').length;
             document.getElementById('statPanitia').textContent = panitia.length;

@@ -201,7 +201,7 @@
         <button class="btn btn-secondary" onclick="toggleAuth()" id="floatingBtn">🔐 Login</button>
     </div>
 
-    <script src="js/storage.js"></script>
+
     <script>
         let subjectChart = null;
         let roomChart = null;
@@ -230,6 +230,7 @@
             loadRanking();
             loadRoomStats();
             loadActivity();
+            if (window.firebaseService) window.firebaseService.initSync();
             initCharts();
 
             document.getElementById('searchInput').addEventListener('input', loadResults);

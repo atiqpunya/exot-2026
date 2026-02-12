@@ -190,6 +190,8 @@
             // Auto-refresh when data changes in other tabs
             window.addEventListener('storage', loadStudents);
             window.addEventListener('storage-update', loadStudents);
+
+            if (window.firebaseService) window.firebaseService.initSync();
         });
 
         function toggleAuth() {

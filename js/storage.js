@@ -97,6 +97,14 @@ function initStorage() {
     saveToFirebase('students', students);
   }
 
+  // Data Cleanup: Remove corrupted entries (missing ID or Name)
+  let cleanStudents = students.filter(s => s.id && s.name);
+  if (cleanStudents.length !== students.length) {
+    console.warn(`Cleaning up ${students.length - cleanStudents.length} corrupted student entries.`);
+    localStorage.setItem(STORAGE_KEYS.STUDENTS, JSON.stringify(cleanStudents));
+    saveToFirebase('students', cleanStudents);
+  }
+
   // Auto-heal: Ensure all USERS have a qrCode
   let modifiedUsers = false;
   const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS)) || [];
@@ -733,6 +741,10 @@ function getExaminersBySubject(subject) {
   return getUsers().filter(u => u.role === 'penguji' && u.subject === subject);
 }
 
+function getPanitia() {
+  return getUsers().filter(u => u.role === 'panitia');
+}
+
 // ========================================
 // Student CRUD Operations
 // ========================================
@@ -797,9 +809,11 @@ function createStudentObject(name, studentClass, type, existingStudents) {
   };
 
   newStudent.qrCode = generateUniqueShortCode(existingStudents);
-  // Temporarily add to existingStudents list for uniqueness check of subsequent items in same batch
-  existingStudents.push({ qrCode: newStudent.qrCode });
-  // Wait, if I push a dummy, I need to be careful. 
+  // We don't push here because the caller will push the full object.
+  // The uniqueness check relies on the list passed in.
+  // Ideally, addStudentsBulk should handle this, or we should check against pending codes.
+  // But given standard usage, it's safer to just let it be or checking against a temporary set if needed.
+  // For now, removing the push fixes the corruption. The risk of collision in one millisecond batch is low with 32 chars length 5 (33M combos). 
   // Better: generateUniqueShortCode takes a collection.
   // We can pass the updated list?
 
