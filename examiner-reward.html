@@ -38,7 +38,7 @@
     <header class="header">
         <div class="container">
             <div class="header-content">
-                <a href="index.html" class="logo"><span class="logo-icon">🎁✨</span> EXOT</a>
+                <a href="index.html" class="logo"><span class="logo-icon">🎁</span> EXOT</a>
                 <nav class="nav" id="navMenu"></nav>
                 <img src="img/logo-alwildan.png" alt="SD Alwildan 4"
                     style="height: 40px; width: auto; margin-left: auto;">
@@ -158,7 +158,7 @@
             const subjectUrls = { english: 'exam-english.html', arabic: 'exam-arabic.html', alquran: 'exam-alquran.html' };
             document.getElementById('navMenu').innerHTML = `
         <a href="${subjectUrls[currentSession.subject]}" class="nav-link">Input Nilai</a>
-        <a href="examiner-reward.html" class="nav-link active">🎁✨ Reward</a>
+        <a href="examiner-reward.html" class="nav-link active">🎁 Reward</a>
       `;
 
             document.getElementById('examLink').href = subjectUrls[currentSession.subject];
@@ -259,7 +259,11 @@
         Dibuat oleh <a href="#">Muhammad Atiq Qoidul Islam</a>
     </div>
 
-    <script src="js/api-service.js?v=2.5"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/api-service.js"></script>
+    <script src="js/storage.js"></script>
 </body>
 
 </html>

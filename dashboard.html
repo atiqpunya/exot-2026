@@ -27,7 +27,7 @@
                     <a href="exam-english.html" class="nav-link"><span class="flag-icon flag-icon-gb"></span>
                         English</a>
                     <a href="exam-arabic.html" class="nav-link"><span class="flag-icon flag-icon-sa"></span> Arabic</a>
-                    <a href="exam-alquran.html" class="nav-link">📖✨ Al-Quran</a>
+                    <a href="exam-alquran.html" class="nav-link">📖 Al-Quran</a>
                     <a href="dashboard.html" class="nav-link active">Dashboard</a>
                 </nav>
                 <div style="margin-left: auto; display: flex; align-items: center; gap: 12px; text-align: right;">
@@ -115,7 +115,7 @@
                             id="arbAvg">0</strong></div>
                 </div>
                 <div class="card" style="border-left: 4px solid #f59e0b;">
-                    <h4 style="margin: 0 0 0.5rem;">📖✨ Al-Quran</h4>
+                    <h4 style="margin: 0 0 0.5rem;">📖 Al-Quran</h4>
                     <div style="display: flex; justify-content: space-between;"><span>Dinilai:</span><strong
                             id="qrnScored">0</strong></div>
                     <div style="display: flex; justify-content: space-between;"><span>Rata-rata:</span><strong
@@ -237,6 +237,16 @@
             document.getElementById('searchInput').addEventListener('input', loadResults);
             document.getElementById('filterClass').addEventListener('change', loadResults);
             document.getElementById('filterStatus').addEventListener('change', loadResults);
+
+            // Real-time update listener
+            window.addEventListener('storage-update', function () {
+                console.log("📈 Dashboard auto-refreshing...");
+                updateStats();
+                loadResults();
+                loadRanking();
+                loadRoomStats();
+                initCharts();
+            });
 
             // Keyboard shortcuts
             document.addEventListener('keydown', function (e) {
@@ -596,7 +606,10 @@
     </script>
     <!-- Footer Credit -->
 
-    <script src="js/api-service.js?v=2.5"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/api-service.js"></script>
     <script src="js/storage.js"></script>
 </body>
 

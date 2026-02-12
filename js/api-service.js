@@ -1,27 +1,28 @@
 /**
  * API Service for EXOT 2026
  * Handles communication with local PHP Backend
+ * & Firebase Realtime Database for instant signaling
  */
 
 const API_URL = './api/index.php';
 const SYNC_CHANNEL = new BroadcastChannel('exot_sync_channel');
 
 const apiService = {
+    firebaseDb: null,
+    isFirebaseInitialized: false,
+
     async save(key, data) {
         try {
-            // Determine type based on key prefix or content
             let type = key;
-            if (key.startsWith('exot_')) {
-                type = key.replace('exot_', '');
-            }
+            if (key.startsWith('exot_')) type = key.replace('exot_', '');
 
-            // Map legacy keys to API types
+            // Map legacy keys
             if (key === 'exot_students' || key === 'students') type = 'students';
             if (key === 'exot_users' || key === 'users') type = 'users';
             if (key === 'exot_questions' || key === 'questions') type = 'questions';
 
             const payload = {
-                action: 'save', // For GET based router if needed, but we POST
+                action: 'save',
                 type: type,
                 data: data
             };
@@ -35,8 +36,11 @@ const apiService = {
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const result = await response.json();
 
-            // Notify other tabs immediately
+            // 1. Notify other tabs (Local)
             SYNC_CHANNEL.postMessage({ type: 'data-updated', key: key });
+
+            // 2. Notify other browsers (Online Signal)
+            this._sendSyncSignal();
 
             return result;
         } catch (error) {
@@ -60,8 +64,8 @@ const apiService = {
             if (!response.ok) throw new Error(`Upload failed: ${response.statusText}`);
             const result = await response.json();
 
-            // Notify other tabs about file upload if needed
             SYNC_CHANNEL.postMessage({ type: 'files-updated' });
+            this._sendSyncSignal();
 
             return result;
         } catch (error) {
@@ -71,30 +75,73 @@ const apiService = {
     },
 
     initSync() {
-        console.log("🔄 API Sync Service Started (Hybrid Mode)");
+        console.log("🔄 API Sync Service Started (Hybrid Real-Time Mode)");
 
-        // 1. Listen for instant updates from other tabs
+        this._initFirebase();
+
         SYNC_CHANNEL.onmessage = (event) => {
             if (event.data.type === 'data-updated' || event.data.type === 'files-updated') {
-                console.log("🚀 Instant sync received from another tab");
+                console.log("🚀 Instant local sync received");
                 this.pollNow();
             }
         };
 
-        // 2. Poll every 5 seconds for updates from other browsers/devices
-        setInterval(() => this.pollNow(), 5000);
+        // Fallback Polling (Reduced frequency to save requests, signal is fast)
+        setInterval(() => this.pollNow(), 15000);
 
-        // Initial poll
         this.pollNow();
+    },
+
+    _initFirebase() {
+        if (this.isFirebaseInitialized || typeof firebase === 'undefined') {
+            if (typeof firebase === 'undefined') console.warn("Firebase SDK not loaded yet.");
+            return;
+        }
+
+        try {
+            // Check if config is actually filled
+            if (!firebaseConfig || firebaseConfig.apiKey === "YOUR_API_KEY") {
+                console.warn("⚠️ Firebase configuration is empty. Real-time signaling disabled.");
+                return;
+            }
+
+            firebase.initializeApp(firebaseConfig);
+            this.firebaseDb = firebase.database();
+            this.isFirebaseInitialized = true;
+
+            const syncRef = this.firebaseDb.ref('sync_signal');
+            syncRef.on('value', (snapshot) => {
+                const signal = snapshot.val();
+                if (signal && signal.timestamp) {
+                    const lastSignal = localStorage.getItem('exot_last_signal');
+                    if (signal.timestamp.toString() !== lastSignal) {
+                        console.log("🔥 Firebase Signal: Data change detected elsewhere.");
+                        localStorage.setItem('exot_last_signal', signal.timestamp);
+                        this.pollNow();
+                    }
+                }
+            });
+            console.log("📡 Firebase Signaling Online");
+        } catch (e) {
+            console.error("Firebase Init Error:", e.message);
+        }
+    },
+
+    _sendSyncSignal() {
+        if (!this.isFirebaseInitialized || !this.firebaseDb) return;
+        const timestamp = Date.now();
+        localStorage.setItem('exot_last_signal', timestamp);
+        this.firebaseDb.ref('sync_signal').set({ timestamp: timestamp }).catch(() => { });
     },
 
     async pollNow() {
         try {
-            const response = await fetch(`${API_URL}?action=getAll`);
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || `HTTP ${response.status}`);
-            }
+            const timestamp = Date.now();
+            const response = await fetch(`${API_URL}?action=getAll&_t=${timestamp}`, {
+                headers: { 'Cache-Control': 'no-cache, no-store' }
+            });
+
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
             const allData = await response.json();
             let updated = false;
@@ -110,34 +157,31 @@ const apiService = {
 
             syncKeys.forEach(mapping => {
                 const remoteData = allData[mapping.remote];
-                if (remoteData) {
-                    const localStr = localStorage.getItem(mapping.local);
-                    const remoteStr = JSON.stringify(remoteData);
-                    if (localStr !== remoteStr) {
-                        localStorage.setItem(mapping.local, remoteStr);
+                if (remoteData !== undefined && remoteData !== null) {
+                    const localDataRaw = localStorage.getItem(mapping.local);
+                    const localData = localDataRaw ? JSON.parse(localDataRaw) : null;
+                    if (this._isDifferent(localData, remoteData)) {
+                        localStorage.setItem(mapping.local, JSON.stringify(remoteData));
                         updated = true;
                     }
                 }
             });
 
             if (updated) {
-                console.log("🔄 Data synced from server/tab.");
+                console.log("✅ Data updated from Cloud.");
                 window.dispatchEvent(new Event('storage-update'));
                 window.dispatchEvent(new Event('students-updated'));
             }
-
         } catch (e) {
-            console.error("Sync Poll Error Detail:", e);
-            window.dispatchEvent(new CustomEvent('sync-error', {
-                detail: {
-                    message: "Server unreachable or API error: " + e.message,
-                    timestamp: new Date().toISOString()
-                }
-            }));
+            console.error("Sync Poll Error:", e.message);
         }
+    },
+
+    _isDifferent(local, remote) {
+        if (!local && !remote) return false;
+        if (!local || !remote) return true;
+        return JSON.stringify(local, Object.keys(local).sort()) !== JSON.stringify(remote, Object.keys(remote).sort());
     }
 };
 
-
-// Expose globally
 window.apiService = apiService;

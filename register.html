@@ -158,7 +158,7 @@
                     <a href="exam-english.html" class="nav-link"><span class="flag-icon flag-icon-gb"></span>
                         English</a>
                     <a href="exam-arabic.html" class="nav-link"><span class="flag-icon flag-icon-sa"></span> Arabic</a>
-                    <a href="exam-alquran.html" class="nav-link">📖✨ Al-Quran</a>
+                    <a href="exam-alquran.html" class="nav-link">📖 Al-Quran</a>
                     <a href="dashboard.html" class="nav-link">Dashboard</a>
                 </nav>
                 <div style="margin-left: auto; display: flex; align-items: center; gap: 12px; text-align: right;">
@@ -398,7 +398,7 @@ qrn1, pass123, Ustadz Ali, alquran
                             ondragleave="handleDragLeave(event, this)" ondrop="handleDrop(event, 'alquran')"
                             onclick="triggerFileUpload('alquran')">
                             <div style="pointer-events: none;">
-                                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📖✨</div>
+                                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📖</div>
                                 <h6 style="color: #92400e; margin: 0;">AL-QURAN</h6>
                                 <p style="font-size: 0.75rem; color: #78350f;">Drop PDF or Click to Browse<br><span
                                         style="font-size:0.7rem; opacity:0.8">(Local / Drive • Max 5MB)</span></p>
@@ -1866,7 +1866,11 @@ qrn1, pass123, Ustadz Ali, alquran
         }
     </script>
 
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="js/firebase-config.js"></script>
     <script src="js/api-service.js"></script>
+    <script src="js/storage.js"></script>
     <script>
         // Init Sync
         document.addEventListener('DOMContentLoaded', () => {
