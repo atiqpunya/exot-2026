@@ -1617,10 +1617,10 @@ qrn1, pass123, Ustadz Ali, alquran
             updateSyncStatus('syncing');
 
             try {
-                const response = await fetch('./api/index.php?action=getAll');
+                // Use consistent API endpoint
+                const response = await fetch('./api/index.php?action=getAll&_t=' + Date.now());
                 if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.error || `HTTP ${response.status}`);
+                    throw new Error(`Koneksi Gagal (HTTP ${response.status})`);
                 }
 
                 const allData = await response.json();

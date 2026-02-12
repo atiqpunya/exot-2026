@@ -3,20 +3,25 @@
 // Main API Handler for EXOT 2026
 
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS, DELETE, PUT");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
 header("Content-Type: application/json; charset=UTF-8");
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Pragma: no-cache");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
+    http_response_code(204);
     exit();
 }
 
 require_once 'config.php';
 
-$action = $_GET['action'] ?? $_POST['action'] ?? '';
+// Read input stream once
+$rawInput = file_get_contents('php://input');
+$jsonInput = json_decode($rawInput, true);
+
+// Action can come from GET, POST, or JSON body
+$action = $_GET['action'] ?? $_POST['action'] ?? ($jsonInput['action'] ?? '');
 
 try {
     switch ($action) {
@@ -25,20 +30,27 @@ try {
             break;
 
         case 'save':
-            handleSave($pdo);
+            handleSave($pdo, $jsonInput);
             break;
 
         case 'uploadFile':
             handleUploadFile($pdo);
             break;
 
+        case 'test':
+            echo json_encode(['success' => true, 'message' => 'API is online']);
+            break;
+
         default:
-            throw new Exception("Invalid Action: $action");
+            throw new Exception("Invalid or missing action: " . ($action ?: 'empty'));
     }
 }
 catch (Exception $e) {
     http_response_code(400);
-    echo json_encode(['error' => $e->getMessage()]);
+    echo json_encode([
+        'success' => false,
+        'error' => $e->getMessage()
+    ]);
 }
 
 // ==========================================
@@ -130,13 +142,9 @@ function handleGetAll($pdo)
     echo json_encode($data);
 }
 
-function handleSave($pdo)
+function handleSave($pdo, $input = null)
 {
-    // Get JSON Input
-    $input = json_decode(file_get_contents('php://input'), true);
-
     if (!$input) {
-        // Fallback to POST fields if form-data
         $input = $_POST;
     }
 

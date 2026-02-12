@@ -27,13 +27,16 @@ const apiService = {
                 data: data
             };
 
-            const response = await fetch(`${API_URL}?action=save`, {
+            const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            if (!response.ok) {
+                const errorText = await response.text().catch(() => "No error body");
+                throw new Error(`Cloud Error: ${response.status} ${response.statusText} pada POST ${API_URL}`);
+            }
             const result = await response.json();
 
             // 1. Notify other tabs (Local)
@@ -45,7 +48,7 @@ const apiService = {
             return result;
         } catch (error) {
             console.error("API Save Error:", error);
-            return { error: error.message };
+            return { error: error.message || "Unknown Cloud Error" };
         }
     },
 
@@ -56,7 +59,7 @@ const apiService = {
         formData.append('action', 'uploadFile');
 
         try {
-            const response = await fetch(`${API_URL}?action=uploadFile`, {
+            const response = await fetch(API_URL, {
                 method: 'POST',
                 body: formData
             });
@@ -137,11 +140,12 @@ const apiService = {
     async pollNow() {
         try {
             const timestamp = Date.now();
-            const response = await fetch(`${API_URL}?action=getAll&_t=${timestamp}`, {
-                headers: { 'Cache-Control': 'no-cache, no-store' }
-            });
+            const response = await fetch(`${API_URL}?action=getAll&_t=${timestamp}`);
 
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            if (!response.ok) {
+                console.warn(`Sync Polling failed: HTTP ${response.status} pada ${API_URL}`);
+                return;
+            }
 
             const allData = await response.json();
             let updated = false;
