@@ -4,7 +4,7 @@
  */
 
 // PASTE YOUR WEB APP URL HERE
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyzGtIVdhLxAYaH8aFWN7dr08Kssxfb13M-8UPpIPDdtK2GBAenzLyuTrgjgChiaBKHcg/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwLt-nhwmHMEW5EP9gw9UqJ-Nn2BTYWKZj8id-8N74jGnPnZvb67wYaeA9NKTu37AQFQQ/exec";
 
 const firebaseService = {
     async save(key, data, timestamp = null) {
@@ -41,34 +41,58 @@ const firebaseService = {
         if (!SCRIPT_URL) return;
         console.log("🔄 GAS Sync Service Started (Polling Mode)");
 
-        // Poll every 15 seconds
+        // Poll every 4 seconds (Balance between responsiveness and quota)
         setInterval(async () => {
             try {
                 // We use a GET request to fetch all data
                 const response = await fetch(`${SCRIPT_URL}?action=getAll`);
                 const allData = await response.json();
 
+                let syncCount = 0;
+
                 // Sync logic similar to original
                 Object.keys(allData).forEach(key => {
-                    const remoteData = allData[key]; // This is the actual data object
-                    // We need to implement conflict resolution? 
-                    // For simplicity in this "Free" mode, Remote Wins or Merge?
+                    // Check if key already has prefix 'exot_'
+                    // Our backend usually stores exactly what we send.
+                    // If we sent 'exot_students', key is 'exot_students'.
 
-                    const localKey = `exot_${key}`; // e.g. exot_students
+                    let localKey = key;
+                    if (!localKey.startsWith('exot_')) {
+                        localKey = `exot_${key}`;
+                    }
+
+                    const remoteData = allData[key];
                     const localStr = localStorage.getItem(localKey);
 
-                    if (JSON.stringify(remoteData.data) !== localStr) {
-                        // Check timestamps if available, else just overwrite (simpler)
-                        // Let's assume Remote is authority for now to enable sync
-                        localStorage.setItem(localKey, JSON.stringify(remoteData.data));
-                        window.dispatchEvent(new Event('storage-update'));
+                    // If remote has data (it should be an object with .data and .timestamp)
+                    // If it's raw data (older version), handle that too?
+                    let remoteContent = remoteData;
+                    if (remoteData && remoteData.data) {
+                        remoteContent = remoteData.data;
+                    }
+
+                    // Compare content strings
+                    const remoteStr = JSON.stringify(remoteContent);
+
+                    if (remoteStr !== localStr) {
+                        // Update Local
+                        localStorage.setItem(localKey, remoteStr);
+                        syncCount++;
                     }
                 });
+
+                if (syncCount > 0) {
+                    console.log(`🔄 Synced ${syncCount} items from cloud.`);
+                    // Dispatch event for UI to update
+                    window.dispatchEvent(new Event('storage-update'));
+                    // Also trigger specific student update event if needed
+                    window.dispatchEvent(new Event('students-updated'));
+                }
 
             } catch (e) {
                 console.warn("Sync Poll Failed:", e);
             }
-        }, 15000);
+        }, 4000);
     },
 
     uploadFile(path, file) {

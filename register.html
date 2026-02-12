@@ -582,22 +582,33 @@ qrn1, pass123, Ustadz Ali, alquran
                                     File</small>
                             </div>
                         </div>
-                        <p>Pulihkan data dari file backup</p>
                     </div>
-                    <input type="file" id="restoreFile" accept=".json" style="display: none;"
-                        onchange="handleRestore(event)">
-                </div>
 
-                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
-                    <h5 style="margin-bottom: 0.75rem;">🔍 Download QR Individual</h5>
-                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                        <input type="text" id="searchQR" class="form-input" placeholder="Cari nama..." style="flex: 1;">
-                        <button class="btn btn-secondary" onclick="searchAndShowQR()">Cari</button>
+                    <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                        <h5 style="margin-bottom: 0.75rem;">☁️ Cloud Connection</h5>
+                        <div style="display: flex; gap: 0.5rem; margin-bottom: 10px;">
+                            <button class="btn btn-secondary btn-sm" onclick="testCloudConnection()">📡 Test
+                                Connection</button>
+                            <button class="btn btn-warning btn-sm"
+                                onclick="window.firebaseService.initSync(); alert('Sync triggered!')">🔄 Force
+                                Sync</button>
+                        </div>
+                        <div id="cloudTestResult"
+                            style="font-size: 0.85rem; padding: 10px; background: var(--bg-surface); border-radius: 4px; display:none;">
+                        </div>
                     </div>
-                    <div id="individualQRResult" style="margin-top: 1rem;"></div>
+
+                    <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                        <h5 style="margin-bottom: 0.75rem;">🔍 Download QR Individual</h5>
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <input type="text" id="searchQR" class="form-input" placeholder="Cari nama..."
+                                style="flex: 1;">
+                            <button class="btn btn-secondary" onclick="searchAndShowQR()">Cari</button>
+                        </div>
+                        <div id="individualQRResult" style="margin-top: 1rem;"></div>
+                    </div>
                 </div>
             </div>
-        </div>
         </div>
         </div>
     </main>
@@ -1444,6 +1455,39 @@ qrn1, pass123, Ustadz Ali, alquran
             document.body.removeChild(a);
         }
 
+
+        async function testCloudConnection() {
+            const el = document.getElementById('cloudTestResult');
+            el.style.display = 'block';
+            el.innerHTML = '⏳ Testing connection to Google Apps Script...';
+            el.style.color = 'var(--text-primary)';
+
+            try {
+                // Check if URL is configured
+                if (!window.firebaseService) throw new Error("Firebase Service missing");
+
+                const start = Date.now();
+                // We'll try to save a dummy value
+                const testData = { check: "ok", time: start };
+
+                // Manually call pure fetch to debug if firebaseService is masking errors
+                // But let's use the service to test IT.
+                const result = await window.firebaseService.save('exot_connection_test', testData);
+
+                const duration = Date.now() - start;
+
+                if (result.success || result.key) {
+                    el.innerHTML = `✅ <strong>Connected!</strong><br>Time: ${duration}ms<br>Database: OK`;
+                    el.style.color = 'green';
+                } else {
+                    throw new Error(result.error || "Unknown error from script");
+                }
+
+            } catch (e) {
+                el.innerHTML = `❌ <strong>Connection Failed</strong><br>Error: ${e.message}<br><small>Pastikan Script sudah dideploy sebagai Web App (Anyone).</small>`;
+                el.style.color = 'red';
+            }
+        }
 
     </script>
     <footer style="text-align: center; margin-top: 2rem; color: var(--text-muted); font-size: 0.8rem;">
