@@ -253,30 +253,32 @@ qrn1, pass123, Ustadz Ali, alquran
                         <div class="card upload-card" data-subject="english"
                             style="border: 2px dashed #3b82f6; background: #eff6ff; text-align: center; cursor: pointer; transition: all 0.2s;"
                             ondragover="handleDragOver(event, this)" ondragleave="handleDragLeave(event, this)"
-                            ondrop="handleDrop(event, 'english')">
-                            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🇬🇧</div>
+                            ondrop="handleDrop(event, 'english')" onclick="triggerFileUpload('english')">
+                            <img src="https://flagcdn.com/w80/gb.png" alt="UK Flag"
+                                style="height: 48px; margin-bottom: 0.5rem; display: block; margin: 0 auto 0.5rem auto;">
                             <h6 style="color: #1e40af; margin: 0;">ENGLISH</h6>
-                            <p style="font-size: 0.75rem; color: #1e3a8a;">Drop PDF here</p>
+                            <p style="font-size: 0.75rem; color: #1e3a8a;">Drop PDF or Click to Upload</p>
                         </div>
 
                         <!-- Arabic Zone -->
                         <div class="card upload-card" data-subject="arabic"
                             style="border: 2px dashed #10b981; background: #ecfdf5; text-align: center; cursor: pointer; transition: all 0.2s;"
                             ondragover="handleDragOver(event, this)" ondragleave="handleDragLeave(event, this)"
-                            ondrop="handleDrop(event, 'arabic')">
-                            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🇸🇦</div>
+                            ondrop="handleDrop(event, 'arabic')" onclick="triggerFileUpload('arabic')">
+                            <img src="https://flagcdn.com/w80/sa.png" alt="Saudi Flag"
+                                style="height: 48px; margin-bottom: 0.5rem; display: block; margin: 0 auto 0.5rem auto;">
                             <h6 style="color: #065f46; margin: 0;">ARABIC</h6>
-                            <p style="font-size: 0.75rem; color: #064e3b;">Drop PDF here</p>
+                            <p style="font-size: 0.75rem; color: #064e3b;">Drop PDF or Click to Upload</p>
                         </div>
 
                         <!-- Al-Quran Zone -->
                         <div class="card upload-card" data-subject="alquran"
                             style="border: 2px dashed #f59e0b; background: #fffbeb; text-align: center; cursor: pointer; transition: all 0.2s;"
                             ondragover="handleDragOver(event, this)" ondragleave="handleDragLeave(event, this)"
-                            ondrop="handleDrop(event, 'alquran')">
+                            ondrop="handleDrop(event, 'alquran')" onclick="triggerFileUpload('alquran')">
                             <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📖</div>
                             <h6 style="color: #92400e; margin: 0;">AL-QURAN</h6>
-                            <p style="font-size: 0.75rem; color: #78350f;">Drop PDF here</p>
+                            <p style="font-size: 0.75rem; color: #78350f;">Drop PDF or Click to Upload</p>
                         </div>
                     </div>
 
@@ -1196,15 +1198,19 @@ qrn1, pass123, Ustadz Ali, alquran
     </script>
     <!-- Bulk Upload Logic -->
     <script>
-        // ==========================================
-        // BULK UPLOAD PDF LOGIC (REDESIGNED)
-        // ==========================================
+        // Global variable to track which subject is being uploaded to via button
+        let currentUploadSubject = '';
+
+        function triggerFileUpload(subject) {
+            currentUploadSubject = subject;
+            document.getElementById('bulkFileInput').click();
+        }
 
         function handleDragOver(e, el) {
             e.preventDefault();
             e.stopPropagation();
             el.style.transform = 'scale(1.02)';
-            el.style.borderColor = getComputedStyle(el).color; // Use text color as border color
+            el.style.borderColor = getComputedStyle(el).color;
             el.style.backgroundColor = '#fff';
         }
 
@@ -1238,10 +1244,14 @@ qrn1, pass123, Ustadz Ali, alquran
             }
         }
 
-        // For hidden file input (optional usage)
+        // For hidden file input
         function handleSelectedFiles(files) {
-            if (files.length > 0) {
-                alert('Silakan drag & drop file ke kotak mapel yang sesuai.');
+            if (files.length > 0 && currentUploadSubject) {
+                processFiles(files, currentUploadSubject);
+                // Reset for next use
+                document.getElementById('bulkFileInput').value = '';
+            } else if (files.length > 0) {
+                alert('Error: Subject not selected.');
             }
         }
 
@@ -1263,6 +1273,21 @@ qrn1, pass123, Ustadz Ali, alquran
                 task.on('state_changed',
                     (snapshot) => {
                         const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        console.log(`Upload: ${snapshot.bytesTransferred} / ${snapshot.totalBytes} bytes`);
+
+                        // Update diagnostic status if available
+                        const statusDiv = document.getElementById('sys-status');
+                        if (statusDiv) {
+                            let progEl = document.getElementById('stat-prog');
+                            if (!progEl) {
+                                progEl = document.createElement('span');
+                                progEl.id = 'stat-prog';
+                                statusDiv.appendChild(progEl);
+                            }
+                            progEl.innerText = `📦 ${Math.round(snapshot.bytesTransferred / 1024)}KB / ${Math.round(snapshot.totalBytes / 1024)}KB`;
+                            progEl.style.color = '#4caf50';
+                        }
+
                         if (onProgress) onProgress(progress);
                     },
                     (error) => {
@@ -1331,7 +1356,13 @@ qrn1, pass123, Ustadz Ali, alquran
 
                 // Upload to Firebase
                 try {
-                    updateProgressItem(progressItem, '🚀 Mengupload ke Cloud... 0%', 'loading');
+                    const authText = window.currentUser ? `(User: ${window.currentUser.uid.substring(0, 4)}..)` : '(No Auth!)';
+                    updateProgressItem(progressItem, `🚀 Mengupload... ${authText}`, 'loading');
+
+                    // Allow retry if auth is missing
+                    if (!window.currentUser && window.auth) {
+                        await window.auth.signInAnonymously();
+                    }
 
                     // Path: questions/SUBJECT/ROOM/FILENAME
                     const path = `questions/${subject}/${room}/${file.name}`;
@@ -1360,6 +1391,7 @@ qrn1, pass123, Ustadz Ali, alquran
                         msg = '❌ Koneksi lambat/terputus. Coba lagi.';
                     }
                     updateProgressItem(progressItem, msg, 'error');
+                    alert(msg + "\n\nPastikan internet lancar dan file tidak corrupt.");
                 }
             }
 
