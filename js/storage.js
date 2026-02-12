@@ -871,7 +871,7 @@ function saveQuestions(questions) {
   saveToFirebase('questions', questions);
 }
 
-function addQuestion(room, subject, content, type = 'text', targetStudent = null) {
+function addQuestion(room, subject, content, type = 'text', targetStudent = null, storagePath = null) {
   const questions = getQuestions();
   const newQuestion = {
     id: generateId(),
@@ -880,6 +880,7 @@ function addQuestion(room, subject, content, type = 'text', targetStudent = null
     content: content,
     type: type, // text, link, image
     targetStudent: targetStudent, // null or student name
+    storagePath: storagePath, // Path in Firebase Storage
     createdAt: new Date().toISOString()
   };
   questions.push(newQuestion);

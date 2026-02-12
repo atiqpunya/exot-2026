@@ -145,6 +145,25 @@ const firebaseService = {
             updateStatus('error');
             return false;
         }
+    },
+
+    /**
+     * Upload file to Firebase Storage
+     * Returns the upload task for progress monitoring
+     */
+    uploadFile(path, file) {
+        if (!window.storage) throw new Error("Storage not initialized");
+        const ref = window.storage.ref(path);
+        return ref.put(file);
+    },
+
+    /**
+     * Delete file from Firebase Storage
+     */
+    async deleteFile(path) {
+        if (!window.storage) throw new Error("Storage not initialized");
+        const ref = window.storage.ref(path);
+        return ref.delete();
     }
 };
 

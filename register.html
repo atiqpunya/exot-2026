@@ -148,6 +148,7 @@ Siti Aminah, 7B
 ..."></textarea>
                 <div style="display: flex; gap: 1rem; margin-top: 1rem;">
                     <button class="btn btn-primary" onclick="importStudents()">📥 Import Siswa</button>
+                    <button class="btn btn-warning" onclick="deleteSelectedStudents()">🗑️ Hapus Terpilih</button>
                     <button class="btn btn-danger" onclick="clearAllStudents()">🗑️ Hapus Semua</button>
                 </div>
                 <div id="studentImportResult" class="alert alert-success" style="display: none; margin-top: 1rem;">
@@ -572,11 +573,25 @@ qrn1, pass123, Ustadz Ali, alquran
             alert('Silakan gunakan Bulk Upload PDF untuk menambahkan soal.');
         }
 
-        function removeQuestion(id) {
-            if (confirm('Hapus soal ini?')) {
-                deleteQuestion(id); // Using storage.js function
-                loadQuestionList();
+        async function removeQuestion(id) {
+            if (!confirm('Hapus soal ini? File di cloud juga akan dihapus.')) return;
+
+            const question = getQuestions().find(q => q.id === id);
+
+            // Delete file if exists
+            if (question && question.storagePath && window.firebaseService) {
+                try {
+                    // Show some loading indicator or just wait
+                    await window.firebaseService.deleteFile(question.storagePath);
+                    console.log('File deleted from storage:', question.storagePath);
+                } catch (e) {
+                    console.warn("File deletion failed or file not found:", e);
+                    // Continue to delete record anyway
+                }
             }
+
+            deleteQuestion(id); // Using storage.js function
+            loadQuestionList();
         }
 
         function loadQuestionList() {
@@ -659,7 +674,7 @@ qrn1, pass123, Ustadz Ali, alquran
         function updateStats() {
             const students = getStudents();
             const examiners = getExaminers();
-            const panitia = getPanitia();
+            const panitia = getUsers().filter(u => u.role === 'panitia'); // Fix: getPanitia not defined
             document.getElementById('statTotal').textContent = students.length;
             document.getElementById('statSiswa').textContent = students.filter(s => s.type === 'siswa').length;
             document.getElementById('statPanitia').textContent = panitia.length;
@@ -692,6 +707,45 @@ qrn1, pass123, Ustadz Ali, alquran
             showResult('studentImportResult', `✅ ${studentsToAdd.length} siswa berhasil diimport!`);
             updateStats();
             loadStudentList();
+        }
+
+        // Student Deletion Logic
+        function toggleSelectAll(source) {
+            document.querySelectorAll('.student-checkbox').forEach(cb => {
+                cb.checked = source.checked;
+            });
+        }
+
+        function deleteSelectedStudents() {
+            const checkboxes = document.querySelectorAll('.student-checkbox:checked');
+            if (checkboxes.length === 0) return alert('Pilih siswa yang akan dihapus!');
+
+            if (confirm(`Hapus ${checkboxes.length} siswa terpilih?`)) {
+                const ids = Array.from(checkboxes).map(cb => cb.value);
+
+                // Optimized deletion: read, filter, save once implies we need a bulk delete in storage.js or just loop
+                // Looping deleteStudent reads/writes every time.
+                // Let's implement manual bulk delete here for performance
+                let students = getStudents();
+                const initialCount = students.length;
+                students = students.filter(s => !ids.includes(s.id));
+
+                if (students.length !== initialCount) {
+                    saveStudents(students);
+                    showResult('studentImportResult', `✅ ${ids.length} siswa dihapus.`);
+                    loadStudentList();
+                    updateStats();
+                }
+            }
+        }
+
+        function clearAllStudents() {
+            // ... (keep existing)
+            if (confirm('⚠️ PERINGATAN: Hapus SEMUA siswa?')) {
+                saveStudents([]);
+                updateStats();
+                loadStudentList();
+            }
         }
 
         function importPanitia() {
@@ -823,10 +877,11 @@ qrn1, pass123, Ustadz Ali, alquran
             container.innerHTML = `
         <div class="table-container">
           <table class="table">
-            <thead><tr><th>No</th><th>Nama</th><th>Ruangan</th><th>Jenis</th><th>Aksi</th></tr></thead>
+            <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllStudents" onchange="toggleSelectAll(this)"></th><th>No</th><th>Nama</th><th>Ruangan</th><th>Jenis</th><th>Aksi</th></tr></thead>
             <tbody>
               ${students.slice(0, 50).map((s, i) => `
                 <tr>
+                  <td><input type="checkbox" class="student-checkbox" value="${s.id}"></td>
                   <td>${i + 1}</td>
                   <td>${s.name}</td>
                   <td>${s.class}</td>
@@ -1162,6 +1217,29 @@ qrn1, pass123, Ustadz Ali, alquran
             }
         }
 
+        async function uploadPDFToFirebase(file, path, onProgress) {
+            return new Promise((resolve, reject) => {
+                if (!window.firebaseService) {
+                    reject(new Error("Firebase Service not loaded"));
+                    return;
+                }
+
+                const task = window.firebaseService.uploadFile(path, file);
+
+                task.on('state_changed',
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        if (onProgress) onProgress(progress);
+                    },
+                    (error) => reject(error),
+                    async () => {
+                        const downloadURL = await task.snapshot.ref.getDownloadURL();
+                        resolve(downloadURL);
+                    }
+                );
+            });
+        }
+
         async function processFiles(files, subject) {
             const progressContainer = document.getElementById('uploadProgressContainer');
             const progressList = document.getElementById('progressList');
@@ -1211,22 +1289,25 @@ qrn1, pass123, Ustadz Ali, alquran
 
                 // Upload to Firebase
                 try {
-                    updateProgressItem(progressItem, '🚀 Mengupload ke Cloud...', 'loading');
+                    updateProgressItem(progressItem, '🚀 Mengupload ke Cloud... 0%', 'loading');
 
                     // Path: questions/SUBJECT/ROOM/FILENAME
                     const path = `questions/${subject}/${room}/${file.name}`;
-                    const downloadURL = await uploadPDFToFirebase(file, path);
+
+                    const downloadURL = await uploadPDFToFirebase(file, path, (progress) => {
+                        updateProgressItem(progressItem, `🚀 Uploading... ${Math.round(progress)}%`, 'loading');
+                        // Update bar width manually if needed or via helper
+                        const el = document.getElementById(progressItem);
+                        const bar = el?.querySelector('.progress-bar');
+                        if (bar) {
+                            bar.style.width = `${progress}%`;
+                            bar.style.transition = 'width 0.1s linear';
+                        }
+                    });
 
                     // Add to Database (Storage.js)
-                    const question = addQuestion(room, subject, downloadURL);
-
-                    // Manually update the question to add 'targetStudent'
-                    const allQuestions = getQuestions();
-                    const idx = allQuestions.findIndex(x => x.id === question.id);
-                    if (idx !== -1) {
-                        allQuestions[idx].targetStudent = student.name;
-                        saveQuestions(allQuestions);
-                    }
+                    // Signature: addQuestion(room, subject, content, type, targetStudent, storagePath)
+                    addQuestion(room, subject, downloadURL, 'pdf', student.name, path);
 
                     updateProgressItem(progressItem, `✅ Berhasil! Disimpan untuk ${name}`, 'success');
 
