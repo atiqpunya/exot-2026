@@ -723,10 +723,21 @@ function updateUser(id, updates) {
 }
 
 function deleteUser(id) {
-  if (id === 'admin-001') return false; // Can't delete main admin
-  const users = getUsers().filter(u => u.id !== id);
-  saveUsers(users);
-  return true;
+  return deleteUsersBulk([id]);
+}
+
+function deleteUsersBulk(ids) {
+  const users = getUsers();
+  const initialLength = users.length;
+
+  // Filter out users to be deleted, but PROTECT admin-001
+  const newUsers = users.filter(u => !ids.includes(u.id) || u.id === 'admin-001');
+
+  if (newUsers.length !== initialLength) {
+    saveUsers(newUsers);
+    return true; // Changes made
+  }
+  return false; // No changes
 }
 
 function getUserById(id) {

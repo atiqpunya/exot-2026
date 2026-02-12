@@ -160,6 +160,14 @@
                     <a href="dashboard.html" class="nav-link">Dashboard</a>
                 </nav>
                 <div style="margin-left: auto; display: flex; align-items: center; gap: 12px; text-align: right;">
+                    <!-- Global Connection Check -->
+                    <div id="globalConnectionStatus"
+                        style="display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.5); padding: 4px 8px; border-radius: 20px; border: 1px solid var(--border-color); cursor: pointer;"
+                        onclick="testCloudConnection()">
+                        <span id="connIcon">📡</span>
+                        <span id="connText" style="font-size: 0.75rem; font-weight: 600;">Check Connection</span>
+                    </div>
+
                     <span style="font-size: 0.7rem; color: #64748b; line-height: 1.2;">
                         Dibuat oleh<br>
                         <strong style="color: var(--primary);">Muhammad Atiq Qoidul Islam</strong>
@@ -263,6 +271,13 @@ sekretaris, securepass, Siti Rahma, Sekretaris
                     <button class="btn btn-warning" onclick="manualSync()" id="btnSync">🔄 Sync Cloud</button>
                     <button class="btn btn-primary" onclick="saveDataManual()">💾 Save</button>
                 </div>
+
+                <div
+                    style="display: flex; gap: 1rem; margin-top: 1rem; border-top: 1px dashed var(--border-color); padding-top: 1rem;">
+                    <button class="btn btn-warning" onclick="deleteSelectedPanitia()">🗑️ Hapus Terpilih</button>
+                    <button class="btn btn-danger" onclick="clearAllPanitia()">🗑️ Hapus Semua</button>
+                </div>
+
                 <div id="panitiaImportResult" class="alert alert-success" style="display: none; margin-top: 1rem;">
                 </div>
 
@@ -288,8 +303,10 @@ sekretaris, securepass, Siti Rahma, Sekretaris
 arb1, pass123, Bu Fatimah, arabic, 8A|8B|8C
 qrn1, pass123, Ustadz Ali, alquran
 ..."></textarea>
-                <div style="margin-top: 1rem;">
+                <div style="margin-top: 1rem; display: flex; gap: 1rem;">
                     <button class="btn btn-primary" onclick="importExaminers()">📥 Import Penguji</button>
+                    <button class="btn btn-warning" onclick="deleteSelectedExaminers()">🗑️ Hapus Terpilih</button>
+                    <button class="btn btn-danger" onclick="clearAllExaminers()">🗑️ Hapus Semua</button>
                 </div>
                 <div id="examinerImportResult" class="alert alert-success" style="display: none; margin-top: 1rem;">
                 </div>
@@ -584,19 +601,9 @@ qrn1, pass123, Ustadz Ali, alquran
                         </div>
                     </div>
 
-                    <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
-                        <h5 style="margin-bottom: 0.75rem;">☁️ Cloud Connection</h5>
-                        <div style="display: flex; gap: 0.5rem; margin-bottom: 10px;">
-                            <button class="btn btn-secondary btn-sm" onclick="testCloudConnection()">📡 Test
-                                Connection</button>
-                            <button class="btn btn-warning btn-sm"
-                                onclick="window.firebaseService.initSync(); alert('Sync triggered!')">🔄 Force
-                                Sync</button>
-                        </div>
-                        <div id="cloudTestResult"
-                            style="font-size: 0.85rem; padding: 10px; background: var(--bg-surface); border-radius: 4px; display:none;">
-                        </div>
-                    </div>
+
+                    <div id="cloudTestResult" style="display:none;"></div>
+
 
                     <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
                         <h5 style="margin-bottom: 0.75rem;">🔍 Download QR Individual</h5>
@@ -1050,10 +1057,11 @@ qrn1, pass123, Ustadz Ali, alquran
             container.innerHTML = `
         <div class="table-container">
           <table class="table">
-            <thead><tr><th>Username</th><th>Password</th><th>Nama</th><th>Jabatan</th><th>Aksi</th></tr></thead>
+            <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllPanitia" onchange="toggleSelectAllPanitia(this)"></th><th>Username</th><th>Password</th><th>Nama</th><th>Jabatan</th><th>Aksi</th></tr></thead>
             <tbody>
               ${displayList.map(p => `
                 <tr>
+                  <td><input type="checkbox" class="panitia-checkbox" value="${p.id}"></td>
                   <td>${p.username}</td>
                   <td style="font-family:monospace; color:var(--primary);">${p.password}</td>
                   <td>${p.name}</td>
@@ -1070,6 +1078,26 @@ qrn1, pass123, Ustadz Ali, alquran
       `;
         }
 
+        function toggleSelectAllPanitia(source) {
+            document.querySelectorAll('.panitia-checkbox').forEach(cb => {
+                cb.checked = source.checked;
+            });
+        }
+
+        function deleteSelectedPanitia() {
+            const checkboxes = document.querySelectorAll('.panitia-checkbox:checked');
+            if (checkboxes.length === 0) return alert('Pilih panitia yang akan dihapus!');
+
+            if (confirm(`Hapus ${checkboxes.length} panitia terpilih?`)) {
+                const ids = Array.from(checkboxes).map(cb => cb.value);
+                deleteUsersBulk(ids);
+
+                loadPanitiaList();
+                updateStats();
+                showToast(`${ids.length} panitia dihapus`, "success");
+            }
+        }
+
         function loadExaminerList() {
             const examiners = getExaminers();
             document.getElementById('examinerCount').textContent = examiners.length;
@@ -1083,10 +1111,11 @@ qrn1, pass123, Ustadz Ali, alquran
             container.innerHTML = `
         <div class="table-container">
           <table class="table">
-            <thead><tr><th>Username</th><th>Password</th><th>Nama</th><th>Mapel</th><th>Ruangan</th><th>Aksi</th></tr></thead>
+            <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllExaminers" onchange="toggleSelectAllExaminers(this)"></th><th>Username</th><th>Password</th><th>Nama</th><th>Mapel</th><th>Ruangan</th><th>Aksi</th></tr></thead>
             <tbody>
               ${examiners.map(e => `
                 <tr>
+                  <td><input type="checkbox" class="examiner-checkbox" value="${e.id}"></td>
                   <td>${e.username}</td>
                   <td style="font-family:monospace; color:var(--primary);">${e.password}</td>
                   <td>${e.name}</td>
@@ -1102,6 +1131,36 @@ qrn1, pass123, Ustadz Ali, alquran
           </table>
         </div>
       `;
+        }
+
+        function toggleSelectAllExaminers(source) {
+            document.querySelectorAll('.examiner-checkbox').forEach(cb => {
+                cb.checked = source.checked;
+            });
+        }
+
+        checkboxes.forEach(cb => {
+            deleteUser(cb.value, false);
+        });
+
+        loadExaminerList();
+        updateStats();
+        showToast(`${checkboxes.length} penguji dihapus`, "success");
+            }
+        }
+
+        function clearAllExaminers() {
+            if (confirm('⚠️ PERINGATAN: Hapus SEMUA data penguji?')) {
+                const examiners = getExaminers();
+                const ids = examiners.map(e => e.id);
+
+                if (ids.length > 0) {
+                    deleteUsersBulk(ids);
+                    loadExaminerList();
+                    updateStats();
+                    showToast("Semua penguji dihapus", "success");
+                }
+            }
         }
 
         function delStudent(id) {
@@ -1457,35 +1516,57 @@ qrn1, pass123, Ustadz Ali, alquran
 
 
         async function testCloudConnection() {
-            const el = document.getElementById('cloudTestResult');
-            el.style.display = 'block';
-            el.innerHTML = '⏳ Testing connection to Google Apps Script...';
-            el.style.color = 'var(--text-primary)';
+            const el = document.getElementById('cloudTestResult'); // Legacy element in export tab (optional)
+            const headerIcon = document.getElementById('connIcon');
+            const headerText = document.getElementById('connText');
+            const headerBadge = document.getElementById('globalConnectionStatus');
+
+            if (el) {
+                el.style.display = 'block';
+                el.innerHTML = '⏳ Testing...';
+            }
+
+            // Header Loading State
+            if (headerIcon) headerIcon.innerText = '⏳';
+            if (headerText) headerText.innerText = 'Connecting...';
 
             try {
-                // Check if URL is configured
-                if (!window.firebaseService) throw new Error("Firebase Service missing");
+                if (!window.firebaseService) throw new Error("Service missing");
 
                 const start = Date.now();
-                // We'll try to save a dummy value
-                const testData = { check: "ok", time: start };
-
-                // Manually call pure fetch to debug if firebaseService is masking errors
-                // But let's use the service to test IT.
-                const result = await window.firebaseService.save('exot_connection_test', testData);
-
-                const duration = Date.now() - start;
+                const result = await window.firebaseService.save('exot_connection_test', { check: "ok", time: start });
 
                 if (result.success || result.key) {
-                    el.innerHTML = `✅ <strong>Connected!</strong><br>Time: ${duration}ms<br>Database: OK`;
-                    el.style.color = 'green';
+                    // Success
+                    if (el) {
+                        el.innerHTML = `✅ <strong>Connected!</strong>`;
+                        el.style.color = 'green';
+                    }
+                    if (headerIcon) {
+                        headerIcon.innerText = '✅';
+                        headerText.innerText = 'Online';
+                        headerText.style.color = 'green';
+                        headerBadge.style.borderColor = 'green';
+                        headerBadge.style.background = '#dcfce7';
+                    }
+                    showToast("Terhubung ke Cloud", "success");
                 } else {
-                    throw new Error(result.error || "Unknown error from script");
+                    throw new Error(result.error);
                 }
 
             } catch (e) {
-                el.innerHTML = `❌ <strong>Connection Failed</strong><br>Error: ${e.message}<br><small>Pastikan Script sudah dideploy sebagai Web App (Anyone).</small>`;
-                el.style.color = 'red';
+                if (el) {
+                    el.innerHTML = `❌ <strong>Failed</strong>`;
+                    el.style.color = 'red';
+                }
+                if (headerIcon) {
+                    headerIcon.innerText = '❌';
+                    headerText.innerText = 'Offline';
+                    headerText.style.color = 'red';
+                    headerBadge.style.borderColor = 'red';
+                    headerBadge.style.background = '#fee2e2';
+                }
+                showToast("Koneksi Gagal: " + e.message, "error");
             }
         }
 

@@ -52,40 +52,40 @@ const firebaseService = {
 
                 // Sync logic similar to original
                 Object.keys(allData).forEach(key => {
-                    // Check if key already has prefix 'exot_'
-                    // Our backend usually stores exactly what we send.
-                    // If we sent 'exot_students', key is 'exot_students'.
-
+                    // Normalize key
                     let localKey = key;
                     if (!localKey.startsWith('exot_')) {
                         localKey = `exot_${key}`;
                     }
 
                     const remoteData = allData[key];
+                    // Remote data structure: { data: {...}, timestamp: 123456789 }
+
                     const localStr = localStorage.getItem(localKey);
+                    const localTimestamp = parseInt(localStorage.getItem(localKey + '_timestamp') || '0');
 
-                    // If remote has data (it should be an object with .data and .timestamp)
-                    // If it's raw data (older version), handle that too?
-                    let remoteContent = remoteData;
+                    // If remote has data
                     if (remoteData && remoteData.data) {
-                        remoteContent = remoteData.data;
-                    }
+                        const remoteContent = remoteData.data;
+                        const remoteTimestamp = remoteData.timestamp || 0;
+                        const remoteStr = JSON.stringify(remoteContent);
 
-                    // Compare content strings
-                    const remoteStr = JSON.stringify(remoteContent);
-
-                    if (remoteStr !== localStr) {
-                        // Update Local
-                        localStorage.setItem(localKey, remoteStr);
-                        syncCount++;
+                        // CRITICAL FIX: Only overwrite if Remote is NEWER than Local
+                        // This prevents local changes (waiting to be saved) from being wiped by old remote data
+                        if (remoteTimestamp > localTimestamp) {
+                            if (remoteStr !== localStr) {
+                                console.log(`📥 Cloud Update for ${localKey}: Remote(${remoteTimestamp}) > Local(${localTimestamp})`);
+                                localStorage.setItem(localKey, remoteStr);
+                                localStorage.setItem(localKey + '_timestamp', remoteTimestamp); // Sync timestamp too
+                                syncCount++;
+                            }
+                        }
                     }
                 });
 
                 if (syncCount > 0) {
                     console.log(`🔄 Synced ${syncCount} items from cloud.`);
-                    // Dispatch event for UI to update
                     window.dispatchEvent(new Event('storage-update'));
-                    // Also trigger specific student update event if needed
                     window.dispatchEvent(new Event('students-updated'));
                 }
 
