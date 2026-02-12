@@ -132,7 +132,7 @@ function handleGetAll($pdo)
     foreach ($settings as $s) {
         $val = $s['value'];
         // Try to decode if looks like JSON
-        if (!empty($val) && ($val[0] === '{' || $val[0] === '[') && ($decoded = json_decode($val, true)) !== null) {
+        if (!empty($val) && (is_string($val)) && ($val[0] === '{' || $val[0] === '[') && ($decoded = json_decode($val, true)) !== null) {
             $val = $decoded;
         }
         $mappedSettings[$s['key_name']] = $val;

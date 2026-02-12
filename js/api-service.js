@@ -140,7 +140,11 @@ const apiService = {
     async pollNow() {
         try {
             const timestamp = Date.now();
-            const response = await fetch(`${API_URL}?action=getAll&_t=${timestamp}`);
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'getAll', _t: timestamp })
+            });
 
             if (!response.ok) {
                 console.warn(`Sync Polling failed: HTTP ${response.status} pada ${API_URL}`);
@@ -148,6 +152,10 @@ const apiService = {
             }
 
             const allData = await response.json();
+            if (!allData || !allData.success) {
+                console.warn("Sync Poll Error: Invalid status from server", allData);
+                return;
+            }
             let updated = false;
 
             const syncKeys = [

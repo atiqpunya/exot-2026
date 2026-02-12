@@ -1617,8 +1617,13 @@ qrn1, pass123, Ustadz Ali, alquran
             updateSyncStatus('syncing');
 
             try {
-                // Use consistent API endpoint
-                const response = await fetch('./api/index.php?action=getAll&_t=' + Date.now());
+                // Use strictly POST to avoid 405 Method Not Allowed
+                const response = await fetch('./api/index.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'getAll', _t: Date.now() })
+                });
+
                 if (!response.ok) {
                     throw new Error(`Koneksi Gagal (HTTP ${response.status})`);
                 }
