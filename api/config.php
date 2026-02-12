@@ -11,10 +11,12 @@
 //
 // Untuk server hosting (cPanel, dll), cukup ubah 4 variabel di bawah
 // sesuai kredensial database yang Anda buat di hosting.
+// ==========================================
 $host = 'localhost';
-$dbname = 'exot_2026';   // Ganti jika nama DB Anda berbeda
-$user = 'root';          // Untuk XAMPP/WAMP lokal
-$pass = '';              // Password default XAMPP biasanya kosong
+$dbname = 'exot_2026'; // GANTI DENGAN NAMA DB DI CPANEL
+$user = 'root'; // GANTI DENGAN USER DB DI CPANEL
+$pass = ''; // GANTI DENGAN PASSWORD DB DI CPANEL
+// ==========================================
 
 try {
     $dsn = "mysql:host=$host;dbname=$dbname;charset=utf8mb4";
