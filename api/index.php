@@ -148,24 +148,19 @@ function handleSave($pdo)
 
     try {
         if ($type === 'students') {
-            // Bulk Save Students (Replace logic or Update?)
-            // For simplicity and matching GAS logic: loop and upsert
-            // GAS was overwriting full JSON. Here we should ideally handle granular, 
-            // but let's assume we receive the full list or a single item?
-            // The existing Frontend sends the WHOLE array for 'students'.
-            // Efficient: DELETE ALL and INSERT ALL? No, risky.
-            // Better: Upsert (INSERT INTO ... ON DUPLICATE KEY UPDATE)
-
-            // To be safe with the current frontend sending FULL ARRAY, 
-            // we first check if it IS an array
             if (is_array($data)) {
-                foreach ($data as $row) {
-                    $jsonScores = json_encode($row['scores'] ?? []);
-                    $jsonScoredBy = json_decode(json_encode($row['scored_by'] ?? []), true); // Ensure format
-                    // Map frontend keys to DB columns
-                    // Frontend: scoredBy -> DB: scored_by
-                    $jsonScoredBy = json_encode($row['scoredBy'] ?? []);
+                // To support synchronization of manual deletions from local:
+                // Delete students from DB that are NOT in the incoming array
+                $incomingIds = array_column($data, 'id');
+                if (!empty($incomingIds)) {
+                    $placeholders = str_repeat('?,', count($incomingIds) - 1) . '?';
+                    $pdo->prepare("DELETE FROM students WHERE id NOT IN ($placeholders)")->execute($incomingIds);
+                }
+                else {
+                    $pdo->query("DELETE FROM students");
+                }
 
+                foreach ($data as $row) {
                     $sql = "INSERT INTO students (id, name, class, type, qr_code, attended, attended_at, scores, scored_by)
                             VALUES (:id, :name, :class, :type, :qr, :att, :att_at, :scores, :scored_by)
                             ON DUPLICATE KEY UPDATE
@@ -186,7 +181,6 @@ function handleSave($pdo)
                         ':scored_by' => json_encode($row['scoredBy'] ?? [])
                     ]);
 
-                    // Also track Class
                     if (!empty($row['class'])) {
                         $pdo->query("INSERT IGNORE INTO classes (name) VALUES ('" . $row['class'] . "')");
                     }
@@ -196,6 +190,15 @@ function handleSave($pdo)
 
         elseif ($type === 'users') {
             if (is_array($data)) {
+                $incomingIds = array_column($data, 'id');
+                if (!empty($incomingIds)) {
+                    $placeholders = str_repeat('?,', count($incomingIds) - 1) . '?';
+                    $pdo->prepare("DELETE FROM users WHERE id NOT IN ($placeholders)")->execute($incomingIds);
+                }
+                else {
+                    $pdo->query("DELETE FROM users");
+                }
+
                 foreach ($data as $row) {
                     $sql = "INSERT INTO users (id, username, password, name, role, subject, assigned_classes, qr_code)
                             VALUES (:id, :u, :p, :n, :r, :s, :ac, :qr)
@@ -220,8 +223,15 @@ function handleSave($pdo)
 
         elseif ($type === 'questions') {
             if (is_array($data)) {
-                // First, maybe clear existing? Or just upsert.
-                // Let's upsert.
+                $incomingIds = array_column($data, 'id');
+                if (!empty($incomingIds)) {
+                    $placeholders = str_repeat('?,', count($incomingIds) - 1) . '?';
+                    $pdo->prepare("DELETE FROM questions WHERE id NOT IN ($placeholders)")->execute($incomingIds);
+                }
+                else {
+                    $pdo->query("DELETE FROM questions");
+                }
+
                 foreach ($data as $row) {
                     $sql = "INSERT INTO questions (id, room, subject, content, type, target_student, storage_path)
                             VALUES (:id, :room, :subj, :cont, :type, :tgt, :path)

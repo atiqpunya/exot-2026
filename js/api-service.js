@@ -127,8 +127,13 @@ const apiService = {
             }
 
         } catch (e) {
-            console.warn("Sync Poll Failed:", e.message);
-            window.dispatchEvent(new CustomEvent('sync-error', { detail: e.message }));
+            console.error("Sync Poll Error Detail:", e);
+            window.dispatchEvent(new CustomEvent('sync-error', {
+                detail: {
+                    message: "Server unreachable or API error: " + e.message,
+                    timestamp: new Date().toISOString()
+                }
+            }));
         }
     }
 };

@@ -115,6 +115,6 @@ CREATE TABLE IF NOT EXISTS `examiner_rewards` (
 --
 
 INSERT INTO `users` (`id`, `username`, `password`, `name`, `role`, `created_at`) VALUES
-('admin-001', 'admin', 'admin123', 'Super Admin', 'admin', NOW());
+('admin-001', 'admin', 'exot2026', 'Super Admin', 'admin', NOW());
 
 COMMIT;

@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css">
     <style>
         .bulk-textarea {
             min-height: 180px;
@@ -154,9 +155,10 @@
                 <nav class="nav">
                     <a href="register.html" class="nav-link active">Data</a>
                     <a href="attendance.html" class="nav-link">Absensi</a>
-                    <a href="exam-english.html" class="nav-link">English</a>
-                    <a href="exam-arabic.html" class="nav-link">Arabic</a>
-                    <a href="exam-alquran.html" class="nav-link">Al-Quran</a>
+                    <a href="exam-english.html" class="nav-link"><span class="flag-icon flag-icon-gb"></span>
+                        English</a>
+                    <a href="exam-arabic.html" class="nav-link"><span class="flag-icon flag-icon-sa"></span> Arabic</a>
+                    <a href="exam-alquran.html" class="nav-link">📖✨ Al-Quran</a>
                     <a href="dashboard.html" class="nav-link">Dashboard</a>
                 </nav>
                 <div style="margin-left: auto; display: flex; align-items: center; gap: 12px; text-align: right;">
@@ -364,8 +366,9 @@ qrn1, pass123, Ustadz Ali, alquran
                             onclick="triggerFileUpload('english')">
                             <!-- Helper overlay to catch events -->
                             <div style="pointer-events: none;">
-                                <img src="https://flagcdn.com/w80/gb.png" alt="UK Flag"
-                                    style="height: 48px; margin-bottom: 0.5rem; display: block; margin: 0 auto 0.5rem auto;">
+                                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;"><span
+                                        class="flag-icon flag-icon-gb"
+                                        style="border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></span></div>
                                 <h6 style="color: #1e40af; margin: 0;">ENGLISH</h6>
                                 <p style="font-size: 0.75rem; color: #1e3a8a;">Drop PDF or Click to Browse<br><span
                                         style="font-size:0.7rem; opacity:0.8">(Local / Drive • Max 5MB)</span></p>
@@ -379,8 +382,9 @@ qrn1, pass123, Ustadz Ali, alquran
                             ondragleave="handleDragLeave(event, this)" ondrop="handleDrop(event, 'arabic')"
                             onclick="triggerFileUpload('arabic')">
                             <div style="pointer-events: none;">
-                                <img src="https://flagcdn.com/w80/sa.png" alt="Saudi Flag"
-                                    style="height: 48px; margin-bottom: 0.5rem; display: block; margin: 0 auto 0.5rem auto;">
+                                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;"><span
+                                        class="flag-icon flag-icon-sa"
+                                        style="border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></span></div>
                                 <h6 style="color: #065f46; margin: 0;">ARABIC</h6>
                                 <p style="font-size: 0.75rem; color: #064e3b;">Drop PDF or Click to Browse<br><span
                                         style="font-size:0.7rem; opacity:0.8">(Local / Drive • Max 5MB)</span></p>
@@ -394,7 +398,7 @@ qrn1, pass123, Ustadz Ali, alquran
                             ondragleave="handleDragLeave(event, this)" ondrop="handleDrop(event, 'alquran')"
                             onclick="triggerFileUpload('alquran')">
                             <div style="pointer-events: none;">
-                                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📖</div>
+                                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📖✨</div>
                                 <h6 style="color: #92400e; margin: 0;">AL-QURAN</h6>
                                 <p style="font-size: 0.75rem; color: #78350f;">Drop PDF or Click to Browse<br><span
                                         style="font-size:0.7rem; opacity:0.8">(Local / Drive • Max 5MB)</span></p>
@@ -415,7 +419,7 @@ qrn1, pass123, Ustadz Ali, alquran
                 </div>
 
                 <!-- Hidden manual input removed per request, but keeping Submit button container structured if needed -->
-                <!-- button class="btn btn-primary" onclick="submitQuestion()">?? Simpan Soal</button> (Use for manual only if re-added) -->
+                <!-- button class="btn btn-primary" onclick="submitQuestion()">💾 Simpan Soal</button> (Use for manual only if re-added) -->
 
                 <div style="margin-top: 2rem; border-top: 1px dashed var(--border-color); padding-top: 1rem;">
                     <h4 style="margin-bottom: 1rem;">📋 Daftar Soal Tersimpan</h4>
@@ -838,7 +842,7 @@ qrn1, pass123, Ustadz Ali, alquran
             }
 
             document.getElementById('bulkStudents').value = '';
-            showResult('studentImportResult', `? ${studentsToAdd.length} siswa berhasil diimport!`);
+            showResult('studentImportResult', `✅ ${studentsToAdd.length} siswa berhasil diimport!`);
             updateStats();
             loadStudentList();
         }
@@ -866,7 +870,7 @@ qrn1, pass123, Ustadz Ali, alquran
 
                 if (students.length !== initialCount) {
                     saveStudents(students);
-                    showResult('studentImportResult', `? ${ids.length} siswa dihapus.`);
+                    showResult('studentImportResult', `🗑️ ${ids.length} siswa dihapus.`);
                     loadStudentList();
                     updateStats();
                 }
@@ -912,7 +916,7 @@ qrn1, pass123, Ustadz Ali, alquran
             }
 
             document.getElementById('bulkPanitia').value = '';
-            let msg = `? ${usersToAdd.length - (errors.length ? 0 : 0)} panitia berhasil diproses!`;
+            let msg = `✅ ${usersToAdd.length - (errors.length ? 0 : 0)} panitia berhasil diproses!`;
             // Correct count logic: usersToAdd includes those that might have failed in bulk (duplicate username)
             // addUsersBulk returns { added, errors }
             // So we should capture the result properly.
@@ -944,7 +948,7 @@ qrn1, pass123, Ustadz Ali, alquran
 
                 updateStats();
                 loadPanitiaList();
-                alert('? Data panitia berhasil dibersihkan.');
+                alert('✅ Data panitia berhasil dibersihkan.');
             }
         }
 
@@ -980,7 +984,7 @@ qrn1, pass123, Ustadz Ali, alquran
             }
 
             document.getElementById('bulkExaminers').value = '';
-            let msg = `? ${successCount} penguji berhasil ditambahkan!`;
+            let msg = `✅ ${successCount} penguji berhasil ditambahkan!`;
             if (errors.length) msg += `<br>❌ ${errors.join(', ')}`;
             showResult('examinerImportResult', msg);
             updateStats();
@@ -1801,9 +1805,9 @@ qrn1, pass123, Ustadz Ali, alquran
             let color = 'var(--text-primary)';
             let bg = 'var(--bg-surface)';
 
-            if (type === 'error') { color = 'var(--danger)'; bg = '#fee2e2'; icon = '?'; }
-            if (type === 'success') { color = 'var(--success)'; bg = '#dcfce7'; icon = '?'; }
-            if (type === 'loading') { color = 'var(--info)'; bg = '#e0f2fe'; icon = '?'; }
+            if (type === 'error') { color = 'var(--danger)'; bg = '#fee2e2'; icon = '❌'; }
+            if (type === 'success') { color = 'var(--success)'; bg = '#dcfce7'; icon = '✅'; }
+            if (type === 'loading') { color = 'var(--info)'; bg = '#e0f2fe'; icon = '⏳'; }
 
             const html = `
                 <div id="${id}" style="

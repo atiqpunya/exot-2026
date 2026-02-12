@@ -11,6 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
@@ -23,9 +24,10 @@
                 <nav class="nav">
                     <a href="register.html" class="nav-link">Data</a>
                     <a href="attendance.html" class="nav-link">Absensi</a>
-                    <a href="exam-english.html" class="nav-link">English</a>
-                    <a href="exam-arabic.html" class="nav-link">Arabic</a>
-                    <a href="exam-alquran.html" class="nav-link">Al-Quran</a>
+                    <a href="exam-english.html" class="nav-link"><span class="flag-icon flag-icon-gb"></span>
+                        English</a>
+                    <a href="exam-arabic.html" class="nav-link"><span class="flag-icon flag-icon-sa"></span> Arabic</a>
+                    <a href="exam-alquran.html" class="nav-link">📖✨ Al-Quran</a>
                     <a href="dashboard.html" class="nav-link active">Dashboard</a>
                 </nav>
                 <div style="margin-left: auto; display: flex; align-items: center; gap: 12px; text-align: right;">
@@ -99,21 +101,21 @@
             <!-- Per Subject Stats -->
             <div class="grid grid-3 fade-in" style="margin-bottom: 1.5rem;">
                 <div class="card" style="border-left: 4px solid #3b82f6;">
-                    <h4 style="margin: 0 0 0.5rem;">🇬🇧 English</h4>
+                    <h4 style="margin: 0 0 0.5rem;"><span class="flag-icon flag-icon-gb"></span> English</h4>
                     <div style="display: flex; justify-content: space-between;"><span>Dinilai:</span><strong
                             id="engScored">0</strong></div>
                     <div style="display: flex; justify-content: space-between;"><span>Rata-rata:</span><strong
                             id="engAvg">0</strong></div>
                 </div>
                 <div class="card" style="border-left: 4px solid #10b981;">
-                    <h4 style="margin: 0 0 0.5rem;">🇸🇦 Arabic</h4>
+                    <h4 style="margin: 0 0 0.5rem;"><span class="flag-icon flag-icon-sa"></span> Arabic</h4>
                     <div style="display: flex; justify-content: space-between;"><span>Dinilai:</span><strong
                             id="arbScored">0</strong></div>
                     <div style="display: flex; justify-content: space-between;"><span>Rata-rata:</span><strong
                             id="arbAvg">0</strong></div>
                 </div>
                 <div class="card" style="border-left: 4px solid #f59e0b;">
-                    <h4 style="margin: 0 0 0.5rem;">📖 Al-Quran</h4>
+                    <h4 style="margin: 0 0 0.5rem;">📖✨ Al-Quran</h4>
                     <div style="display: flex; justify-content: space-between;"><span>Dinilai:</span><strong
                             id="qrnScored">0</strong></div>
                     <div style="display: flex; justify-content: space-between;"><span>Rata-rata:</span><strong

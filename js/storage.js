@@ -220,6 +220,16 @@ function updateSyncStatus(status) {
   if (dot) dot.style.backgroundColor = colors[status] || '#cbd5e1';
   if (text) text.textContent = texts[status] || status;
 
+  // Add error detail if available
+  if (status === 'error' || status === 'offline') {
+    const errorDetail = indicator.dataset.lastError || "Check network or server log";
+    indicator.title = `Error: ${errorDetail}`;
+    indicator.style.cursor = 'help';
+  } else {
+    indicator.title = '';
+    indicator.style.cursor = 'default';
+  }
+
   // Visual feedback
   if (status === 'syncing') {
     if (dot) dot.style.boxShadow = `0 0 0 4px ${colors.syncing}30`;
@@ -229,6 +239,15 @@ function updateSyncStatus(status) {
     indicator.style.borderColor = status === 'online' ? '#bbf7d0' : '#e2e8f0';
   }
 }
+
+// Global listener for sync errors to update the indicator
+window.addEventListener('sync-error', (e) => {
+  const indicator = document.getElementById('syncStatus');
+  if (indicator) {
+    indicator.dataset.lastError = e.detail.message;
+    updateSyncStatus('error');
+  }
+});
 
 let syncTimeout = null;
 
