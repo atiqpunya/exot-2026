@@ -1359,9 +1359,16 @@ qrn1, pass123, Ustadz Ali, alquran
                     const authText = window.currentUser ? `(User: ${window.currentUser.uid.substring(0, 4)}..)` : '(No Auth!)';
                     updateProgressItem(progressItem, `🚀 Mengupload... ${authText}`, 'loading');
 
-                    // Allow retry if auth is missing
+                    // Allow retry if auth is missing, but don't block if it fails (e.g. auth not configured)
                     if (!window.currentUser && window.auth) {
-                        await window.auth.signInAnonymously();
+                        try {
+                            await window.auth.signInAnonymously();
+                            console.log("✅ Auto-signin success");
+                        } catch (authErr) {
+                            console.warn("⚠️ Auto-signin failed, trying upload anyway:", authErr);
+                            // We proceed to uploadPDFToFirebase. If storage requires auth, it will fail there.
+                            // If storage is public, it will succeed.
+                        }
                     }
 
                     // Path: questions/SUBJECT/ROOM/FILENAME
