@@ -1176,9 +1176,24 @@ qrn1, pass123, Ustadz Ali, alquran
     <script src="js/firebase-firestore-compat.js"></script>
     <script src="js/firebase-storage-compat.js"></script>
 
+    <!-- Firebase Auth (CDN - Required for Storage Rules) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
     <!-- App Scripts (Compat Mode) -->
     <script src="js/firebase-config.js?v=2.5"></script>
     <script src="js/firebase-service.js?v=2.5"></script>
+    <script>
+        // Auto Sign-in Anonymously for Storage Access
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.auth) {
+                window.auth.signInAnonymously()
+                    .then(() => console.log("✅ Signed in anonymously"))
+                    .catch(error => console.error("❌ Auth Error:", error));
+            } else {
+                console.warn("⚠️ Auth not loaded - Uploads may fail");
+            }
+        });
+    </script>
     <!-- Bulk Upload Logic -->
     <script>
         // ==========================================
@@ -1237,6 +1252,12 @@ qrn1, pass123, Ustadz Ali, alquran
                     return;
                 }
 
+                // Create a timeout to prevent hanging forever
+                const timeout = setTimeout(() => {
+                    if (task) task.cancel();
+                    reject(new Error("Upload timed out (30s). Cek koneksi internet."));
+                }, 30000);
+
                 const task = window.firebaseService.uploadFile(path, file);
 
                 task.on('state_changed',
@@ -1244,10 +1265,18 @@ qrn1, pass123, Ustadz Ali, alquran
                         const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
                         if (onProgress) onProgress(progress);
                     },
-                    (error) => reject(error),
+                    (error) => {
+                        clearTimeout(timeout);
+                        reject(error);
+                    },
                     async () => {
-                        const downloadURL = await task.snapshot.ref.getDownloadURL();
-                        resolve(downloadURL);
+                        clearTimeout(timeout);
+                        try {
+                            const downloadURL = await task.snapshot.ref.getDownloadURL();
+                            resolve(downloadURL);
+                        } catch (e) {
+                            reject(e);
+                        }
                     }
                 );
             });
@@ -1326,7 +1355,11 @@ qrn1, pass123, Ustadz Ali, alquran
 
                 } catch (err) {
                     console.error(err);
-                    updateProgressItem(progressItem, `❌ Gagal upload: ${err.message}`, 'error');
+                    let msg = `❌ Gagal upload: ${err.message}`;
+                    if (err.message.includes('timed out')) {
+                        msg = '❌ Koneksi lambat/terputus. Coba lagi.';
+                    }
+                    updateProgressItem(progressItem, msg, 'error');
                 }
             }
 

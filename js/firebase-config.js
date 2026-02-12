@@ -21,7 +21,10 @@ if (typeof firebase === 'undefined') {
     try {
         firebase.initializeApp(firebaseConfig);
         window.db = firebase.firestore();
-        window.storage = firebase.storage(); // Initialize Storage
+        window.storage = firebase.storage();
+        if (firebase.auth) {
+            window.auth = firebase.auth();
+        }
 
         // Enable offline persistence
         window.db.enablePersistence()
