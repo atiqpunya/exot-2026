@@ -16,12 +16,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once 'config.php';
 
-// Read input stream once
+// Read input stream (for JSON)
 $rawInput = file_get_contents('php://input');
 $jsonInput = json_decode($rawInput, true);
 
-// Action can come from GET, POST, or JSON body
-$action = $_GET['action'] ?? $_POST['action'] ?? ($jsonInput['action'] ?? '');
+// Unified input source
+$input = array_merge($_GET, $_POST, $jsonInput ? $jsonInput : []);
+$action = $input['action'] ?? '';
 
 try {
     switch ($action) {
@@ -30,7 +31,7 @@ try {
             break;
 
         case 'save':
-            handleSave($pdo, $jsonInput);
+            handleSave($pdo, $input);
             break;
 
         case 'uploadFile':
@@ -38,7 +39,7 @@ try {
             break;
 
         case 'test':
-            echo json_encode(['success' => true, 'message' => 'API is online']);
+            echo json_encode(['success' => true, 'message' => 'API is online', 'method' => $_SERVER['REQUEST_METHOD']]);
             break;
 
         default:
@@ -59,7 +60,7 @@ catch (Exception $e) {
 
 function handleGetAll($pdo)
 {
-    $data = [];
+    $data = ['success' => true];
 
     // Fetch Students
     $stmt = $pdo->query("SELECT * FROM students");
@@ -150,6 +151,14 @@ function handleSave($pdo, $input = null)
 
     $type = $input['type'] ?? '';
     $data = $input['data'] ?? null;
+
+    // If data comes from FormData, it might be a JSON string
+    if ($data && is_string($data)) {
+        $decoded = json_decode($data, true);
+        if ($decoded !== null) {
+            $data = $decoded;
+        }
+    }
 
     if (!$data)
         throw new Exception("No data provided");

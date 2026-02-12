@@ -27,10 +27,14 @@ const apiService = {
                 data: data
             };
 
+            const formData = new FormData();
+            formData.append('action', 'save');
+            formData.append('type', type);
+            formData.append('data', JSON.stringify(data));
+
             const response = await fetch(API_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body: formData
             });
 
             if (!response.ok) {
@@ -140,10 +144,13 @@ const apiService = {
     async pollNow() {
         try {
             const timestamp = Date.now();
+            const formData = new FormData();
+            formData.append('action', 'getAll');
+            formData.append('_t', timestamp);
+
             const response = await fetch(API_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'getAll', _t: timestamp })
+                body: formData
             });
 
             if (!response.ok) {
