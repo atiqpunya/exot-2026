@@ -269,9 +269,9 @@ Siti Aminah, 7B
 sekretaris, securepass, Siti Rahma, Sekretaris
 ..."></textarea>
                 <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-                    <button class="btn btn-secondary" onclick="loadFromStorage()">🔄 Load</button>
+                    <button class="btn btn-secondary" onclick="forceLoadCloud()">🔄 Load</button>
                     <button class="btn btn-warning" onclick="manualSync()" id="btnSync">☁️ Sync Cloud</button>
-                    <button class="btn btn-primary" onclick="saveDataManual()">💾 Save</button>
+                    <button class="btn btn-primary" onclick="forceSaveCloud()">💾 Save</button>
                 </div>
 
                 <div
@@ -663,6 +663,7 @@ qrn1, pass123, Ustadz Ali, alquran
                 console.log('🔄 Data synced, refreshing UI...');
                 updateStats();
                 loadStudentList();
+                loadPanitiaList();
                 loadExaminerList();
             });
 
@@ -673,18 +674,70 @@ qrn1, pass123, Ustadz Ali, alquran
                 updateStats();
             });
 
-            if (typeof loadClassList === 'function') loadClassList();
+            loadClassList();
 
             // Initialize room dropdowns for questions
             loadQuestionRooms();
 
             document.getElementById('searchStudent').addEventListener('input', loadStudentList);
-            document.getElementById('filterType').addEventListener('change', loadStudentList);
         });
 
         // ==========================================
         // QUESTION MANAGEMENT (SOAL UJIAN)
         // ==========================================
+
+        function loadClassList() {
+            const classes = getClasses();
+            const listEl = document.getElementById('classList');
+            const editEl = document.getElementById('editClassOld');
+            if (!listEl) return;
+
+            if (classes.length === 0) {
+                listEl.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Belum ada ruangan. Tambahkan di atas.</p>';
+            } else {
+                listEl.innerHTML = classes.map(c => `
+                    <span class="class-tag">
+                        ${c}
+                        <button onclick="removeClass('${c}'); loadClassList(); loadQuestionRooms();" title="Hapus">×</button>
+                    </span>
+                `).join('');
+            }
+            if (editEl) {
+                const cur = editEl.value;
+                editEl.innerHTML = classes.map(c => `<option value="${c}">${c}</option>`).join('');
+                if (cur && classes.includes(cur)) editEl.value = cur;
+                else if (classes.length > 0) editEl.value = classes[0];
+            }
+        }
+
+        function addNewClass() {
+            const input = document.getElementById('newClassName');
+            const name = input && input.value.trim();
+            if (!name) return alert('Masukkan nama ruangan!');
+            addClass(name);
+            if (input) input.value = '';
+            loadClassList();
+            loadQuestionRooms();
+            showToast('Ruangan ditambahkan', 'success');
+        }
+
+        function editClass() {
+            const oldName = document.getElementById('editClassOld')?.value;
+            const newName = document.getElementById('editClassNew')?.value?.trim();
+            if (!oldName || !newName) return alert('Pilih ruangan dan masukkan nama baru!');
+            updateClass(oldName, newName);
+            document.getElementById('editClassNew').value = '';
+            loadClassList();
+            loadQuestionRooms();
+            loadStudentList();
+            loadQuestionList();
+            showToast('Ruangan diperbarui', 'success');
+        }
+
+        async function manualSync() {
+            forceSaveCloud();
+            await forceLoadCloud();
+        }
 
         function loadQuestionRooms() {
             const classes = getClasses();
@@ -712,23 +765,18 @@ qrn1, pass123, Ustadz Ali, alquran
         }
 
         async function removeQuestion(id) {
-            if (!confirm('Hapus soal ini? File di cloud juga akan dihapus.')) return;
+            if (!confirm('Hapus soal ini? Data akan dihapus dari sistem.')) return;
 
             const question = getQuestions().find(q => q.id === id);
-
-            // Delete file if exists
-            if (question && question.storagePath && window.apiService) {
+            if (question && question.storagePath && window.apiService && typeof window.apiService.deleteFile === 'function') {
                 try {
-                    // Show some loading indicator or just wait
                     await window.apiService.deleteFile(question.storagePath);
-                    console.log('File deleted from server:', question.storagePath);
                 } catch (e) {
-                    console.warn("File deletion failed or file not found:", e);
-                    // Continue to delete record anyway
+                    console.warn("File deletion skipped:", e);
                 }
             }
 
-            deleteQuestion(id); // Using storage.js function
+            deleteQuestion(id);
             loadQuestionList();
         }
 
@@ -806,6 +854,9 @@ qrn1, pass123, Ustadz Ali, alquran
             if (tab === 'soal') {
                 loadQuestionRooms();
                 loadQuestionList();
+            }
+            if (tab === 'ruangan') {
+                loadClassList();
             }
         }
 
@@ -910,24 +961,19 @@ qrn1, pass123, Ustadz Ali, alquran
                 }
             });
 
+            let successCount = 0;
             if (usersToAdd.length > 0) {
                 const result = addUsersBulk(usersToAdd);
+                successCount = result.added ? result.added.length : 0;
                 if (result.errors) errors.push(...result.errors);
             }
 
             document.getElementById('bulkPanitia').value = '';
-            let msg = `✅ ${usersToAdd.length - (errors.length ? 0 : 0)} panitia berhasil diproses!`;
-            // Correct count logic: usersToAdd includes those that might have failed in bulk (duplicate username)
-            // addUsersBulk returns { added, errors }
-            // So we should capture the result properly.
-
-            // Let's refine the logic inside the replacement content:
-            /*
-            const result = addUsersBulk(usersToAdd);
-            const successCount = result.added.length;
-            errors.push(...result.errors);
-            */
-            // See revised content below.
+            let msg = `✅ ${successCount} panitia berhasil ditambahkan!`;
+            if (errors.length) msg += `<br>❌ ${errors.join(', ')}`;
+            showResult('panitiaImportResult', msg);
+            updateStats();
+            loadPanitiaList();
         }
 
         function clearAllPanitia() {

@@ -187,6 +187,9 @@
         </div>
     </footer>
 
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="js/firebase-config.js"></script>
     <script src="js/api-service.js?v=2.5"></script>
     <script src="js/storage.js"></script>
     <script>
@@ -225,6 +228,7 @@
 
         function handleLogin(e) {
             e.preventDefault();
+            document.getElementById('loginError').style.display = 'none';
 
             const role = document.getElementById('loginRole').value;
             const username = document.getElementById('username').value.trim();
@@ -286,8 +290,8 @@
                 return;
             }
 
-            // Redirect based on role
-            redirectByRole(result.role ? result : result); // login() returns session object, student manual returns result with role
+            // Redirect based on role (login returns session object)
+            redirectByRole(result);
         }
 
         function redirectByRole(session) {
@@ -305,10 +309,6 @@
             }
         }
     </script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="js/firebase-config.js"></script>
-    <script src="js/api-service.js"></script>
 </body>
 
 </html>

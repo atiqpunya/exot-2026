@@ -41,7 +41,6 @@ const DEFAULT_SETTINGS = {
 };
 
 // Initialize storage
-// Initialize storage
 function initStorage() {
   if (!localStorage.getItem(STORAGE_KEYS.STUDENTS)) {
     localStorage.setItem(STORAGE_KEYS.STUDENTS, JSON.stringify([]));

@@ -200,6 +200,11 @@ const apiService = {
         if (!local && !remote) return false;
         if (!local || !remote) return true;
         return JSON.stringify(local, Object.keys(local).sort()) !== JSON.stringify(remote, Object.keys(remote).sort());
+    },
+
+    async deleteFile(path) {
+        // API belum mendukung delete file - stub untuk kompatibilitas
+        return Promise.reject(new Error('File deletion not implemented'));
     }
 };
 

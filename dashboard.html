@@ -11,6 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/logo.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -69,11 +70,11 @@
 
         <!-- Tabs -->
         <div class="tabs">
-            <button class="tab-btn active" onclick="showTab('overview')">📋 Ringkasan</button>
-            <button class="tab-btn" onclick="showTab('ranking')">🏆 Ranking</button>
-            <button class="tab-btn" onclick="showTab('rooms')">🏠 Per Ruangan</button>
-            <button class="tab-btn" onclick="showTab('charts')">📈 Grafik</button>
-            <button class="tab-btn" onclick="showTab('activity')">🕰️ Activity Log</button>
+            <button class="tab-btn active" onclick="showTab('overview', event)">📋 Ringkasan</button>
+            <button class="tab-btn" onclick="showTab('ranking', event)">🏆 Ranking</button>
+            <button class="tab-btn" onclick="showTab('rooms', event)">🏠 Per Ruangan</button>
+            <button class="tab-btn" onclick="showTab('charts', event)">📈 Grafik</button>
+            <button class="tab-btn" onclick="showTab('activity', event)">🕰️ Activity Log</button>
         </div>
 
         <!-- Tab: Overview -->
@@ -272,11 +273,11 @@
             document.getElementById('soundBtn').textContent = settings.soundEnabled ? '🔊' : '🔇';
         }
 
-        function showTab(tabId) {
+        function showTab(tabId, evt) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('tab-' + tabId).classList.add('active');
-            event.target.classList.add('active');
+            if (evt && evt.target) evt.target.classList.add('active');
 
             if (tabId === 'charts') {
                 setTimeout(initCharts, 100);
